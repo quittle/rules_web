@@ -13,6 +13,7 @@ def parse_args():
     parser.add_argument('--template', type=str, required=True)
     parser.add_argument('--config', type=argparse.FileType('r'), required=True)
     parser.add_argument('--favicons', type=str, nargs='+', default=[])
+    parser.add_argument('--body', type=str, required=True)
     parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
     return parser.parse_args()
 
@@ -29,9 +30,12 @@ def main():
     with args.config as config_file:
         config = json.load(config_file)
     config['favicons'] = favicons
+    config['body'] = args.body
 
     template_path, template_filename = os.path.split(args.template)
-    env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_path))
+    body_path, _ = os.path.split(args.body)
+
+    env = jinja2.Environment(loader = jinja2.FileSystemLoader([template_path, body_path]))
     template = env.get_template(template_filename)
     rendered_output = template.render(config)
 

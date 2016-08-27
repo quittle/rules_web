@@ -1,13 +1,16 @@
 {{ doctype or '<!DOCTYPE HTML>'}}
 <html>
-    {% if title %}
-        <title>{{ title }}</title>
-    {% endif %}
-    {% for size, favicon in favicons.iteritems() %}
-        <link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
-        <link rel="icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
-    {% endfor %}
-    {% for name, content in meta.iteritems()  %}
-        <meta name="{{ name }}" content="{{ content }}" />
-    {% endfor %}
+    <head>
+        {% if title %}
+            <title>{{ title }}</title>
+        {% endif %}
+        {% for size, favicon in favicons.iteritems() %}
+            <link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
+            <link rel="icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
+        {% endfor %}
+        {% for name, content in meta.iteritems()  %}
+            <meta name="{{ name }}" content="{{ content }}" />
+        {% endfor %}
+    </head>
+    {% include body %}
 </html>
