@@ -5,9 +5,7 @@ load(":internal.bzl",
     "web_internal_minify_css_impl",
     "web_internal_minify_js_impl",
     "web_internal_html_page_impl",
-    "web_internal_favicon_image_generator",
-    "web_internal_favicon_image_generator_defaults",
-    "web_internal_favicon_image_generator_outputs")
+    "web_internal_favicon_image_generator")
 
 CSS_FILE_TYPE = FileType([".css"])
 HTML_FILE_TYPE = FileType([".html"])
@@ -83,6 +81,7 @@ html_page = rule(
             allow_files = True,
         ),
         "favicon_sizes": attr.int_list(),
+        "deps": attr.label_list(),
         "_html_template_script": attr.label(
             default = Label("//:html_template"),
             executable = True,
@@ -101,15 +100,15 @@ html_page = rule(
 
 favicon_image_generator = rule(
     attrs = {
-        "generated_file_prefix": attr.string(
-            default = web_internal_favicon_image_generator_defaults["generated_file_prefix"],
-        ),
         "image": attr.label(
             single_file = True,
             allow_files = True,
         ),
-        "sizes": attr.int_list(
-            default = web_internal_favicon_image_generator_defaults["sizes"],
+        "output_files": attr.output_list(
+            allow_empty = False,
+            mandatory = True,
+        ),
+        "output_sizes": attr.int_list(
             allow_empty = False,
         ),
         "allow_upsizing": attr.bool(
@@ -122,32 +121,13 @@ favicon_image_generator = rule(
             default = Label("//:resize_image"),
             executable = True,
             allow_files = True,
+
             # single_file cannot be used while py_binary produces multiple
             # files, the binary of which is not selectable as a specific target
             # the way java_binary is
             # single_file = True,
         ),
     },
-    outputs = web_internal_favicon_image_generator_outputs,
     implementation = web_internal_favicon_image_generator,
+    output_to_genfiles = True,
 )
-
-def build_html_page(name, html_page_args, favicon_image_generator_args):
-    favicon_sizes = getattr(favicon_image_generator_args,
-                            "sizes",
-                            web_internal_favicon_image_generator_defaults["sizes"])
-    favicon_prefix = getattr(favicon_image_generator_args,
-                             "generated_file_prefix",
-                             web_internal_favicon_image_generator_defaults["generated_file_prefix"])
-
-    favicon_outputs = {
-        int(key): value
-            for key, value in
-                web_internal_favicon_image_generator_outputs(favicon_prefix, favicon_sizes).items() }
-
-    favicon_image_generator(name = name + "__favicon", **favicon_image_generator_args)
-    html_page(
-        name = name + "__html",
-        favicon_sizes = favicon_outputs.keys(),
-        favicon_images = favicon_outputs.values(),
-        **html_page_args)

@@ -67,19 +67,11 @@ def web_internal_html_page_impl(ctx):
         outputs = [ ctx.outputs.html_file ],
     )
 
-web_internal_favicon_image_generator_defaults = {
-    "sizes": [ 16, 32 ],
-    "generated_file_prefix": "favicon",
-}
-
-def web_internal_favicon_image_generator_outputs(generated_file_prefix, sizes):
-    return {
-            str(size):
-            "favicon/{prefix}_{size}.png".format(prefix = generated_file_prefix, size = size)
-                for size in sizes }
-
 def web_internal_favicon_image_generator(ctx):
     additional_args = []
+
+    if len(ctx.attr.output_files) != len(ctx.attr.output_sizes):
+        fail("Same number of output files as sizes expected")
 
     if ctx.attr.allow_upsizing:
         additional_args.append("--allow-upsizing")
@@ -87,21 +79,19 @@ def web_internal_favicon_image_generator(ctx):
     if ctx.attr.allow_stretching:
         additional_args.append("--allow-stretching")
 
-    for size in ctx.attr.sizes:
-        file = getattr(ctx.outputs, str(size))
-
+    for size, out_file in zip(ctx.attr.output_sizes, ctx.outputs.output_files):
         ctx.action(
             mnemonic = "GenerateFaviconSize",
             arguments = [
                 "--source", ctx.file.image.path,
                 "--width", str(size),
                 "--height", str(size),
-                "--output", file.path,
+                "--output", out_file.path,
             ] + additional_args,
             inputs = [
                 ctx.executable._resize_image,
                 ctx.file.image,
             ],
             executable = ctx.executable._resize_image,
-            outputs = [ file ],
-        )
+            outputs = [ out_file ],
+    )
