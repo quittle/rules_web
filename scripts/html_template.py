@@ -12,7 +12,10 @@ def parse_args():
             description='Builds an HTML file from a jinja file and a config json file')
     parser.add_argument('--template', type=str, required=True)
     parser.add_argument('--config', type=argparse.FileType('r'), required=True)
-    parser.add_argument('--favicons', type=str, nargs='+', default=[])
+    parser.add_argument('--css-files', type=str, nargs='+', default=[])
+    parser.add_argument('--js-files', type=str, nargs='+', default=[])
+    parser.add_argument('--favicons', type=str, nargs='+', default=[],
+            help='A list of size and file pairs. e.g. "16 favicon-16x16.png 32 favicon-32x32.png"')
     parser.add_argument('--body', type=str, required=True)
     parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
     return parser.parse_args()
@@ -31,6 +34,8 @@ def main():
         config = json.load(config_file)
     config['favicons'] = favicons
     config['body'] = args.body
+    config['css_files'] = args.css_files
+    config['js_files'] = args.js_files
 
     template_path, template_filename = os.path.split(args.template)
     body_path, _ = os.path.split(args.body)

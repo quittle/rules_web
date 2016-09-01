@@ -4,12 +4,22 @@
         {% if title %}
             <title>{{ title }}</title>
         {% endif %}
+
         {% for size, favicon in favicons.iteritems() %}
             <link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
             <link rel="icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
         {% endfor %}
+
         {% for name, content in meta.iteritems()  %}
             <meta name="{{ name }}" content="{{ content }}" />
+        {% endfor %}
+
+        {% for file in css_files  %}
+            <link rel=stylesheet href="{{ file }}" type="text/css" />
+        {% endfor %}
+
+        {% for file in js_files  %}
+            <script src="{{ file }}" type="text/javascript" />
         {% endfor %}
     </head>
     {% include body %}

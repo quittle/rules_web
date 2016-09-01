@@ -23,3 +23,26 @@ py_binary(
     ],
     visibility = [ "//visibility:public" ],
 )
+
+py_binary(
+    name = "zip_site",
+    srcs = [
+        "scripts/zip_site.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
+    name = "minify_site_zip",
+    srcs = [
+        "scripts/minify_site_zip.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+java_binary(
+    name = "html_compressor",
+    main_class = "com.googlecode.htmlcompressor.CmdLineCompressor",
+    runtime_deps = [ "@http_compressor//jar" ],
+    visibility = [ "//visibility:public" ],
+)
