@@ -6,5 +6,5 @@ workspace(name = "rules_web")
 load(":rules_web_repositories.bzl", "rules_web_repositories")
 rules_web_repositories()
 
-load("@sass//sass:sass.bzl", "sass_repositories")
+load("@io_bazel_rules_sass//sass:sass.bzl", "sass_repositories")
 sass_repositories()

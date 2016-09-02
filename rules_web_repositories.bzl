@@ -96,7 +96,7 @@ def rules_web_repositories():
     )
 
     native.git_repository(
-        name = "sass",
+        name = "io_bazel_rules_sass",
         commit = "5973952ac44b93691e137362567220d64a92e7e9",
         remote = "https://github.com/bazelbuild/rules_sass.git",
     )

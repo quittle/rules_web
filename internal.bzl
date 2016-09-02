@@ -32,7 +32,6 @@ def web_internal_minify_js_impl(ctx):
     )
 
 def web_internal_minify_html_impl(ctx):
-    print(ctx.executable._http_compressor)
     ctx.action(
         mnemonic = "MinifyHTML",
         arguments = [
