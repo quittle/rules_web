@@ -9,6 +9,7 @@ load(":internal.bzl",
     "web_internal_favicon_image_generator",
     "web_internal_zip_site",
     "web_internal_minify_site_zip",
+    "web_internal_rename_zip_paths",
 )
 
 CSS_FILE_TYPE = FileType([".css"])
@@ -200,4 +201,33 @@ minify_site_zip = rule(
         ),
     },
     implementation = web_internal_minify_site_zip,
+)
+
+rename_zip_paths = rule(
+    attrs = {
+        "source_zip": attr.label(
+            mandatory = True,
+            allow_files = True,
+            single_file = True,
+        ),
+        "path_map_labels_in": attr.label_list(
+            allow_files = True,
+        ),
+        "path_map_labels_out": attr.string_list(),
+        "path_map": attr.string_dict(),
+        "out_zip": attr.output(
+            mandatory = True,
+        ),
+        "_rename_zip_paths_script": attr.label(
+            default = Label("//:rename_zip_paths"),
+            executable = True,
+            allow_files = True,
+
+            # single_file cannot be used while py_binary produces multiple
+            # files, the binary of which is not selectable as a specific target
+            # the way java_binary is
+            # single_file = True,
+        )
+    },
+    implementation = web_internal_rename_zip_paths,
 )

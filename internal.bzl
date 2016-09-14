@@ -154,3 +154,34 @@ def web_internal_minify_site_zip(ctx):
         executable = ctx.executable._minify_site_zip_script,
         outputs = [ ctx.outputs.minified_zip ],
     )
+
+def web_internal_rename_zip_paths(ctx):
+    if len(ctx.files.path_map_labels_in) != len(ctx.attr.path_map_labels_out):
+        fail("path_map_labels_in must be the same size as path_map_labels_out")
+
+
+    path_map = { key: value for key, value in ctx.attr.path_map.items() }
+    path_map.update({
+            in_label.path: out_path
+                    for in_label in ctx.files.path_map_labels_in
+                            for out_path in ctx.attr.path_map_labels_out })
+
+    path_map_list = [
+        value
+            for key in path_map
+                for value in (key, path_map[key]) ]
+
+    ctx.action(
+        mnemonic = "RenameZipPaths",
+        arguments = [
+                "--in-zip", ctx.file.source_zip.path,
+                "--out-zip", ctx.outputs.out_zip.path,
+            ] +
+            [ "--path-map" ] + path_map_list,
+        inputs = [
+            ctx.executable._rename_zip_paths_script,
+            ctx.file.source_zip,
+        ],
+        executable = ctx.executable._rename_zip_paths_script,
+        outputs = [ ctx.outputs.out_zip ],
+    )

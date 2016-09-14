@@ -46,3 +46,11 @@ java_binary(
     runtime_deps = [ "@http_compressor//jar" ],
     visibility = [ "//visibility:public" ],
 )
+
+py_binary(
+    name = "rename_zip_paths",
+    srcs = [
+        "scripts/rename_zip_paths.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
