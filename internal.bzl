@@ -185,3 +185,25 @@ def web_internal_rename_zip_paths(ctx):
         executable = ctx.executable._rename_zip_paths_script,
         outputs = [ ctx.outputs.out_zip ],
     )
+
+def web_internal_generate_deploy_site_zip_s3_script(ctx):
+    ctx.action(
+        mnemonic = "GeneratingS3DeployScript",
+        arguments = [
+            "--aws-access-key", ctx.attr.aws_access_key,
+            "--aws-secret-key", ctx.attr.aws_secret_key,
+            "--bucket", ctx.attr.bucket,
+            "--deploy-executable", ctx.executable._s3_website_deploy.path,
+            "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
+            "--generated-file", ctx.outputs.generated_script.path,
+            "--website-zip", ctx.file.zip.path,
+        ],
+        inputs = [
+            ctx.file.zip,
+            ctx.file._deploy_site_zip_to_s3_template,
+            ctx.executable._s3_website_deploy,
+            ctx.executable._s3_website_deploy_script_builder,
+        ],
+        outputs = [ ctx.outputs.generated_script ],
+        executable = ctx.executable._s3_website_deploy_script_builder,
+    )

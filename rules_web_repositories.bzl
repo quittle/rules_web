@@ -120,3 +120,15 @@ def rules_web_repositories():
         sha256 = "88894e330cdb0e418e805136d424f4c262236b1aa3683e51037cdb66310cb0f9",
         url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/htmlcompressor/htmlcompressor-1.5.3.jar",
     )
+
+    native.maven_jar(
+        name = "aws_sdk_java",
+        artifact = "com.amazonaws:aws-java-sdk:1.11.35",
+        sha1 = "c65469176d3fac12930c67c6986fe7bc9d7f6700",
+    )
+
+    native.maven_jar(
+        name = "apache_commons_cli",
+        artifact = "commons-cli:commons-cli:1.3.1",
+        sha1 = "1303efbc4b181e5a58bf2e967dc156a3132b97c0",
+    )

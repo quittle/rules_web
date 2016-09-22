@@ -10,6 +10,7 @@ load(":internal.bzl",
     "web_internal_zip_site",
     "web_internal_minify_site_zip",
     "web_internal_rename_zip_paths",
+    "web_internal_generate_deploy_site_zip_s3_script",
 )
 
 CSS_FILE_TYPE = FileType([".css"])
@@ -231,3 +232,74 @@ rename_zip_paths = rule(
     },
     implementation = web_internal_rename_zip_paths,
 )
+
+generate_deploy_site_zip_s3_script = rule(
+    attrs = {
+        "aws_access_key": attr.string(
+            mandatory = True,
+        ),
+        "aws_secret_key": attr.string(
+            mandatory = True,
+        ),
+        "bucket": attr.string(
+            mandatory = True,
+        ),
+        "zip": attr.label(
+            mandatory = True,
+            allow_files = True,
+            single_file = True,
+        ),
+        "_deploy_site_zip_to_s3_template": attr.label(
+            default = Label("//:deploy_site_zip_to_s3.py.jinja2"),
+            executable = True,
+            allow_files = True,
+            single_file = True,
+        ),
+        "_s3_website_deploy": attr.label(
+            default = Label("//:s3_website_deploy"),
+            executable = True,
+            allow_files = True,
+
+            # single_file cannot be used as the wrapper executable script is not selectable as a
+            # specific target.
+            # single_file = True,
+        ),
+        "_s3_website_deploy_script_builder": attr.label(
+            default = Label("//:s3_website_deploy_script_builder"),
+            executable = True,
+            allow_files = True,
+
+            # single_file cannot be used while py_binary produces multiple
+            # files, the binary of which is not selectable as a specific target
+            # the way java_binary is
+            # single_file = True,
+        ),
+    },
+    implementation = web_internal_generate_deploy_site_zip_s3_script,
+    outputs = {
+        "generated_script": "deploy_site_zip_s3_%{name}.py",
+    },
+)
+
+# Currently broken due to:
+# https://github.com/bazelbuild/bazel/issues/1192
+#   Skylark ctx.command doesn't incorporate runfiles from input executables;
+#   py_binary/java_binary executables fail
+# https://github.com/bazelbuild/bazel/issues/1136
+#   Can't invoke py_binary or java_binary from Skylark action
+def deploy_site_zip_s3_script(name, aws_access_key, aws_secret_key, bucket, zip):
+    script_name = name + "_script"
+    generate_deploy_site_zip_s3_script(
+        name = script_name,
+        aws_access_key = aws_access_key,
+        aws_secret_key = aws_secret_key,
+        bucket = bucket,
+        zip = zip,
+    )
+
+    native.py_binary(
+        name = name,
+        main = "deploy_site_zip_s3_" + script_name + ".py",
+        srcs = [ ":" + script_name ],
+        visibility = [ "//visibility:public" ],
+    )
