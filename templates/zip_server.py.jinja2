@@ -1,0 +1,30 @@
+{#
+ # Copyright (c) 2016 Dustin Doloff
+ # Licensed under Apache License v2.0
+ #}
+
+import http.server
+import zipfile
+
+class ZipRequestHandler(http.server.BaseHTTPRequestHandler):
+    def do_HEAD(s):
+        s.send_response(200)
+        s.end_headers()
+
+    def do_GET(self):
+        try:
+            info = self.server.zip.open(self.path[1:])
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(info.read())
+        except KeyError:
+            self.send_response(404)
+        return
+
+def main():
+    server = http.server.HTTPServer(('localhost', {{ port }}), ZipRequestHandler)
+    server.zip = zipfile.ZipFile("""{{ zip }}""")
+    server.serve_forever()
+
+if __name__ == '__main__':
+    main()

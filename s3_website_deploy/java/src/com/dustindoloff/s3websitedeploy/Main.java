@@ -9,11 +9,15 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.listObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.cli.CommandLine;
@@ -82,31 +86,35 @@ public final class Main {
     }
 
     private static boolean emptyBucket(final AmazonS3 s3Client, final String bucket) {
-        final listObjectsV2Request request = new listObjectsV2Request();
+        final ListObjectsV2Request request = new ListObjectsV2Request();
         request.setBucketName(bucket);
 
-        String continuationToken;
+        String continuationToken = null;
+        ListObjectsV2Result result;
         do {
-            request.setContinutationToken(continuationToken)
-            final ListObjectsV2Result result = s3client.listObjectsV2(bucket);
+            request.setContinuationToken(continuationToken);
+            result = s3Client.listObjectsV2(bucket);
             for (final S3ObjectSummary summary : result.getObjectSummaries()) {
                 s3Client.deleteObject(bucket, summary.getKey());
             }
 
             continuationToken = result.getNextContinuationToken();
         } while (result.isTruncated());
-        s3client.deleteBucket(bucketName);
+
+        return true;
     }
 
     private static boolean upload(final AmazonS3 s3Client, final String bucket,
                                   final ZipFile zipFile) {
         boolean failed = false;
         final ObjectMetadata data = new ObjectMetadata();
-        for (final ZipEntry entry : zipFile.entries()) {
+        final Enumeration<? extends ZipEntry> entries = zipFile.entries();
+        while (entries.hasMoreElements()) {
+            final ZipEntry entry = entries.nextElement();
             data.setContentLength(entry.getSize());
             try {
                 s3Client.putObject(bucket, entry.getName(), zipFile.getInputStream(entry), data);
-            } catch (final AmazonClientException e) {
+            } catch (final AmazonClientException|IOException e) {
                 failed = true;
             }
         }
@@ -153,13 +161,13 @@ public final class Main {
 
         s3Client.setRegion(bucketRegion);
 
-        if (!emptyBucket(s3Client, bucketRegion, s3Bucket)) {
+        if (!emptyBucket(s3Client, s3Bucket)) {
             System.out.println("Unable to upload to empty bucket.");
             System.exit(4);
             return;
         }
 
-        if (!upload(s3Client, bucketRegion, s3Bucket, zipFile)) {
+        if (!upload(s3Client, s3Bucket, zipFile)) {
             System.out.println("Unable to upload to S3.");
             System.exit(5);
             return;

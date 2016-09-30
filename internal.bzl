@@ -186,6 +186,37 @@ def web_internal_rename_zip_paths(ctx):
         outputs = [ ctx.outputs.out_zip ],
     )
 
+def web_internal_generate_jinja_file(ctx, template, config, out_file):
+    if (type(ctx) != "ctx"):
+        fail("ctx was not a context")
+    if (type(template) != "File"):
+        fail("template was not a File")
+    if (type(config) != "dict"):
+        fail("config was not a dictionary")
+    if (type(out_file) != "File"):
+        fail("out_file was not a File")
+
+    ctx.action(
+        mnemonic = "GeneratingFileFromJinjaTemplate",
+        arguments = [
+            "--template", template.path,
+            "--config", str(config),
+            "--out-file", out_file.path,
+        ],
+        inputs = [ template ],
+        executable = ctx.executable._generate_jinja_file,
+        outputs = [ out_file ],
+    )
+
+
+def web_internal_generate_zip_server_python_file(ctx):
+    config = {
+        "port": ctx.attr.port,
+        "zip": ctx.file.zip.basename,
+    }
+
+    web_internal_generate_jinja_file(ctx, ctx.file._template, config, ctx.outputs.out_file)
+
 def web_internal_generate_deploy_site_zip_s3_script(ctx):
     ctx.action(
         mnemonic = "GeneratingS3DeployScript",

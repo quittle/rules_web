@@ -4,4 +4,8 @@
 build --strict_java_deps error
 build --javacopt -Werror
 build --javacopt -extra_checks
-build --javawarn all
+
+# Unable to use javawarn as that will inject the same thing, but after the java_* target's
+# overrides. This makes it impossible to disable warning for external dependencies.
+# build --javawarn all
+build --javacopt -Xlint:all

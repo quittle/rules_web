@@ -6,6 +6,17 @@ exports_files([
     "index.jinja2",
 ])
 
+py_library(
+    name = "jinja_helper",
+    srcs = [
+        "scripts/jinja_helper.py",
+    ],
+    deps = [
+        "@jinja//:jinja",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
 py_binary(
     name = "html_template",
     srcs = [
@@ -57,6 +68,27 @@ py_binary(
 )
 
 py_binary(
+    name = "generate_templated_file",
+    srcs = [
+        "scripts/generate_templated_file.py",
+    ],
+    deps = [
+        ":jinja_helper"
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
+    name = "zip_server",
+    srcs = [
+        "scripts/zip_server.py",
+    ],
+    srcs_version = "PY3",
+    default_python_version = "PY3",
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
     name = "s3_website_deploy_script_builder",
     srcs = [
         "scripts/s3_website_deploy_script_builder.py",
@@ -74,8 +106,10 @@ java_binary(
         "s3_website_deploy/java/src/com/dustindoloff/s3websitedeploy/Main.java",
     ],
     deps = [
-        "@apache_commons_cli//jar",
-        "@aws_sdk_java//jar",
+        "@org_apache_commons_cli//jar",
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_amazonaws_aws_java_sdk_kms//jar",
+        "@com_amazonaws_aws_java_sdk_s3//jar",
     ],
     visibility = [ "//visibility:public" ],
 )

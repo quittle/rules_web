@@ -73,6 +73,19 @@ py_library(
 
 """
 
+_PY_BASIC_HTTP_SERVER_FILE = """
+
+py_library(
+    name = "basic_http_server",
+    srcs = [
+        "BasicHttpServer-1.0.0/BasicHttpServer.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+
+"""
+
 def rules_web_repositories():
     native.new_git_repository(
         name = "yui_compressor",
@@ -122,13 +135,25 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
-        name = "aws_sdk_java",
-        artifact = "com.amazonaws:aws-java-sdk:1.11.35",
-        sha1 = "c65469176d3fac12930c67c6986fe7bc9d7f6700",
+        name = "org_apache_commons_cli",
+        artifact = "commons-cli:commons-cli:1.3.1",
+        sha1 = "1303efbc4b181e5a58bf2e967dc156a3132b97c0",
     )
 
     native.maven_jar(
-        name = "apache_commons_cli",
-        artifact = "commons-cli:commons-cli:1.3.1",
-        sha1 = "1303efbc4b181e5a58bf2e967dc156a3132b97c0",
+        name = "com_amazonaws_aws_java_sdk_core",
+        artifact = "com.amazonaws:aws-java-sdk-core:1.11.38",
+        sha1 = "a42c623900d372a3df72c4d44f9c2c420ff64dbc",
+    )
+
+    native.maven_jar(
+        name = "com_amazonaws_aws_java_sdk_kms",
+        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.38",
+        sha1 = "34e8a0a665c7db51265b10824fb0b11eb062fc1a",
+    )
+
+    native.maven_jar(
+        name = "com_amazonaws_aws_java_sdk_s3",
+        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.38",
+        sha1 = "96e88f07d8fcba7f87a9d68ccd8282a28bb3d88c",
     )

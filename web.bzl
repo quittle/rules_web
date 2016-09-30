@@ -10,6 +10,7 @@ load(":internal.bzl",
     "web_internal_zip_site",
     "web_internal_minify_site_zip",
     "web_internal_rename_zip_paths",
+    "web_internal_generate_zip_server_python_file",
     "web_internal_generate_deploy_site_zip_s3_script",
 )
 
@@ -81,7 +82,7 @@ minify_html = rule(
 html_page = rule(
     attrs = {
         "template": attr.label(
-            default = Label("//:index.jinja2"),
+            default = Label("//templates:index.html.jinja2"),
             single_file = True,
             allow_files = True,
         ),
@@ -233,6 +234,65 @@ rename_zip_paths = rule(
     implementation = web_internal_rename_zip_paths,
 )
 
+generate_zip_server_python_file = rule(
+    attrs = {
+        "zip": attr.label(
+            single_file = True,
+        ),
+        "port": attr.int(),
+        "out_file": attr.output(),
+        "_template": attr.label(
+            default = Label("//templates:zip_server.py.jinja2"),
+            allow_files = True,
+            single_file = True,
+        ),
+        "_generate_jinja_file": attr.label(
+            default = Label("//:generate_templated_file"),
+            executable = True,
+            allow_files = True,
+
+            # single_file cannot be used while py_binary produces multiple
+            # files, the binary of which is not selectable as a specific target
+            # the way java_binary is
+            # single_file = True,
+        ),
+    },
+    output_to_genfiles = True,
+    implementation = web_internal_generate_zip_server_python_file,
+)
+
+def zip_server(name, zip, port=80):
+    generated_file_target = "{name}__args".format(name=name)
+    generated_file_name = "zip_server_{name}.py".format(name=name)
+
+    generate_zip_server_python_file(
+        name = generated_file_target,
+        zip = zip,
+        port = port,
+        out_file = generated_file_name,
+    )
+
+    # This group is so the generated zip can be referenced as data by the binary as it can't be
+    # consumed directly.
+    fg_name = "{name}__zip_filegroup".format(name=name)
+    native.filegroup(
+        name = fg_name,
+        srcs = [ zip ]
+    )
+
+    native.py_binary(
+        name = name,
+        srcs = [
+            ":{generated_file_target}".format(generated_file_target=generated_file_target),
+        ],
+        data = [
+            fg_name,
+        ],
+        srcs_version = "PY3",
+        default_python_version = "PY3",
+        main = generated_file_name,
+    )
+
 generate_deploy_site_zip_s3_script = rule(
     attrs = {
         "aws_access_key": attr.string(
@@ -250,7 +310,7 @@ generate_deploy_site_zip_s3_script = rule(
             single_file = True,
         ),
         "_deploy_site_zip_to_s3_template": attr.label(
-            default = Label("//:deploy_site_zip_to_s3.py.jinja2"),
+            default = Label("//templates:deploy_site_zip_to_s3.py.jinja2"),
             executable = True,
             allow_files = True,
             single_file = True,
