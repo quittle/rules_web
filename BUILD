@@ -18,6 +18,14 @@ py_library(
 )
 
 py_binary(
+    name = "file_copy",
+    srcs = [
+        "scripts/file_copy.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
     name = "html_template",
     srcs = [
         "scripts/html_template.py",
@@ -74,6 +82,14 @@ py_binary(
     ],
     deps = [
         ":jinja_helper"
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
+    name = "minify_ttx",
+    srcs = [
+        "scripts/minify_ttx.py",
     ],
     visibility = [ "//visibility:public" ],
 )

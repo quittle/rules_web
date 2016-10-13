@@ -2,11 +2,18 @@
 # Licensed under Apache License v2.0
 
 load(":internal.bzl",
+    "web_internal_python_script_label",
+    "web_internal_tool_label",
     "web_internal_minify_css_impl",
     "web_internal_minify_js_impl",
     "web_internal_minify_html_impl",
     "web_internal_html_page_impl",
     "web_internal_favicon_image_generator",
+    "web_internal_minify_ttf",
+    "web_internal_ttf_to_woff",
+    "web_internal_ttf_to_woff2",
+    "web_internal_ttf_to_eot",
+    "web_internal_font_generator",
     "web_internal_zip_site",
     "web_internal_minify_site_zip",
     "web_internal_rename_zip_paths",
@@ -26,12 +33,7 @@ minify_css = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": attr.label(
-            default = Label("@yui_compressor//:yui_compressor_deploy.jar"),
-            executable = True,
-            single_file = True,
-            allow_files = True,
-        ),
+        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
     },
     outputs = {
         "min_css_file": "%{name}.min.css",
@@ -46,12 +48,7 @@ minify_js = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": attr.label(
-            default = Label("@yui_compressor//:yui_compressor_deploy.jar"),
-            executable = True,
-            single_file = True,
-            allow_files = True,
-        ),
+        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
     },
     outputs = {
         "min_js_file": "%{name}.min.js",
@@ -66,12 +63,7 @@ minify_html = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_http_compressor": attr.label(
-            default = Label("//:html_compressor_deploy.jar"),
-            executable = True,
-            single_file = True,
-            allow_files = True,
-        ),
+        "_http_compressor": web_internal_tool_label("//:html_compressor_deploy.jar"),
     },
     outputs = {
         "min_html_file": "%{name}.min.html",
@@ -109,15 +101,7 @@ html_page = rule(
         ),
         "favicon_sizes": attr.int_list(),
         "deps": attr.label_list(),
-        "_html_template_script": attr.label(
-            default = Label("//:html_template"),
-            executable = True,
-            allow_files = True,
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        ),
+        "_html_template_script": web_internal_python_script_label("//:html_template"),
     },
     outputs = {
         "html_file": "%{name}.html",
@@ -130,6 +114,7 @@ favicon_image_generator = rule(
         "image": attr.label(
             single_file = True,
             allow_files = True,
+            mandatory = True,
         ),
         "output_files": attr.output_list(
             allow_empty = False,
@@ -144,19 +129,134 @@ favicon_image_generator = rule(
         "allow_stretching": attr.bool(
             default = False,
         ),
-        "_resize_image": attr.label(
-            default = Label("//:resize_image"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        ),
+        "_resize_image": web_internal_python_script_label("//:resize_image"),
     },
     implementation = web_internal_favicon_image_generator,
     output_to_genfiles = True,
+)
+
+minify_ttf = rule(
+    attrs = {
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_ttx": web_internal_python_script_label("@font_tools//:ttx"),
+        "_minify_ttx": web_internal_python_script_label("//:minify_ttx"),
+    },
+    implementation = web_internal_minify_ttf,
+    output_to_genfiles = True,
+    outputs = {
+        "out_ttf": "%{name}__minified.ttf",
+    },
+)
+
+ttf_to_woff = rule(
+    attrs = {
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_ttx": web_internal_python_script_label("@font_tools//:ttx"),
+    },
+    implementation = web_internal_ttf_to_woff,
+    output_to_genfiles = True,
+    outputs = {
+        "out_woff": "%{name}__generated.woff",
+    },
+)
+
+ttf_to_woff2 = rule(
+    attrs = {
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_ttf2woff2": web_internal_tool_label("@woff2//:ttf2woff2"),
+        "_file_copy": web_internal_python_script_label("//:file_copy"),
+    },
+    implementation = web_internal_ttf_to_woff2,
+    output_to_genfiles = True,
+    outputs = {
+        "out_woff2": "%{name}__generated.woff2",
+    },
+)
+
+ttf_to_eot = rule(
+    attrs = {
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_ttf2eot": web_internal_tool_label("@ttf2eot//:ttf2eot"),
+    },
+    implementation = web_internal_ttf_to_eot,
+    output_to_genfiles = True,
+    outputs = {
+        "out_eot": "%{name}__generated.eot",
+    },
+)
+
+font_generator = rule(
+    attrs = {
+        "font_name": attr.string(
+            mandatory = True,
+        ),
+        "eot": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "woff": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "woff2": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "svg": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "weight": attr.string(
+            default = "normal",
+            values = [
+                100,
+                200,
+                300,
+                400,
+                500,
+                600,
+                700,
+                800,
+                900,
+                "ligher",
+                "normal",
+                "bold",
+                "bolder",
+            ],
+        ),
+        "style": attr.string(
+            default = "normal",
+            values = [
+                "normal",
+                "italic",
+            ],
+        ),
+    },
+    implementation = web_internal_font_generator,
+    output_to_genfiles = True,
+    outputs = {
+        "out_css": "%{name}__generated.css"
+    },
 )
 
 zip_site = rule(
@@ -166,16 +266,7 @@ zip_site = rule(
         "out_zip": attr.output(
             mandatory = True,
         ),
-        "_zip_site_script": attr.label(
-            default = Label("//:zip_site"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        )
+        "_zip_site_script": web_internal_python_script_label("//:zip_site"),
     },
     implementation = web_internal_zip_site,
 )
@@ -191,16 +282,7 @@ minify_site_zip = rule(
         "minified_zip": attr.output(
             mandatory = True,
         ),
-        "_minify_site_zip_script": attr.label(
-            default = Label("//:minify_site_zip"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        ),
+        "_minify_site_zip_script": web_internal_python_script_label("//:minify_site_zip"),
     },
     implementation = web_internal_minify_site_zip,
 )
@@ -220,16 +302,7 @@ rename_zip_paths = rule(
         "out_zip": attr.output(
             mandatory = True,
         ),
-        "_rename_zip_paths_script": attr.label(
-            default = Label("//:rename_zip_paths"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        )
+        "_rename_zip_paths_script": web_internal_python_script_label("//:rename_zip_paths"),
     },
     implementation = web_internal_rename_zip_paths,
 )
@@ -246,16 +319,7 @@ generate_zip_server_python_file = rule(
             allow_files = True,
             single_file = True,
         ),
-        "_generate_jinja_file": attr.label(
-            default = Label("//:generate_templated_file"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        ),
+        "_generate_jinja_file": web_internal_python_script_label("//:generate_templated_file"),
     },
     output_to_genfiles = True,
     implementation = web_internal_generate_zip_server_python_file,
@@ -312,28 +376,12 @@ generate_deploy_site_zip_s3_script = rule(
         "_deploy_site_zip_to_s3_template": attr.label(
             default = Label("//templates:deploy_site_zip_to_s3.py.jinja2"),
             executable = True,
+            cfg = "host",
             allow_files = True,
             single_file = True,
         ),
-        "_s3_website_deploy": attr.label(
-            default = Label("//:s3_website_deploy"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used as the wrapper executable script is not selectable as a
-            # specific target.
-            # single_file = True,
-        ),
-        "_s3_website_deploy_script_builder": attr.label(
-            default = Label("//:s3_website_deploy_script_builder"),
-            executable = True,
-            allow_files = True,
-
-            # single_file cannot be used while py_binary produces multiple
-            # files, the binary of which is not selectable as a specific target
-            # the way java_binary is
-            # single_file = True,
-        ),
+        "_s3_website_deploy": web_internal_python_script_label("//:s3_website_deploy"),
+        "_s3_website_deploy_script_builder": web_internal_python_script_label("//:s3_website_deploy_script_builder"),
     },
     implementation = web_internal_generate_deploy_site_zip_s3_script,
     outputs = {

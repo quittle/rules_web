@@ -86,17 +86,80 @@ py_library(
 
 """
 
+_FONT_TOOLS_BUILD_FILE = """
+
+py_binary(
+    name = "ttx",
+    srcs = glob([
+        "Lib/*.py",
+        "Lib/**/*.py"
+    ]),
+    imports = [ "Lib" ],
+    main = "Lib/fontTools/ttx.py",
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
+_IO_BROTLI_BUILD_FILE = """
+
+cc_library(
+    name = "brotli_enc",
+    srcs = glob(["common/*.c", "enc/*.c", "enc/*.cc" ]),
+    hdrs = glob(["common/*.h", "enc/*.h"]),
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
+_WOFF_2_BUILD_FILE = """
+
+cc_binary(
+    name = "ttf2woff2",
+    srcs = glob(
+        include = [
+            "src/*.cc",
+            "src/*.h",
+        ],
+        exclude = [
+            "src/woff2_decompress.cc",
+            "src/woff2_dec.cc",
+        ],
+    ),
+    deps = [
+        "@io_brotli//:brotli_enc",
+    ],
+    includes = [ "@io_brotli//:enc" ],
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
+_TTF_2_EOT_BUILD_FILE = """
+
+cc_binary(
+    name = "ttf2eot",
+    srcs = [
+        "OpenTypeUtilities.cpp",
+        "OpenTypeUtilities.h",
+        "ttf2eot.cpp",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
 def rules_web_repositories():
     native.new_git_repository(
         name = "yui_compressor",
-        commit = "b3de528f45966e418d6e3e2f6f8135db4d0be7f1",
+        commit = "b3de528f45966e418d6e3e2f6f8135db4d0be7f1", # master
         remote = "https://github.com/yui/yuicompressor.git",
         build_file_content = _YUI_BUILD_FILE,
     )
 
     native.new_git_repository(
         name = "jargs",
-        commit = "87e0009313e4e508102bb20bd9d736bc71ace30d",
+        commit = "87e0009313e4e508102bb20bd9d736bc71ace30d", # master
         remote = "https://github.com/purcell/jargs.git",
         build_file_content = _JARGS_BUILD_FILE,
     )
@@ -110,20 +173,20 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "io_bazel_rules_sass",
-        commit = "5973952ac44b93691e137362567220d64a92e7e9",
+        commit = "5973952ac44b93691e137362567220d64a92e7e9", # 0.0.1
         remote = "https://github.com/bazelbuild/rules_sass.git",
     )
 
     native.new_git_repository(
         name = "jinja",
-        commit = "368e1b117e74d998f0d3796169c412374708efaf",
+        commit = "966e1a409f02de57b75a0463fc953d54dad2a205", # 2.8
         remote = "https://github.com/pallets/jinja.git",
         build_file_content = _JINJA_BUILD_FILE,
     )
 
     native.new_git_repository(
         name = "markup_safe",
-        commit = "feb1d70c16df62f60dcb521d127fdad8819fc036",
+        commit = "feb1d70c16df62f60dcb521d127fdad8819fc036", # 0.23
         remote = "https://github.com/pallets/markupsafe.git",
         build_file_content = _MARKUP_SAFE_BUILD_FILE,
     )
@@ -156,4 +219,33 @@ def rules_web_repositories():
         name = "com_amazonaws_aws_java_sdk_s3",
         artifact = "com.amazonaws:aws-java-sdk-s3:1.11.38",
         sha1 = "96e88f07d8fcba7f87a9d68ccd8282a28bb3d88c",
+    )
+
+    native.new_git_repository(
+        name = "io_brotli",
+        commit = "66c14517cf8afcc1a1649a7833ac789366eb0b51", # 0.5
+        remote = "https://github.com/google/brotli.git",
+        build_file_content = _IO_BROTLI_BUILD_FILE,
+    )
+
+    native.new_git_repository(
+        name = "font_tools",
+        commit = "ea155757f4887422d93fe430a06a643cbe1bb94a", # 3.1.2
+        remote = "https://github.com/googlei18n/fonttools.git",
+        build_file_content = _FONT_TOOLS_BUILD_FILE,
+    )
+
+    native.new_git_repository(
+        name = "woff2",
+        commit = "3cca6ff8a9a0d63b0224d5d28aa0e3e1e0639308", # master
+        remote = "https://github.com/quittle/woff2.git",
+        build_file_content = _WOFF_2_BUILD_FILE,
+    )
+
+    # This repo includes the patch to fix the build
+    native.new_git_repository(
+        name = "ttf2eot",
+        commit = "0133021ec33552b0b6ae7b3c8f052d067f4b4193", # master
+        remote = "https://github.com/metaflop/ttf2eot.git",
+        build_file_content = _TTF_2_EOT_BUILD_FILE,
     )
