@@ -243,7 +243,7 @@ def web_internal_ttf_to_woff2(ctx):
 
     # The tool unfortunately does not take the output path as an argument and simply creates a new
     # file next to the old one with a new extension
-    copied_source = ctx.new_file(ctx.outputs.out_woff2.short_path.replace(".woff2", ".ttf"))
+    copied_source = ctx.new_file(ctx.outputs.out_woff2.basename.replace(".woff2", ".ttf"))
 
     _copy(ctx, ctx.executable._file_copy, ctx.file.ttf, copied_source)
 
