@@ -249,3 +249,9 @@ def rules_web_repositories():
         remote = "https://github.com/metaflop/ttf2eot.git",
         build_file_content = _TTF_2_EOT_BUILD_FILE,
     )
+
+    native.maven_jar(
+        name = "pngtastic",
+        artifact = "com.github.depsypher:pngtastic:1.2",
+        sha1 = "ff40ec21712778285fc4977521ea3a6ba71354a2",
+    )

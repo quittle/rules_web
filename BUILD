@@ -37,6 +37,15 @@ py_binary(
 )
 
 py_binary(
+    name = "generate_ico",
+    srcs = [
+        "scripts/create_ico.py",
+    ],
+    main = "scripts/create_ico.py",
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
     name = "resize_image",
     srcs = [
         "scripts/resize_image.py",
@@ -127,5 +136,12 @@ java_binary(
         "@com_amazonaws_aws_java_sdk_kms//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
     ],
+    visibility = [ "//visibility:public" ],
+)
+
+java_binary(
+    name = "pngtastic",
+    main_class = "com.googlecode.pngtastic.PngtasticOptimizer",
+    runtime_deps = [ "@pngtastic//jar" ],
     visibility = [ "//visibility:public" ],
 )

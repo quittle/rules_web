@@ -1,6 +1,12 @@
 # Copyright (c) 2016 Dustin Doloff
 # Licensed under Apache License v2.0
 
+# Reverses a string
+# string - str - The string to reverse
+# Returns the string in reverse.
+def _reverse(string):
+    return string[::-1]
+
 # Helper function for copying a file from one location to another
 # ctx - ctx - The context to use
 # file_copy_script - executable - The file_copy executable
@@ -25,6 +31,16 @@ def _copy(ctx, file_copy_script, source_file, destination_file):
         inputs = [ file_copy_script, source_file ],
         executable = file_copy_script,
         outputs = [ destination_file ],
+    )
+
+def _transitive_resources(orig_struct, resource):
+    return struct(
+        resources = getattr(orig_struct, "resources", set()) +
+                getattr(resource, "resources", set()),
+        css_resources = getattr(orig_struct, "css_resources", set()) +
+                getattr(resource, "css_resources", set()),
+        js_resources = getattr(orig_struct, "js_resources", set()) +
+                getattr(resource, "js_resources", set()),
     )
 
 
@@ -67,12 +83,16 @@ def web_internal_minify_css_impl(ctx):
         mnemonic = "MinifyCSS",
         arguments = source_paths +
             [
+                "--type", "css",
                 "-o", ctx.outputs.min_css_file.path,
-                "--type", "css"
             ],
         inputs = [ ctx.executable._yui_binary ] + ctx.files.srcs,
         executable = ctx.executable._yui_binary,
         outputs = [ ctx.outputs.min_css_file ],
+    )
+
+    return struct(
+        css_resources = set([ ctx.outputs.min_css_file ]),
     )
 
 def web_internal_minify_js_impl(ctx):
@@ -82,12 +102,16 @@ def web_internal_minify_js_impl(ctx):
         mnemonic = "MinifyJavaScript",
         arguments = source_paths +
             [
+                "--type", "js",
                 "-o", ctx.outputs.min_js_file.path,
-                "--type", "js"
             ],
         inputs = [ ctx.executable._yui_binary ] + ctx.files.srcs,
         executable = ctx.executable._yui_binary,
         outputs = [ ctx.outputs.min_js_file ],
+    )
+
+    return struct(
+        js_resources = set([ ctx.outputs.min_js_file ]),
     )
 
 def web_internal_minify_html_impl(ctx):
@@ -102,6 +126,14 @@ def web_internal_minify_html_impl(ctx):
         outputs = [ ctx.outputs.min_html_file ],
     )
 
+    ret = struct(
+        resources = set([ ctx.outputs.min_html_file ]),
+    )
+
+    ret = _transitive_resources(ret, ctx.attr.src)
+
+    return ret
+
 def web_internal_html_page_impl(ctx):
     if len(ctx.attr.favicon_sizes) != len(ctx.files.favicon_images):
         fail("Favicon sizes list length does not match favicon images list length")
@@ -110,8 +142,20 @@ def web_internal_html_page_impl(ctx):
         for size, favicon in zip(ctx.attr.favicon_sizes, ctx.files.favicon_images)
             for value in (str(size), favicon.path)
     ]
-    css_paths = [ css_file.path for css_file in ctx.files.css_files ]
-    js_paths = [ js_file.path for js_file in ctx.files.js_files ]
+
+    resources = []
+    css_files = ctx.files.css_files
+    js_files = ctx.files.js_files
+    for dep in ctx.attr.deps:
+        if hasattr(dep, "resources"):
+            resources.extend(list(dep.resources))
+        if hasattr(dep, "css_resources"):
+            css_files.extend(list(dep.css_resources))
+        if hasattr(dep, "js_resources"):
+            js_files.extend(list(dep.js_resources))
+
+    css_paths = [ css_file.path for css_file in css_files ]
+    js_paths = [ js_file.path for js_file in js_files ]
 
     ctx.action(
         mnemonic = "GenerateHTMLPage",
@@ -130,11 +174,98 @@ def web_internal_html_page_impl(ctx):
                 ctx.file.config,
                 ctx.file.body,
             ] +
-            ctx.files.js_files +
-            ctx.files.css_files +
+            css_files +
+            js_files +
             ctx.files.favicon_images,
         executable = ctx.executable._html_template_script,
         outputs = [ ctx.outputs.html_file ],
+    )
+
+    ret = struct(
+        resources = set(
+            resources +
+            ctx.files.favicon_images +
+            [ ctx.outputs.html_file ]
+        ),
+        css_resources = set(css_files),
+        js_resources = set(js_files),
+    )
+
+    for resource in resources + ctx.attr.css_files + ctx.attr.js_files:
+        ret = _transitive_resources(ret, resource)
+
+    return ret
+
+def _minify_png(ctx, pngtastic, file_copy, in_png, out_png, suffix, iterations):
+    if (type(ctx) != "ctx"):
+        fail("ctx was not a context")
+    if (type(pngtastic) != "File"):
+        fail("pngtastic was not a File")
+    if (type(file_copy) != "File"):
+        fail("file_copy was not a File")
+    if (type(in_png) != "File"):
+        fail("in_png was not a File")
+    if (type(out_png) != "File"):
+        fail("out_png was not a File")
+    if (type(suffix) != "string"):
+        fail("suffix was not a string")
+    if (type(iterations) != "int"):
+        fail("iterations was not a int")
+
+    # The tool unfortunately does not take the output path as an argument and simply creates a new
+    # file at {toDir}/{path-to-file}{fileSuffix}. Bazel builds invoke actions from the workspace
+    # root so the path-to-file will always be long so in order to get the output file, we need to
+    # copy over the souce file to one we can suffix.
+    new_name = _reverse(_reverse(out_png.short_path).replace(_reverse(suffix), "", 1))
+    copied_png = ctx.new_file(new_name)
+
+    # Copy the file to gen_files then minify it to exist next to it
+    _copy(ctx, file_copy, in_png, copied_png)
+
+    ctx.action(
+        mnemonic = "MinifyPNG",
+        arguments = [
+            "com.googlecode.pngtastic.PngtasticOptimizer",
+            "--iterations", str(iterations),
+            "--fileSuffix", suffix,
+            copied_png.path,
+        ],
+        inputs = [ copied_png ],
+        executable = pngtastic,
+        outputs = [ out_png ],
+    )
+
+def web_internal_minify_png(ctx):
+    _minify_png(
+        ctx,
+        ctx.executable._pngtastic,
+        ctx.executable._file_copy,
+        ctx.file.png,
+        ctx.outputs.min_png,
+        ctx.attr._suffix,
+        ctx.attr.iterations,
+    )
+
+    return struct(
+        resources = set([ ctx.outputs.min_png ]),
+    )
+
+def web_internal_generate_ico(ctx):
+    ctx.action(
+        mnemonic = "GenerateICO",
+        arguments = [
+                "--source", ctx.file.source.path,
+                "--output", ctx.outputs.ico.path,
+            ] +
+            [ "--sizes" ] + [ str(size) for size in ctx.attr.sizes ] +
+            ([ "--allow-upsizing" ] if ctx.attr.allow_upsizing else []),
+        inputs = [ ctx.file.source ],
+        executable = ctx.executable._generate_ico,
+        outputs = [ ctx.outputs.ico ],
+    )
+
+    return struct(
+        resources = set([ ctx.outputs.ico ]),
     )
 
 def web_internal_favicon_image_generator(ctx):
@@ -149,14 +280,18 @@ def web_internal_favicon_image_generator(ctx):
     if ctx.attr.allow_stretching:
         additional_args.append("--allow-stretching")
 
+    outputs = []
+
     for size, out_file in zip(ctx.attr.output_sizes, ctx.outputs.output_files):
+        unoptimized_png = ctx.new_file(out_file.short_path + "-unoptimized.png")
+
         ctx.action(
             mnemonic = "GenerateFaviconSize",
             arguments = [
                     "--source", ctx.file.image.path,
                     "--width", str(size),
                     "--height", str(size),
-                    "--output", out_file.path,
+                    "--output", unoptimized_png.path,
                 ] +
                 additional_args,
             inputs = [
@@ -164,7 +299,23 @@ def web_internal_favicon_image_generator(ctx):
                 ctx.file.image,
             ],
             executable = ctx.executable._resize_image,
-            outputs = [ out_file ],
+            outputs = [ unoptimized_png ],
+        )
+
+        _minify_png(
+            ctx,
+            ctx.executable._pngtastic,
+            ctx.executable._file_copy,
+            unoptimized_png,
+            out_file,
+            out_file.basename[-1], # Hack that simply treats the last character as the suffix.
+            ctx.attr.png_optimize_iterations,
+        )
+
+        outputs.append(out_file)
+
+    return struct(
+        resources = set(outputs),
     )
 
 def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
@@ -220,6 +371,10 @@ def web_internal_minify_ttf(ctx):
         outputs = [ ctx.outputs.out_ttf ],
     )
 
+    return struct(
+        resources = set([ ctx.outputs.out_ttf ]),
+    )
+
 def web_internal_ttf_to_woff(ctx):
     name = ctx.label.name
     ttx = ctx.new_file("{name}__generated_ttx.ttx".format(name = name))
@@ -238,9 +393,11 @@ def web_internal_ttf_to_woff(ctx):
         outputs = [ ctx.outputs.out_woff ],
     )
 
-def web_internal_ttf_to_woff2(ctx):
-    name = ctx.label.name
+    return struct(
+        resources = set([ ctx.outputs.out_woff ]),
+    )
 
+def web_internal_ttf_to_woff2(ctx):
     # The tool unfortunately does not take the output path as an argument and simply creates a new
     # file next to the old one with a new extension
     copied_source = ctx.new_file(ctx.outputs.out_woff2.basename.replace(".woff2", ".ttf"))
@@ -257,6 +414,10 @@ def web_internal_ttf_to_woff2(ctx):
         outputs = [ ctx.outputs.out_woff2 ],
     )
 
+    return struct(
+        resources = set([ ctx.outputs.out_woff2 ]),
+    )
+
 def web_internal_ttf_to_eot(ctx):
     ctx.action(
         mnemonic = "GenerateEOT",
@@ -267,6 +428,10 @@ def web_internal_ttf_to_eot(ctx):
         inputs = [ ctx.file.ttf ],
         executable = ctx.executable._ttf2eot,
         outputs = [ ctx.outputs.out_eot ],
+    )
+
+    return struct(
+        resources = set([ ctx.outputs.out_eot ]),
     )
 
 def web_internal_font_generator(ctx):
@@ -326,15 +491,38 @@ def web_internal_font_generator(ctx):
         content = content
     )
 
+    return struct(
+        resources = set(
+            [ file for file in
+                [
+                    ctx.file.eot,
+                    ctx.file.ttf,
+                    ctx.file.woff,
+                    ctx.file.woff2,
+                    ctx.file.svg,
+                ] if file != None ]
+        ),
+        css_resources = set([
+            ctx.outputs.out_css,
+        ]),
+    )
+
 def web_internal_zip_site(ctx):
-    html_pages = [ page.path for page in ctx.files.html_pages ]
-    resources = [ resource.path for resource in ctx.files.resources ]
+    resources = set()
+    for resource in ctx.attr.root_files + ctx.attr.resources:
+        resources += getattr(resource, "resources", set())
+        resources += getattr(resource, "css_resources", set())
+        resources += getattr(resource, "js_resources", set())
+    resources += ctx.files.resources
+
+    root_files = [ page.path for page in ctx.files.root_files ]
+    resource_paths = [ resource.path for resource in resources ]
 
     additional_args = []
-    if len(html_pages) > 0:
-        additional_args += [ "--html-pages" ] + html_pages
-    if len(resources) > 0:
-        additional_args += [ "--resources" ] + resources
+    if len(root_files) > 0:
+        additional_args += [ "--root-files" ] + root_files
+    if len(resource_paths) > 0:
+        additional_args += [ "--resources" ] + resource_paths
 
     ctx.action(
         mnemonic = "ZipSite",
@@ -345,8 +533,8 @@ def web_internal_zip_site(ctx):
         inputs = [
                 ctx.executable._zip_site_script,
             ] +
-            ctx.files.resources +
-            ctx.files.html_pages,
+            list(resources) +
+            ctx.files.root_files,
         executable = ctx.executable._zip_site_script,
         outputs = [ ctx.outputs.out_zip ]
     )
@@ -381,8 +569,8 @@ def web_internal_rename_zip_paths(ctx):
     path_map = { key: value for key, value in ctx.attr.path_map.items() }
     path_map.update({
             in_label.path: out_path
-                    for in_label in ctx.files.path_map_labels_in
-                            for out_path in ctx.attr.path_map_labels_out })
+                    for in_label, out_path in
+                            zip(ctx.files.path_map_labels_in, ctx.attr.path_map_labels_out) })
 
     path_map_list = [
         value
@@ -425,7 +613,6 @@ def web_internal_generate_jinja_file(ctx, template, config, out_file):
         executable = ctx.executable._generate_jinja_file,
         outputs = [ out_file ],
     )
-
 
 def web_internal_generate_zip_server_python_file(ctx):
     config = {

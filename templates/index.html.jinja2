@@ -6,17 +6,31 @@
 {{ doctype or '<!DOCTYPE HTML>'}}
 <html>
     <head>
+        <meta charset="{{ charset or 'UTF-8' }}" />
         {% if title %}
             <title>{{ title }}</title>
+            <meta name="application-name" content="{{ title }}" />
         {% endif %}
 
         {% for size, favicon in favicons.iteritems() %}
-            <link rel="apple-touch-icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
+            <link rel="apple-touch-icon-precomposed" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
             <link rel="icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
         {% endfor %}
 
-        {% for name, content in meta.iteritems()  %}
-            <meta name="{{ name }}" content="{{ content }}" />
+        {% if 144 in favicons %}
+            <meta name="msapplication-TileImage" content="{{ favicons[144] }}" />
+        {% endif %}
+
+        {% for size, favicon in favicons.iteritems() if size in [70, 150, 310] %}
+            <meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ favicon }}" />
+        {% endfor %}
+
+        {% for items in meta %}
+            <meta
+            {% for key, value in items.iteritems() %}
+                {{ key }}="{{ value }}"
+            {% endfor %}
+            />
         {% endfor %}
 
         {% for file in css_files  %}
