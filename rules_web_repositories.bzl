@@ -255,3 +255,9 @@ def rules_web_repositories():
         artifact = "com.github.depsypher:pngtastic:1.2",
         sha1 = "ff40ec21712778285fc4977521ea3a6ba71354a2",
     )
+
+    native.maven_jar(
+        name = "com_google_javascript_closure_compiler",
+        artifact = "com.google.javascript:closure-compiler:v20160208",
+        sha1 = "5a2f4be6cf41e27ed7119d26cb8f106300d87d91",
+    )
