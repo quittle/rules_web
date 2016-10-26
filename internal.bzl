@@ -32,6 +32,22 @@ def _dict_to_struct(dictionary):
 def _merge_structs(struct_1, struct_2):
     return _dict_to_struct(_struct_to_dict(struct_1) + _struct_to_dict(struct_2))
 
+# Helper function for adding optional flags to action inputs
+# flag - str - The flag for the argument. E.g. "--arg-name"
+# val - bool or list - A boolean to indicate if the flag should appear or not or a list, which if
+#                      non-empty will result in a list with the flag followed by the contents.
+# list - Returns a list that will either be empty, contain just the flag, or contain the flag and
+#        the contents of val.
+def _optional_arg(flag, val):
+    val_type = type(val)
+
+    if val_type == "bool" and val:
+        return [ flag ]
+    elif val_type == "list" and len(val) > 0:
+        return [ flag ] + val
+    else:
+        return []
+
 # Helper function for copying a file from one location to another
 # ctx - ctx - The context to use
 # file_copy_script - executable - The file_copy executable
@@ -159,7 +175,7 @@ def web_internal_closure_compile_impl(ctx):
                 "--language_in", "ECMASCRIPT6_STRICT",
                 "--language_out", "ECMASCRIPT5",
             ] +
-            ([ "--externs" ] + extern_paths if extern_paths else []) +
+            _optional_arg("--externs", extern_paths) +
             ctx.attr.extra_args,
         inputs = ctx.files.srcs + ctx.files.externs,
         executable = ctx.executable._closure_compiler,
@@ -273,10 +289,10 @@ def web_internal_html_page_impl(ctx):
                 "--output", ctx.outputs.html_file.path,
                 "--resource-json-map", str(path_object),
             ] +
-            ([ "--favicons" ] + favicons if favicons else []) +
-            ([ "--css-files" ] + css_paths if css_paths else []) +
-            ([ "--js-files" ] + js_paths if js_paths else []) +
-            ([ "--deferred-js-files" ] + deferred_js_paths if deferred_js_paths else []),
+            _optional_arg("--favicons", favicons) +
+            _optional_arg("--css-files", css_paths) +
+            _optional_arg("--js-files", js_paths) +
+            _optional_arg("--deferred-js-files", deferred_js_paths),
         inputs = [
                 ctx.executable._html_template_script,
                 ctx.file.template,
@@ -358,7 +374,7 @@ def web_internal_generate_ico(ctx):
                 "--output", ctx.outputs.ico.path,
             ] +
             [ "--sizes" ] + [ str(size) for size in ctx.attr.sizes ] +
-            ([ "--allow-upsizing" ] if ctx.attr.allow_upsizing else []),
+            _optional_arg("--allow-upsizing", ctx.attr.allow_upsizing),
         inputs = [ ctx.file.source ],
         executable = ctx.executable._generate_ico,
         outputs = [ ctx.outputs.ico ],
@@ -372,13 +388,10 @@ def web_internal_favicon_image_generator(ctx):
     if len(ctx.attr.output_files) != len(ctx.attr.output_sizes):
         fail("Same number of output files as sizes expected")
 
-    additional_args = []
-
-    if ctx.attr.allow_upsizing:
-        additional_args.append("--allow-upsizing")
-
-    if ctx.attr.allow_stretching:
-        additional_args.append("--allow-stretching")
+    additional_args = (
+        _optional_arg("--allow-upsizing", ctx.attr.allow_upsizing) +
+        _optional_arg("--allow-stretching", ctx.attr.allow_stretching)
+    )
 
     outputs = []
 
@@ -618,18 +631,13 @@ def web_internal_zip_site(ctx):
     root_files = [ page.path for page in ctx.files.root_files ]
     resource_paths = [ resource.path for resource in resources ]
 
-    additional_args = []
-    if len(root_files) > 0:
-        additional_args += [ "--root-files" ] + root_files
-    if len(resource_paths) > 0:
-        additional_args += [ "--resources" ] + resource_paths
-
     ctx.action(
         mnemonic = "ZipSite",
         arguments = [
                 "--output", ctx.outputs.out_zip.path,
             ] +
-            additional_args,
+            _optional_arg("--root-files", root_files) +
+            _optional_arg("--resources", resource_paths),
         inputs = [
                 ctx.executable._zip_site_script,
             ] +
@@ -653,7 +661,7 @@ def web_internal_minify_site_zip(ctx):
                 "--in-zip", ctx.file.site_zip.path,
                 "--out-zip", ctx.outputs.minified_zip.path,
             ] +
-            ([ "--root-files" ] + root_files if len(root_files) > 0 else []),
+            _optional_arg("--root-files", root_files),
         inputs = [
                 ctx.executable._minify_site_zip_script,
                 ctx.file.site_zip,
