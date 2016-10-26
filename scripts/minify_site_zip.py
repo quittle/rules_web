@@ -26,7 +26,7 @@ def process_file(file_path, file_name_map, in_zip, out_zip, name_generator):
 
     for key, value in file_name_map.iteritems():
         if key in contents:
-            contents = contents.replace(key, value)
+            contents = contents.replace(key, '/' + value)
 
     out_zip.writestr(file_name_map[file_path], contents)
 

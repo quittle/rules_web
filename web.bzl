@@ -79,6 +79,15 @@ closure_compile = rule(
                 "ADVANCED",
             ],
         ),
+        "warning_level": attr.string(
+            default = "VERBOSE",
+            values = [
+                "QUIET",
+                "DEFAULT",
+                "VERBOSE",
+            ],
+        ),
+        "extra_args": attr.string_list(),
         "_closure_compiler": web_internal_tool_label("//:closure_compiler_deploy.jar"),
     },
     outputs = {
@@ -94,7 +103,7 @@ minify_html = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_http_compressor": web_internal_tool_label("//:html_compressor_deploy.jar"),
+        "_html_compressor": web_internal_tool_label("//:html_compressor_deploy.jar"),
     },
     outputs = {
         "min_html_file": "%{name}.min.html",
@@ -119,6 +128,10 @@ html_page = rule(
             mandatory = True,
             allow_files = True,
         ),
+        "deferred_js_files": attr.label_list(
+            default = [],
+            allow_files = JS_FILE_TYPE,
+        ),
         "js_files": attr.label_list(
             default = [],
             allow_files = JS_FILE_TYPE,
@@ -140,7 +153,6 @@ html_page = rule(
     implementation = web_internal_html_page_impl,
 )
 
-_minify_png_suffix = ".min.png"
 minify_png = rule(
     attrs = {
         "png": attr.label(
@@ -151,19 +163,12 @@ minify_png = rule(
         "iterations": attr.int(
             default = DEFAULT_PNG_ITERATIONS,
         ),
-        "_suffix": attr.string(
-            default = _minify_png_suffix,
-        ),
-        "_file_copy": web_internal_python_script_label("//:file_copy"),
-        "_pngtastic": web_internal_tool_label("//:pngtastic_deploy.jar"),
+        "_pngtastic": web_internal_tool_label("//:simplified_pngtastic_deploy.jar"),
     },
     outputs = {
-        # Due to limitations of pngtastic, we will create an intermediate file without the
-        # ".min.png" suffix as well and want it to have a readable name.
-        "min_png": "%{{name}}.png{suffix}".format(suffix = _minify_png_suffix),
+        "min_png": "minified_png/%{name}.png",
     },
     implementation = web_internal_minify_png,
-    output_to_genfiles = True,
 )
 
 # BUG: This doesn't work as PIL does not support writing out ICO files
@@ -216,8 +221,7 @@ favicon_image_generator = rule(
             default = DEFAULT_PNG_ITERATIONS,
         ),
         "_resize_image": web_internal_python_script_label("//:resize_image"),
-        "_file_copy": web_internal_python_script_label("//:file_copy"),
-        "_pngtastic": web_internal_tool_label("//:pngtastic_deploy.jar"),
+        "_pngtastic": web_internal_tool_label("//:simplified_pngtastic_deploy.jar"),
     },
     implementation = web_internal_favicon_image_generator,
     output_to_genfiles = True,

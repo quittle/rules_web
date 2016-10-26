@@ -3,9 +3,34 @@
 
 # Reverses a string
 # string - str - The string to reverse
-# Returns the string in reverse.
+# str - Returns the string in reverse.
 def _reverse(string):
     return string[::-1]
+
+# Converts a struct to a dict
+# structure - struct - The struct to convert
+# dict - Returns a dict representation of the struct
+def _struct_to_dict(structure):
+    default_struct_methods = set(dir(struct()))
+    ret = {}
+    for key in dir(structure):
+        if key not in default_struct_methods:
+            ret[key] = getattr(structure, key)
+    return ret
+
+# Converts a dict to a struct
+# dictionary - dict - The dict to convert
+# struct - Returns a struct representation of the dict
+def _dict_to_struct(dictionary):
+    return struct(**dictionary)
+
+# Merges the two structs and returns the new, merged struct
+# struct_1 - struct - The first struct to merge
+# struct_2 - struct - The second struct to merge
+# struct - Returns a new struct containing all the entries from the inputs. The second struct's
+#          entries override the first's.
+def _merge_structs(struct_1, struct_2):
+    return _dict_to_struct(_struct_to_dict(struct_1) + _struct_to_dict(struct_2))
 
 # Helper function for copying a file from one location to another
 # ctx - ctx - The context to use
@@ -33,12 +58,17 @@ def _copy(ctx, file_copy_script, source_file, destination_file):
         outputs = [ destination_file ],
     )
 
+# Adds all the transitive dependencies of resource to orig_struct and returns the new struct
 def _transitive_resources(orig_struct, resource):
     return struct(
+        source_map = _merge_structs(getattr(orig_struct, "source_map", struct()),
+                getattr(resource, "source_map", struct())),
         resources = getattr(orig_struct, "resources", set()) +
                 getattr(resource, "resources", set()),
         css_resources = getattr(orig_struct, "css_resources", set()) +
                 getattr(resource, "css_resources", set()),
+        deferred_js_files = getattr(orig_struct, "deferred_js_files", set()) +
+                getattr(resource, "deferred_js_files", set()),
         js_resources = getattr(orig_struct, "js_resources", set()) +
                 getattr(resource, "js_resources", set()),
     )
@@ -121,15 +151,16 @@ def web_internal_closure_compile_impl(ctx):
     ctx.action(
         mnemonic = "ClosureCompilingJavascript",
         arguments = source_paths +
-            ([ "--externs" ] + extern_paths if extern_paths else []) +
             [
                 "--js_output_file", ctx.outputs.compiled_js.path,
                 "--compilation_level", ctx.attr.compilation_level,
                 "--jscomp_error", "*",
-                "--warning_level", "VERBOSE",
+                "--warning_level", ctx.attr.warning_level,
                 "--language_in", "ECMASCRIPT6_STRICT",
                 "--language_out", "ECMASCRIPT5",
-            ],
+            ] +
+            ([ "--externs" ] + extern_paths if extern_paths else []) +
+            ctx.attr.extra_args,
         inputs = ctx.files.srcs + ctx.files.externs,
         executable = ctx.executable._closure_compiler,
         outputs = [ ctx.outputs.compiled_js ],
@@ -144,18 +175,38 @@ def web_internal_closure_compile_impl(ctx):
 
 
 def web_internal_minify_html_impl(ctx):
+    whitespace_agnostic_tags = [
+        "html",
+        "head", "script", "style", "meta", "title",
+        "body", "br", "p",
+    ]
+
     ctx.action(
         mnemonic = "MinifyHTML",
         arguments = [
+            "--remove-quotes",
+            "--remove-style-attr",
+            "--remove-script-attr",
+            "--remove-form-attr",
+            "--remove-input-attr",
+            "--simple-bool-attr",
+            "--remove-js-protocol",
+            "--remove-http-protocol",
+            "--remove-https-protocol",
+            "--remove-surrounding-spaces", ",".join(whitespace_agnostic_tags),
             "--output", ctx.outputs.min_html_file.path,
             ctx.file.src.path
         ],
-        inputs = [ ctx.executable._http_compressor, ctx.file.src ],
-        executable = ctx.executable._http_compressor,
+        inputs = [ ctx.executable._html_compressor, ctx.file.src ],
+        executable = ctx.executable._html_compressor,
         outputs = [ ctx.outputs.min_html_file ],
     )
 
+    source_map = {}
+    source_map[ctx.file.src.short_path] = ctx.outputs.min_html_file
+
     ret = struct(
+        source_map = _dict_to_struct(source_map),
         resources = set([ ctx.outputs.min_html_file ]),
     )
 
@@ -172,19 +223,46 @@ def web_internal_html_page_impl(ctx):
             for value in (str(size), favicon.path)
     ]
 
+    source_map = {}
     resources = []
     css_files = ctx.files.css_files
+    deferred_js_files = ctx.files.deferred_js_files
     js_files = ctx.files.js_files
     for dep in ctx.attr.deps:
+        if hasattr(dep, "source_map"):
+            source_map += _struct_to_dict(dep.source_map)
         if hasattr(dep, "resources"):
             resources.extend(list(dep.resources))
         if hasattr(dep, "css_resources"):
             css_files.extend(list(dep.css_resources))
+        if hasattr(dep, "deferred_js_files"):
+            deferred_js_files.extend(list(dep.deferred_js_files))
         if hasattr(dep, "js_resources"):
             js_files.extend(list(dep.js_resources))
+        for file in dep.files:
+            if file.is_source:
+                source_map[file.short_path] = file
+                resources.append(file)
 
+    resource_paths = [ resource.path for resource in resources ]
     css_paths = [ css_file.path for css_file in css_files ]
+    deferred_js_paths = [ js_file.path for js_file in deferred_js_files ]
     js_paths = [ js_file.path for js_file in js_files ]
+
+    path_map = {
+        in_relative_path: out_file.path
+            for in_relative_path, out_file in source_map.items()
+    }
+
+    path_object = {}
+    for short_path, full_path in path_map.items():
+        path_list = short_path.split("/")
+        cur_obj = path_object
+        for item in path_list[:-1]:
+            if item not in cur_obj:
+                cur_obj[item] = {}
+            cur_obj = cur_obj[item]
+        cur_obj[path_list[-1]] = full_path
 
     ctx.action(
         mnemonic = "GenerateHTMLPage",
@@ -193,10 +271,12 @@ def web_internal_html_page_impl(ctx):
                 "--config", ctx.file.config.path,
                 "--body", ctx.file.body.path,
                 "--output", ctx.outputs.html_file.path,
+                "--resource-json-map", str(path_object),
             ] +
-            [ "--favicons" ] + favicons +
-            [ "--css-files" ] + css_paths +
-            [ "--js-files" ] + js_paths,
+            ([ "--favicons" ] + favicons if favicons else []) +
+            ([ "--css-files" ] + css_paths if css_paths else []) +
+            ([ "--js-files" ] + js_paths if js_paths else []) +
+            ([ "--deferred-js-files" ] + deferred_js_paths if deferred_js_paths else []),
         inputs = [
                 ctx.executable._html_template_script,
                 ctx.file.template,
@@ -204,62 +284,51 @@ def web_internal_html_page_impl(ctx):
                 ctx.file.body,
             ] +
             css_files +
+            deferred_js_files +
             js_files +
+            resources +
             ctx.files.favicon_images,
         executable = ctx.executable._html_template_script,
         outputs = [ ctx.outputs.html_file ],
     )
 
     ret = struct(
+        source_map = _dict_to_struct(source_map),
         resources = set(
             resources +
             ctx.files.favicon_images +
             [ ctx.outputs.html_file ]
         ),
         css_resources = set(css_files),
+        deferred_js_resources = set(deferred_js_files),
         js_resources = set(js_files),
     )
 
-    for resource in resources + ctx.attr.css_files + ctx.attr.js_files:
+    for resource in resources + ctx.attr.css_files + ctx.attr.deferred_js_files + ctx.attr.js_files:
         ret = _transitive_resources(ret, resource)
 
     return ret
 
-def _minify_png(ctx, pngtastic, file_copy, in_png, out_png, suffix, iterations):
+def _minify_png(ctx, pngtastic, in_png, out_png, iterations):
     if (type(ctx) != "ctx"):
         fail("ctx was not a context")
     if (type(pngtastic) != "File"):
         fail("pngtastic was not a File")
-    if (type(file_copy) != "File"):
-        fail("file_copy was not a File")
     if (type(in_png) != "File"):
         fail("in_png was not a File")
     if (type(out_png) != "File"):
         fail("out_png was not a File")
-    if (type(suffix) != "string"):
-        fail("suffix was not a string")
     if (type(iterations) != "int"):
         fail("iterations was not a int")
-
-    # The tool unfortunately does not take the output path as an argument and simply creates a new
-    # file at {toDir}/{path-to-file}{fileSuffix}. Bazel builds invoke actions from the workspace
-    # root so the path-to-file will always be long so in order to get the output file, we need to
-    # copy over the souce file to one we can suffix.
-    new_name = _reverse(_reverse(out_png.short_path).replace(_reverse(suffix), "", 1))
-    copied_png = ctx.new_file(new_name)
-
-    # Copy the file to gen_files then minify it to exist next to it
-    _copy(ctx, file_copy, in_png, copied_png)
 
     ctx.action(
         mnemonic = "MinifyPNG",
         arguments = [
-            "com.googlecode.pngtastic.PngtasticOptimizer",
+            "--input", in_png.path,
+            "--output", out_png.path,
             "--iterations", str(iterations),
-            "--fileSuffix", suffix,
-            copied_png.path,
         ],
-        inputs = [ copied_png ],
+        inputs = [ in_png ],
         executable = pngtastic,
         outputs = [ out_png ],
     )
@@ -268,14 +337,16 @@ def web_internal_minify_png(ctx):
     _minify_png(
         ctx,
         ctx.executable._pngtastic,
-        ctx.executable._file_copy,
         ctx.file.png,
         ctx.outputs.min_png,
-        ctx.attr._suffix,
         ctx.attr.iterations,
     )
 
+    source_map = {}
+    source_map[ctx.file.png.short_path] = ctx.outputs.min_png
+
     return struct(
+        source_map = struct(**source_map),
         resources = set([ ctx.outputs.min_png ]),
     )
 
@@ -334,10 +405,8 @@ def web_internal_favicon_image_generator(ctx):
         _minify_png(
             ctx,
             ctx.executable._pngtastic,
-            ctx.executable._file_copy,
             unoptimized_png,
             out_file,
-            out_file.basename[-1], # Hack that simply treats the last character as the suffix.
             ctx.attr.png_optimize_iterations,
         )
 
@@ -538,7 +607,9 @@ def web_internal_font_generator(ctx):
 
 def web_internal_zip_site(ctx):
     resources = set()
+    source_map = {}
     for resource in ctx.attr.root_files + ctx.attr.resources:
+        source_map += _struct_to_dict(getattr(resource, "source_map", struct()))
         resources += getattr(resource, "resources", set())
         resources += getattr(resource, "css_resources", set())
         resources += getattr(resource, "js_resources", set())
@@ -568,19 +639,21 @@ def web_internal_zip_site(ctx):
         outputs = [ ctx.outputs.out_zip ]
     )
 
+
+    return struct(
+        source_map = _dict_to_struct(source_map),
+    )
+
 def web_internal_minify_site_zip(ctx):
     root_files = [ file.path for file in ctx.files.root_files ]
-
-    additional_args = []
-    if len(root_files) > 0:
-        additional_args += [ "--root-files" ] + root_files
 
     ctx.action(
         mnemonic = "MinifySiteZip",
         arguments = [
                 "--in-zip", ctx.file.site_zip.path,
                 "--out-zip", ctx.outputs.minified_zip.path,
-            ] + additional_args,
+            ] +
+            ([ "--root-files" ] + root_files if len(root_files) > 0 else []),
         inputs = [
                 ctx.executable._minify_site_zip_script,
                 ctx.file.site_zip,

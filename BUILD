@@ -131,10 +131,10 @@ java_binary(
         "s3_website_deploy/java/src/com/dustindoloff/s3websitedeploy/Main.java",
     ],
     deps = [
-        "@org_apache_commons_cli//jar",
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_kms//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
+        "@org_apache_commons_cli//jar",
     ],
     visibility = [ "//visibility:public" ],
 )
@@ -143,6 +143,19 @@ java_binary(
     name = "pngtastic",
     main_class = "com.googlecode.pngtastic.PngtasticOptimizer",
     runtime_deps = [ "@pngtastic//jar" ],
+    visibility = [ "//visibility:public" ],
+)
+
+java_binary(
+    name = "simplified_pngtastic",
+    main_class = "com.dustindoloff.pngtastic.Main",
+    srcs = [
+        "pngtastic/java/src/com/dustindoloff/pngtastic/Main.java",
+    ],
+    deps = [
+        "@org_apache_commons_cli//jar",
+        "@pngtastic//jar",
+    ],
     visibility = [ "//visibility:public" ],
 )
 

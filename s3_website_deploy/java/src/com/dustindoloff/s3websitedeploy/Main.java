@@ -130,7 +130,7 @@ public final class Main {
         } catch (final ParseException e) {
             System.out.println(e.getMessage());
             new HelpFormatter().printHelp("s3WebsiteDeploy", options);
-            System.exit(100);
+            System.exit(1);
             return;
         }
 

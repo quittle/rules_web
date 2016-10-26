@@ -37,8 +37,16 @@
             <link rel=stylesheet href="{{ file }}" type="text/css" />
         {% endfor %}
 
+        <script type="text/javascript">
+            var RESOURCE_PATHS = {{ resource_json_map_string }};
+        </script>
+
         {% for file in js_files  %}
             <script src="{{ file }}" type="text/javascript"></script>
+        {% endfor %}
+
+        {% for file in deferred_js_files  %}
+            <script src="{{ file }}" defer type="text/javascript"></script>
         {% endfor %}
     </head>
     {% include body %}
