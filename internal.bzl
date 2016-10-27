@@ -38,7 +38,7 @@ def _merge_structs(struct_1, struct_2):
 #                      non-empty will result in a list with the flag followed by the contents.
 # list - Returns a list that will either be empty, contain just the flag, or contain the flag and
 #        the contents of val.
-def _optional_arg(flag, val):
+def optional_arg_(flag, val):
     val_type = type(val)
 
     if val_type == "bool" and val:
@@ -175,7 +175,7 @@ def web_internal_closure_compile_impl(ctx):
                 "--language_in", "ECMASCRIPT6_STRICT",
                 "--language_out", "ECMASCRIPT5",
             ] +
-            _optional_arg("--externs", extern_paths) +
+            optional_arg_("--externs", extern_paths) +
             ctx.attr.extra_args,
         inputs = ctx.files.srcs + ctx.files.externs,
         executable = ctx.executable._closure_compiler,
@@ -289,10 +289,10 @@ def web_internal_html_page_impl(ctx):
                 "--output", ctx.outputs.html_file.path,
                 "--resource-json-map", str(path_object),
             ] +
-            _optional_arg("--favicons", favicons) +
-            _optional_arg("--css-files", css_paths) +
-            _optional_arg("--js-files", js_paths) +
-            _optional_arg("--deferred-js-files", deferred_js_paths),
+            optional_arg_("--favicons", favicons) +
+            optional_arg_("--css-files", css_paths) +
+            optional_arg_("--js-files", js_paths) +
+            optional_arg_("--deferred-js-files", deferred_js_paths),
         inputs = [
                 ctx.executable._html_template_script,
                 ctx.file.template,
@@ -324,110 +324,6 @@ def web_internal_html_page_impl(ctx):
         ret = _transitive_resources(ret, resource)
 
     return ret
-
-def _minify_png(ctx, pngtastic, in_png, out_png, iterations):
-    if (type(ctx) != "ctx"):
-        fail("ctx was not a context")
-    if (type(pngtastic) != "File"):
-        fail("pngtastic was not a File")
-    if (type(in_png) != "File"):
-        fail("in_png was not a File")
-    if (type(out_png) != "File"):
-        fail("out_png was not a File")
-    if (type(iterations) != "int"):
-        fail("iterations was not a int")
-
-    ctx.action(
-        mnemonic = "MinifyPNG",
-        arguments = [
-            "--input", in_png.path,
-            "--output", out_png.path,
-            "--iterations", str(iterations),
-        ],
-        inputs = [ in_png ],
-        executable = pngtastic,
-        outputs = [ out_png ],
-    )
-
-def web_internal_minify_png(ctx):
-    _minify_png(
-        ctx,
-        ctx.executable._pngtastic,
-        ctx.file.png,
-        ctx.outputs.min_png,
-        ctx.attr.iterations,
-    )
-
-    source_map = {}
-    source_map[ctx.file.png.short_path] = ctx.outputs.min_png
-
-    return struct(
-        source_map = struct(**source_map),
-        resources = set([ ctx.outputs.min_png ]),
-    )
-
-def web_internal_generate_ico(ctx):
-    ctx.action(
-        mnemonic = "GenerateICO",
-        arguments = [
-                "--source", ctx.file.source.path,
-                "--output", ctx.outputs.ico.path,
-            ] +
-            [ "--sizes" ] + [ str(size) for size in ctx.attr.sizes ] +
-            _optional_arg("--allow-upsizing", ctx.attr.allow_upsizing),
-        inputs = [ ctx.file.source ],
-        executable = ctx.executable._generate_ico,
-        outputs = [ ctx.outputs.ico ],
-    )
-
-    return struct(
-        resources = set([ ctx.outputs.ico ]),
-    )
-
-def web_internal_favicon_image_generator(ctx):
-    if len(ctx.attr.output_files) != len(ctx.attr.output_sizes):
-        fail("Same number of output files as sizes expected")
-
-    additional_args = (
-        _optional_arg("--allow-upsizing", ctx.attr.allow_upsizing) +
-        _optional_arg("--allow-stretching", ctx.attr.allow_stretching)
-    )
-
-    outputs = []
-
-    for size, out_file in zip(ctx.attr.output_sizes, ctx.outputs.output_files):
-        unoptimized_png = ctx.new_file(out_file.short_path + "-unoptimized.png")
-
-        ctx.action(
-            mnemonic = "GenerateFaviconSize",
-            arguments = [
-                    "--source", ctx.file.image.path,
-                    "--width", str(size),
-                    "--height", str(size),
-                    "--output", unoptimized_png.path,
-                ] +
-                additional_args,
-            inputs = [
-                ctx.executable._resize_image,
-                ctx.file.image,
-            ],
-            executable = ctx.executable._resize_image,
-            outputs = [ unoptimized_png ],
-        )
-
-        _minify_png(
-            ctx,
-            ctx.executable._pngtastic,
-            unoptimized_png,
-            out_file,
-            ctx.attr.png_optimize_iterations,
-        )
-
-        outputs.append(out_file)
-
-    return struct(
-        resources = set(outputs),
-    )
 
 def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
     if (type(ctx) != "ctx"):
@@ -636,8 +532,8 @@ def web_internal_zip_site(ctx):
         arguments = [
                 "--output", ctx.outputs.out_zip.path,
             ] +
-            _optional_arg("--root-files", root_files) +
-            _optional_arg("--resources", resource_paths),
+            optional_arg_("--root-files", root_files) +
+            optional_arg_("--resources", resource_paths),
         inputs = [
                 ctx.executable._zip_site_script,
             ] +
@@ -661,7 +557,7 @@ def web_internal_minify_site_zip(ctx):
                 "--in-zip", ctx.file.site_zip.path,
                 "--out-zip", ctx.outputs.minified_zip.path,
             ] +
-            _optional_arg("--root-files", root_files),
+            optional_arg_("--root-files", root_files),
         inputs = [
                 ctx.executable._minify_site_zip_script,
                 ctx.file.site_zip,

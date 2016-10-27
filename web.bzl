@@ -9,9 +9,6 @@ load(":internal.bzl",
     "web_internal_closure_compile_impl",
     "web_internal_minify_html_impl",
     "web_internal_html_page_impl",
-    "web_internal_minify_png",
-    "web_internal_generate_ico",
-    "web_internal_favicon_image_generator",
     "web_internal_minify_ttf",
     "web_internal_ttf_to_woff",
     "web_internal_ttf_to_woff2",
@@ -28,8 +25,6 @@ CSS_FILE_TYPE = FileType([".css"])
 HTML_FILE_TYPE = FileType([".html"])
 JS_FILE_TYPE = FileType([".js"])
 JSON_FILE_TYPE = FileType([".json"])
-
-DEFAULT_PNG_ITERATIONS = 64
 
 minify_css = rule(
     attrs = {
@@ -151,80 +146,6 @@ html_page = rule(
         "html_file": "%{name}.html",
     },
     implementation = web_internal_html_page_impl,
-)
-
-minify_png = rule(
-    attrs = {
-        "png": attr.label(
-            single_file = True,
-            allow_files = True,
-            mandatory = True,
-        ),
-        "iterations": attr.int(
-            default = DEFAULT_PNG_ITERATIONS,
-        ),
-        "_pngtastic": web_internal_tool_label("//:simplified_pngtastic_deploy.jar"),
-    },
-    outputs = {
-        "min_png": "minified_png/%{name}.png",
-    },
-    implementation = web_internal_minify_png,
-)
-
-# BUG: This doesn't work as PIL does not support writing out ICO files
-_generate_ico = rule(
-    attrs = {
-        "source": attr.label(
-            single_file = True,
-            allow_files = True,
-            mandatory = True,
-        ),
-        "sizes": attr.int_list(
-            mandatory = True,
-            allow_empty = False,
-        ),
-        "allow_upsizing": attr.bool(
-            default = False,
-        ),
-        "_generate_ico": web_internal_python_script_label("//:generate_ico"),
-    },
-    outputs = {
-        # Due to limitations of pngtastic, we will create an intermediate file without the
-        # ".min.png" suffix as well and want it to have a readable name.
-        "ico": "%{name}.ico",
-    },
-    implementation = web_internal_generate_ico,
-    output_to_genfiles = True,
-)
-
-favicon_image_generator = rule(
-    attrs = {
-        "image": attr.label(
-            single_file = True,
-            allow_files = True,
-            mandatory = True,
-        ),
-        "output_files": attr.output_list(
-            allow_empty = False,
-            mandatory = True,
-        ),
-        "output_sizes": attr.int_list(
-            allow_empty = False,
-        ),
-        "allow_upsizing": attr.bool(
-            default = False,
-        ),
-        "allow_stretching": attr.bool(
-            default = False,
-        ),
-        "png_optimize_iterations": attr.int(
-            default = DEFAULT_PNG_ITERATIONS,
-        ),
-        "_resize_image": web_internal_python_script_label("//:resize_image"),
-        "_pngtastic": web_internal_tool_label("//:simplified_pngtastic_deploy.jar"),
-    },
-    implementation = web_internal_favicon_image_generator,
-    output_to_genfiles = True,
 )
 
 minify_ttf = rule(
