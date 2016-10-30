@@ -3,7 +3,41 @@
 
 load("//:internal.bzl",
     "optional_arg_",
+    "struct_to_dict_",
+    "transitive_resources_",
 )
+
+def web_internal_resource_map_impl(ctx):
+    source_map = {}
+    for dep in ctx.attr.deps:
+        source_map += struct_to_dict_(getattr(dep, "source_map", struct()))
+        for file in dep.files:
+            if file.is_source:
+                source_map[file.short_path] = file
+
+    path_map = {
+        in_relative_path: out_file.path
+            for in_relative_path, out_file in source_map.items()
+    }
+
+    ctx.action(
+        mnemonic = "GeneratingResourceMapJS",
+        arguments = [
+            "--constant-name", ctx.attr.constant_name,
+            "--path-map", str(path_map),
+            "--output", ctx.outputs.resource_map.path,
+        ],
+        inputs = [ ctx.executable._resource_map_script ] + ctx.files.deps,
+        executable = ctx.executable._resource_map_script,
+        outputs = [ ctx.outputs.resource_map ],
+    )
+
+    ret = struct(
+        js_resources = set([ ctx.outputs.resource_map ]),
+    )
+    for dep in ctx.attr.deps:
+        ret = transitive_resources_(ret, dep)
+    return ret
 
 def web_internal_minify_js_impl(ctx):
     source_paths = [ source.path for source in ctx.files.srcs ]

@@ -37,10 +37,6 @@
             <link rel=stylesheet href="{{ file }}" type="text/css" />
         {% endfor %}
 
-        <script type="text/javascript">
-            var RESOURCE_PATHS = {{ resource_json_map_string }};
-        </script>
-
         {% for file in js_files  %}
             <script src="{{ file }}" type="text/javascript"></script>
         {% endfor %}

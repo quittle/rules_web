@@ -6,12 +6,31 @@ load("//:constants.bzl",
 )
 
 load("//:internal.bzl",
+    "web_internal_python_script_label",
     "web_internal_tool_label",
 )
 
 load(":internal.bzl",
     "web_internal_closure_compile_impl",
     "web_internal_minify_js_impl",
+    "web_internal_resource_map_impl",
+)
+
+resource_map = rule(
+    attrs = {
+        "constant_name": attr.string(
+            mandatory = True,
+        ),
+        "deps": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+        ),
+        "_resource_map_script": web_internal_python_script_label("//js:resource_map"),
+    },
+    outputs = {
+        "resource_map": "resource_map/%{name}.js",
+    },
+    implementation = web_internal_resource_map_impl,
 )
 
 minify_js = rule(
@@ -24,7 +43,7 @@ minify_js = rule(
         "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
     },
     outputs = {
-        "min_js_file": "%{name}.min.js",
+        "min_js_file": "minify_js/%{name}.min.js",
     },
     implementation = web_internal_minify_js_impl,
 )
@@ -59,7 +78,7 @@ closure_compile = rule(
         "_closure_compiler": web_internal_tool_label("//js:closure_compiler_deploy.jar"),
     },
     outputs = {
-        "compiled_js": "%{name}.js",
+        "compiled_js": "closure_compile/%{name}.js",
     },
     implementation = web_internal_closure_compile_impl,
 )

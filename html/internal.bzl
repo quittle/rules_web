@@ -83,21 +83,6 @@ def web_internal_html_page_impl(ctx):
     deferred_js_paths = [ js_file.path for js_file in deferred_js_files ]
     js_paths = [ js_file.path for js_file in js_files ]
 
-    path_map = {
-        in_relative_path: out_file.path
-            for in_relative_path, out_file in source_map.items()
-    }
-
-    path_object = {}
-    for short_path, full_path in path_map.items():
-        path_list = short_path.split("/")
-        cur_obj = path_object
-        for item in path_list[:-1]:
-            if item not in cur_obj:
-                cur_obj[item] = {}
-            cur_obj = cur_obj[item]
-        cur_obj[path_list[-1]] = full_path
-
     ctx.action(
         mnemonic = "GenerateHTMLPage",
         arguments = [
@@ -105,7 +90,6 @@ def web_internal_html_page_impl(ctx):
                 "--config", ctx.file.config.path,
                 "--body", ctx.file.body.path,
                 "--output", ctx.outputs.html_file.path,
-                "--resource-json-map", str(path_object),
             ] +
             optional_arg_("--favicons", favicons) +
             optional_arg_("--css-files", css_paths) +
@@ -125,6 +109,8 @@ def web_internal_html_page_impl(ctx):
         executable = ctx.executable._html_template_script,
         outputs = [ ctx.outputs.html_file ],
     )
+
+    source_map[ctx.outputs.html_file.short_path] = ctx.outputs.html_file
 
     ret = struct(
         source_map = dict_to_struct_(source_map),

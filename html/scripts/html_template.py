@@ -15,7 +15,6 @@ def parse_args():
     parser.add_argument('--css-files', type=str, nargs='+', default=[])
     parser.add_argument('--deferred-js-files', type=str, nargs='+', default=[])
     parser.add_argument('--js-files', type=str, nargs='+', default=[])
-    parser.add_argument('--resource-json-map', type=json.loads, default={})
     parser.add_argument('--favicons', type=str, nargs='+', default=[],
             help='A list of size and file pairs. e.g. "16 favicon-16x16.png 32 favicon-32x32.png"')
     parser.add_argument('--body', type=str, required=True)
@@ -42,7 +41,6 @@ def main():
     config['css_files'] = args.css_files
     config['deferred_js_files'] = args.deferred_js_files
     config['js_files'] = args.js_files
-    config['resource_json_map_string'] = json.dumps(args.resource_json_map)
 
     env = jinja2.Environment(loader = jinja2.FileSystemLoader([template_path, body_path]))
     template = env.get_template(template_filename)

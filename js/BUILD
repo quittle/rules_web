@@ -7,3 +7,11 @@ java_binary(
     runtime_deps = [ "@com_google_javascript_closure_compiler//jar" ],
     visibility = [ "//visibility:public" ],
 )
+
+py_binary(
+    name = "resource_map",
+    srcs = [
+        "scripts/resource_map.py",
+    ],
+    visibility = [ "//visibility:public" ],
+)
