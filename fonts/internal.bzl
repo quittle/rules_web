@@ -18,6 +18,7 @@ def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
     ctx.action(
         mnemonic = "GenerateTTX",
         arguments = [
+            "-q",
             "-o", out_ttx.path,
             in_ttf.path,
         ],
@@ -50,6 +51,7 @@ def web_internal_minify_ttf(ctx):
     ctx.action(
         mnemonic = "GenerateMinimalTTX",
         arguments = [
+            "-q",
             "-o", ctx.outputs.out_ttf.path,
             min_ttx.path,
         ],
@@ -62,6 +64,22 @@ def web_internal_minify_ttf(ctx):
         resources = set([ ctx.outputs.out_ttf ]),
     )
 
+def web_internal_ttf_to_eot(ctx):
+    ctx.action(
+        mnemonic = "GenerateEOT",
+        arguments = [
+            ctx.file.ttf.path,
+            ctx.outputs.out_eot.path,
+        ],
+        inputs = [ ctx.file.ttf ],
+        executable = ctx.executable._ttf2eot,
+        outputs = [ ctx.outputs.out_eot ],
+    )
+
+    return struct(
+        resources = set([ ctx.outputs.out_eot ]),
+    )
+
 def web_internal_ttf_to_woff(ctx):
     name = ctx.label.name
     ttx = ctx.new_file("{name}__generated_ttx.ttx".format(name = name))
@@ -71,8 +89,9 @@ def web_internal_ttf_to_woff(ctx):
     ctx.action(
         mnemonic = "GenerateWOFF",
         arguments = [
-            "-o", ctx.outputs.out_woff.path,
+            "-q",
             "--flavor", "woff",
+            "-o", ctx.outputs.out_woff.path,
             ttx.path,
         ],
         inputs = [ ttx ],
@@ -103,22 +122,6 @@ def web_internal_ttf_to_woff2(ctx):
 
     return struct(
         resources = set([ ctx.outputs.out_woff2 ]),
-    )
-
-def web_internal_ttf_to_eot(ctx):
-    ctx.action(
-        mnemonic = "GenerateEOT",
-        arguments = [
-            ctx.file.ttf.path,
-            ctx.outputs.out_eot.path,
-        ],
-        inputs = [ ctx.file.ttf ],
-        executable = ctx.executable._ttf2eot,
-        outputs = [ ctx.outputs.out_eot ],
-    )
-
-    return struct(
-        resources = set([ ctx.outputs.out_eot ]),
     )
 
 def web_internal_font_generator(ctx):

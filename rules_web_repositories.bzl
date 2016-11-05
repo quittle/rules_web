@@ -126,6 +126,9 @@ cc_binary(
             "src/woff2_dec.cc",
         ],
     ),
+    copts = [
+        "-w",
+    ],
     deps = [
         "@io_brotli//:brotli_enc",
     ],
@@ -143,6 +146,9 @@ cc_binary(
         "OpenTypeUtilities.cpp",
         "OpenTypeUtilities.h",
         "ttf2eot.cpp",
+    ],
+    copts = [
+        "-w",
     ],
     visibility = [ "//visibility:public" ],
 )

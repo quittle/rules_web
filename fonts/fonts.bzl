@@ -3,9 +3,9 @@
 
 load(":internal.bzl",
     "web_internal_minify_ttf",
+    "web_internal_ttf_to_eot",
     "web_internal_ttf_to_woff",
     "web_internal_ttf_to_woff2",
-    "web_internal_ttf_to_eot",
     "web_internal_font_generator",
 )
 
@@ -28,6 +28,22 @@ minify_ttf = rule(
     output_to_genfiles = True,
     outputs = {
         "out_ttf": "%{name}__minified.ttf",
+    },
+)
+
+ttf_to_eot = rule(
+    attrs = {
+        "ttf": attr.label(
+            allow_files = True,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_ttf2eot": web_internal_tool_label("@ttf2eot//:ttf2eot"),
+    },
+    implementation = web_internal_ttf_to_eot,
+    output_to_genfiles = True,
+    outputs = {
+        "out_eot": "%{name}__generated.eot",
     },
 )
 
@@ -61,22 +77,6 @@ ttf_to_woff2 = rule(
     output_to_genfiles = True,
     outputs = {
         "out_woff2": "%{name}__generated.woff2",
-    },
-)
-
-ttf_to_eot = rule(
-    attrs = {
-        "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
-            mandatory = True,
-        ),
-        "_ttf2eot": web_internal_tool_label("@ttf2eot//:ttf2eot"),
-    },
-    implementation = web_internal_ttf_to_eot,
-    output_to_genfiles = True,
-    outputs = {
-        "out_eot": "%{name}__generated.eot",
     },
 )
 

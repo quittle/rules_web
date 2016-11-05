@@ -102,6 +102,10 @@ _assert_valid_type = rule(
         ),
         "type": attr.string(
             mandatory = True,
+            values = [
+                "json",
+                "png",
+            ]
         ),
         "_assert_valid_type": web_internal_python_script_label("//test:assert_valid_type"),
     },
