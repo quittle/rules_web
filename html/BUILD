@@ -15,6 +15,6 @@ py_binary(
 java_binary(
     name = "html_compressor",
     main_class = "com.googlecode.htmlcompressor.CmdLineCompressor",
-    runtime_deps = [ "@http_compressor//jar" ],
+    runtime_deps = [ "@html_compressor//jar" ],
     visibility = [ "//visibility:public" ],
 )

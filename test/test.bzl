@@ -103,6 +103,7 @@ _assert_valid_type = rule(
         "type": attr.string(
             mandatory = True,
             values = [
+                "html",
                 "json",
                 "png",
             ]

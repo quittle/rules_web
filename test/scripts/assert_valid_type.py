@@ -2,6 +2,7 @@
 # Licensed under Apache License v2.0
 
 import argparse
+from HTMLParser import HTMLParser
 import json
 import os
 from PIL import Image
@@ -11,8 +12,14 @@ def parse_args():
     parser.add_argument('--stamp', type=argparse.FileType('w+'), required=True,
                                    help='Stamp file to record action completed')
     parser.add_argument('--files', type=argparse.FileType('rb'), nargs='+', required=True)
-    parser.add_argument('--type', type=str, choices=['json','png'], required=True)
+    parser.add_argument('--type', type=str, choices=['html', 'json','png'], required=True)
     return parser.parse_args()
+
+# This is not a great parser. It does not support strict parsing
+def validate_html(file):
+    parser = HTMLParser()
+    parser.feed(file.read())
+    parser.close()
 
 def validate_json(file):
     # Throws an exception if not valid JSON
@@ -32,7 +39,9 @@ def main():
 
     for file in args.files:
         with file as fp:
-            if file_type == 'json':
+            if file_type == 'html':
+                validate_html(fp)
+            elif file_type == 'json':
                 validate_json(fp)
             elif file_type == 'png':
                 validate_png(fp)

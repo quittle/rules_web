@@ -31,7 +31,10 @@ def web_internal_minify_html_impl(ctx):
             "--output", ctx.outputs.min_html_file.path,
             ctx.file.src.path
         ],
-        inputs = [ ctx.executable._html_compressor, ctx.file.src ],
+        inputs = [
+            ctx.executable._html_compressor,
+            ctx.file.src,
+        ],
         executable = ctx.executable._html_compressor,
         outputs = [ ctx.outputs.min_html_file ],
     )

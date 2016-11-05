@@ -198,7 +198,7 @@ def rules_web_repositories():
     )
 
     native.http_jar(
-        name = "http_compressor",
+        name = "html_compressor",
         sha256 = "88894e330cdb0e418e805136d424f4c262236b1aa3683e51037cdb66310cb0f9",
         url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/htmlcompressor/htmlcompressor-1.5.3.jar",
     )
