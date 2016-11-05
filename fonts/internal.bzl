@@ -5,6 +5,79 @@ load("//:internal.bzl",
     "copy_",
 )
 
+def web_internal_font_generator(ctx):
+    # CSS src line for ie support
+    single_source = ""
+    # CSS  src line with multiple fonts for non-ie support. Contains tupples of (url, type)
+    multi_source = []
+    if ctx.file.eot != None:
+        eot = ctx.file.eot.path
+        single_source = "src: url('{eot}');".format(eot = eot)
+        multi_source.append(("{eot}?#iefix".format(eot = eot), "embedded-opentype"))
+    if ctx.file.ttf != None:
+        ttf = ctx.file.ttf.path
+        multi_source.append((ttf, "truetype"))
+    if ctx.file.woff != None:
+        woff = ctx.file.woff.path
+        multi_source.append((woff, "woff"))
+    if ctx.file.woff2 != None:
+        woff2 = ctx.file.woff2.path
+        multi_source.append((woff2, "woff2"))
+    if ctx.file.svg != None:
+        svg = ctx.file.svg.path
+        multi_source.append((
+                "{svg}#{name}-{weight}-{style}".format( # Must be unique per variant
+                        svg = svg,
+                        name = ctx.attr.name,
+                        weight = ctx.attr.weight,
+                        style = ctx.attr.style),
+                "svg"))
+
+    multi_source = [
+            "url('{path}') format('{type}')".format(path=path,type=type)
+                    for (path, type) in multi_source ]
+    if len(multi_source) > 0:
+        multi_source = "src: {formats};".format(formats = ",".join(multi_source))
+
+    content = """
+                /* AUTO-GENERATED FILE. DO NOT EDIT */
+
+                @font-face {{
+                    font-family: '{name}';
+                    {single_source}
+                    {multi_source}
+                    font-weight: {weight};
+                    font-style: {style};
+                }}
+            """.format(
+                name = ctx.attr.font_name,
+                single_source = single_source,
+                multi_source = multi_source,
+                weight = ctx.attr.weight,
+                style = ctx.attr.style,
+            )
+
+    ctx.file_action(
+        output = ctx.outputs.out_css,
+        content = content
+    )
+
+    return struct(
+        resources = set(
+            [ file for file in
+                [
+                    ctx.file.eot,
+                    ctx.file.ttf,
+                    ctx.file.woff,
+                    ctx.file.woff2,
+                    ctx.file.svg,
+                ] if file != None ]
+        ),
+        css_resources = set([
+            ctx.outputs.out_css,
+        ]),
+    )
+
 def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
     if (type(ctx) != "ctx"):
         fail("ctx was not a context")
@@ -122,77 +195,4 @@ def web_internal_ttf_to_woff2(ctx):
 
     return struct(
         resources = set([ ctx.outputs.out_woff2 ]),
-    )
-
-def web_internal_font_generator(ctx):
-    # CSS src line for ie support
-    single_source = ""
-    # CSS  src line with multiple fonts for non-ie support. Contains tupples of (url, type)
-    multi_source = []
-    if ctx.file.eot != None:
-        eot = ctx.file.eot.path
-        single_source = "src: url('{eot}');".format(eot = eot)
-        multi_source.append(("{eot}?#iefix".format(eot = eot), "embedded-opentype"))
-    if ctx.file.ttf != None:
-        ttf = ctx.file.ttf.path
-        multi_source.append((ttf, "truetype"))
-    if ctx.file.woff != None:
-        woff = ctx.file.woff.path
-        multi_source.append((woff, "woff"))
-    if ctx.file.woff2 != None:
-        woff2 = ctx.file.woff2.path
-        multi_source.append((woff2, "woff2"))
-    if ctx.file.svg != None:
-        svg = ctx.file.svg.path
-        multi_source.append((
-                "{svg}#{name}-{weight}-{style}".format( # Must be unique per variant
-                        svg = svg,
-                        name = ctx.attr.name,
-                        weight = ctx.attr.weight,
-                        style = ctx.attr.style),
-                "svg"))
-
-    multi_source = [
-            "url('{path}') format('{type}')".format(path=path,type=type)
-                    for (path, type) in multi_source ]
-    if len(multi_source) > 0:
-        multi_source = "src: {formats};".format(formats = ",".join(multi_source))
-
-    content = """
-                /* AUTO-GENERATED FILE. DO NOT EDIT */
-
-                @font-face {{
-                    font-family: '{name}';
-                    {single_source}
-                    {multi_source}
-                    font-weight: {weight};
-                    font-style: {style};
-                }}
-            """.format(
-                name = ctx.attr.font_name,
-                single_source = single_source,
-                multi_source = multi_source,
-                weight = ctx.attr.weight,
-                style = ctx.attr.style,
-            )
-
-    ctx.file_action(
-        output = ctx.outputs.out_css,
-        content = content
-    )
-
-    return struct(
-        resources = set(
-            [ file for file in
-                [
-                    ctx.file.eot,
-                    ctx.file.ttf,
-                    ctx.file.woff,
-                    ctx.file.woff2,
-                    ctx.file.svg,
-                ] if file != None ]
-        ),
-        css_resources = set([
-            ctx.outputs.out_css,
-        ]),
     )
