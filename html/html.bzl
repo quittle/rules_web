@@ -66,7 +66,9 @@ html_page = rule(
             allow_files = True,
         ),
         "favicon_sizes": attr.int_list(),
-        "deps": attr.label_list(),
+        "deps": attr.label_list(
+            allow_files = True,
+        ),
         "_html_template_script": web_internal_python_script_label("//html:html_template"),
     },
     outputs = {

@@ -23,21 +23,16 @@ def _assert_descending_sizes_impl(ctx):
     )
 
 def _assert_equal_impl(ctx):
-    if not ctx.file.expected_file.is_source:
-        fail("expected_file must be a source file")
-    if ctx.file.generated_file.is_source:
-        fail("generated_file must be a non-source file")
-
     ctx.action(
         mnemonic = "AssertingFilesAreEqual",
         arguments = [
-            "--files", ctx.file.expected_file.path, ctx.file.generated_file.path,
+            "--files", ctx.file.expected_file.path, ctx.file.actual_file.path,
             "--stamp", ctx.outputs.stamp_file.path,
         ],
         inputs = [
             ctx.executable._assert_equal,
             ctx.file.expected_file,
-            ctx.file.generated_file,
+            ctx.file.actual_file,
         ],
         executable = ctx.executable._assert_equal,
         outputs = [ ctx.outputs.stamp_file ]
@@ -83,7 +78,7 @@ _assert_equal = rule(
             allow_single_file = True,
             mandatory = True,
         ),
-        "generated_file": attr.label(
+        "actual_file": attr.label(
             allow_single_file = True,
             mandatory = True,
         ),
@@ -131,14 +126,13 @@ def assert_descending_sizes(files):
         files = files,
     )
 
-def assert_equal(expected_file, generated_file):
-    name = "assert_equal_{expected}_{generated}".format(
-            expected = expected_file, generated = generated_file)
+def assert_equal(expected_file, actual_file):
+    name = "assert_equal_{expected}_{actual}".format(expected = expected_file, actual = actual_file)
     name = _normalize_name(name)
     _assert_equal(
         name = name,
         expected_file = expected_file,
-        generated_file = generated_file,
+        actual_file = actual_file,
     )
 
 def assert_valid_type(files, type):
