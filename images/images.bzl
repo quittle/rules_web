@@ -2,9 +2,9 @@
 # Licensed under Apache License v2.0
 
 load(":internal.bzl",
+    "web_internal_favicon_image_generator",
     "web_internal_minify_png",
     "web_internal_generate_ico",
-    "web_internal_favicon_image_generator",
 )
 
 load("//:internal.bzl",
@@ -12,7 +12,32 @@ load("//:internal.bzl",
     "web_internal_tool_label",
 )
 
-DEFAULT_PNG_ITERATIONS = 64
+favicon_image_generator = rule(
+    attrs = {
+        "image": attr.label(
+            single_file = True,
+            allow_files = True,
+            mandatory = True,
+        ),
+        "output_files": attr.output_list(
+            allow_empty = False,
+            mandatory = True,
+        ),
+        "output_sizes": attr.int_list(
+            allow_empty = False,
+        ),
+        "allow_upsizing": attr.bool(
+            default = False,
+        ),
+        "allow_stretching": attr.bool(
+            default = False,
+        ),
+        "_resize_image": web_internal_python_script_label("//images:resize_image"),
+        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic_deploy.jar"),
+    },
+    implementation = web_internal_favicon_image_generator,
+    output_to_genfiles = True,
+)
 
 minify_png = rule(
     attrs = {
@@ -20,9 +45,6 @@ minify_png = rule(
             single_file = True,
             allow_files = True,
             mandatory = True,
-        ),
-        "iterations": attr.int(
-            default = DEFAULT_PNG_ITERATIONS,
         ),
         "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic_deploy.jar"),
     },
@@ -55,35 +77,5 @@ _generate_ico = rule(
         "ico": "%{name}.ico",
     },
     implementation = web_internal_generate_ico,
-    output_to_genfiles = True,
-)
-
-favicon_image_generator = rule(
-    attrs = {
-        "image": attr.label(
-            single_file = True,
-            allow_files = True,
-            mandatory = True,
-        ),
-        "output_files": attr.output_list(
-            allow_empty = False,
-            mandatory = True,
-        ),
-        "output_sizes": attr.int_list(
-            allow_empty = False,
-        ),
-        "allow_upsizing": attr.bool(
-            default = False,
-        ),
-        "allow_stretching": attr.bool(
-            default = False,
-        ),
-        "png_optimize_iterations": attr.int(
-            default = DEFAULT_PNG_ITERATIONS,
-        ),
-        "_resize_image": web_internal_python_script_label("//images:resize_image"),
-        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic_deploy.jar"),
-    },
-    implementation = web_internal_favicon_image_generator,
     output_to_genfiles = True,
 )

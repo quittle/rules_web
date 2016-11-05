@@ -1,0 +1,12 @@
+/* This is a comment */
+a,
+b [href="link with spaces"]
+{
+    display: none;
+    outline: none; /* Optimized to 0 */
+    border: 0px 0em 0% 0; /* Should use shorthand of 0 */
+    margin-top: 0;
+    /* Extra spaces */
+    padding: 0px 3px 0px 3px; /* Ideally should compress to "0 3px 0" */
+    ;;;; /* Extra semicolons */
+}

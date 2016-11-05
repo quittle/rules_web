@@ -31,8 +31,13 @@ public final class Main {
     private static final String ARG_REMOVE_GAMMA = "remove-gamma";
     private static final String ARG_COMPRESSION_LEVEL = "compression-level";
 
-    private static Options buildOptions() {
-        return new Options()
+    /**
+     * Parses command-line arguments. Exits with a return code if the args failed to be parsed.
+     * @param args The args passed into the main function.
+     * @return The parsed arguments.
+     */
+    private static CommandLine parseArgs(final String[] args) {
+        final Options options = new Options()
             .addOption(Option.builder()
                     .argName("Input PNG")
                     .longOpt(ARG_INPUT_PNG)
@@ -76,29 +81,46 @@ public final class Main {
                     .desc("The compresion level (0-9). " +
                           "Default is to brute force all for best result")
                     .build());
-    }
 
-    public static void main(final String[] args) throws FileNotFoundException, IOException {
-        final Options options = buildOptions();
-        final CommandLineParser parser = new DefaultParser();
-        final CommandLine commandLine;
         try {
-            commandLine = parser.parse(options, args);
+            return new DefaultParser().parse(options, args);
         } catch (final ParseException e) {
             System.out.println(e.getMessage());
             new HelpFormatter().printHelp("pngtastic", options);
             System.exit(1);
-            return;
+            return null;
         }
+    }
+
+    /**
+     * Parses a {@link String} into an {@link Integer}.
+     * @param value The value to convert.
+     * @return an integer version of {@code value} or null if {@code value} is null.
+     * @throws RuntimeException if {@code value} is not parsable.
+     */
+    private static Integer toInteger(final String value) throws RuntimeException {
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            return Integer.valueOf(value);
+        } catch (final NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void main(final String[] args) throws FileNotFoundException, IOException {
+        final CommandLine commandLine = parseArgs(args);
 
         final String in = commandLine.getOptionValue(ARG_INPUT_PNG);
         final String out = commandLine.getOptionValue(ARG_OUTPUT_PNG);
         final String logLevel = commandLine.getOptionValue(ARG_LOG_LEVEL);
-        final Integer iterations = Integer.getInteger(commandLine.getOptionValue(ARG_ITERATIONS));
+        final Integer iterations = toInteger(commandLine.getOptionValue(ARG_ITERATIONS));
         final String compressor = commandLine.getOptionValue(ARG_COMPRESSOR);
         final Boolean removeGamma = Boolean.valueOf(commandLine.getOptionValue(ARG_REMOVE_GAMMA));
         final Integer compressionLevel =
-                Integer.getInteger(commandLine.getOptionValue(ARG_COMPRESSION_LEVEL));
+                toInteger(commandLine.getOptionValue(ARG_COMPRESSION_LEVEL));
 
         final PngOptimizer pngOptimizer = new PngOptimizer(logLevel);
         pngOptimizer.setCompressor(compressor, iterations);

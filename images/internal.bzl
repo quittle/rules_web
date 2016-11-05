@@ -5,7 +5,7 @@ load("//:internal.bzl",
     "optional_arg_",
 )
 
-def _minify_png(ctx, pngtastic, in_png, out_png, iterations):
+def _minify_png(ctx, pngtastic, in_png, out_png):
     if (type(ctx) != "ctx"):
         fail("ctx was not a context")
     if (type(pngtastic) != "File"):
@@ -14,15 +14,12 @@ def _minify_png(ctx, pngtastic, in_png, out_png, iterations):
         fail("in_png was not a File")
     if (type(out_png) != "File"):
         fail("out_png was not a File")
-    if (type(iterations) != "int"):
-        fail("iterations was not a int")
 
     ctx.action(
         mnemonic = "MinifyPNG",
         arguments = [
             "--input", in_png.path,
             "--output", out_png.path,
-            "--iterations", str(iterations),
         ],
         inputs = [ in_png ],
         executable = pngtastic,
@@ -35,7 +32,6 @@ def web_internal_minify_png(ctx):
         ctx.executable._pngtastic,
         ctx.file.png,
         ctx.outputs.min_png,
-        ctx.attr.iterations,
     )
 
     source_map = {}
@@ -100,7 +96,6 @@ def web_internal_favicon_image_generator(ctx):
             ctx.executable._pngtastic,
             unoptimized_png,
             out_file,
-            ctx.attr.png_optimize_iterations,
         )
 
         outputs.append(out_file)

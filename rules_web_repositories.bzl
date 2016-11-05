@@ -8,7 +8,7 @@ java_binary(
     main_class = "com.yahoo.platform.yui.compressor.Bootstrap",
     srcs = glob([ "src/**/*.java" ]) + [ "@rhino//:rhino_sources_for_yui_compiler" ],
     deps = [ "@jargs//:jargs" ],
-    javacopts = [ "-extra_checks:off" ],
+    javacopts = [ "-extra_checks:off", "-nowarn" ],
     visibility = [ "//visibility:public" ],
 )
 
@@ -19,7 +19,7 @@ _JARGS_BUILD_FILE = """
 java_library(
     name = "jargs",
     srcs = glob([ "src/jargs/gnu/**/*.java" ]),
-    javacopts = [ "-extra_checks:off" ],
+    javacopts = [ "-extra_checks:off", "-nowarn" ],
     visibility = [ "//visibility:public" ],
 )
 

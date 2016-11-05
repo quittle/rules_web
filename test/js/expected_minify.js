@@ -1,0 +1,1 @@
+var a=3;(function(){function c(d){}var b="value";c(b);console.log("message")})();const value="pizza";console.log("Message "+value);
