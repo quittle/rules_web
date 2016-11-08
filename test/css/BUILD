@@ -8,6 +8,7 @@ load("//css:css.bzl",
 load("//test:test.bzl",
     "assert_descending_sizes",
     "assert_equal",
+    "assert_label_struct",
 )
 
 minify_css(
@@ -17,3 +18,11 @@ minify_css(
 
 assert_equal(":expected_minify.css", ":test_minify_css")
 assert_descending_sizes([ "test.css", ":test_minify_css" ])
+assert_label_struct(
+    ":test_minify_css",
+    {
+        "css_resources": [
+            "{BIN_DIR}/test/css/test_minify_css.min.css",
+        ],
+    },
+)

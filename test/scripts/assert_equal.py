@@ -59,7 +59,8 @@ def main():
     for i in xrange(len(files) - 1):
         file_a = files[i].read()
         file_b = files[i + 1].read()
-        files[i + 1].seek(0) # Only bother resetting the last one as it will be re-used
+        # Only reset the latter one as it will be re-used in the next iteration
+        files[i + 1].seek(0)
         diff, problem = color_diff(file_a, file_b)
         assert not problem, 'File {a} does not match {b}:{newline}{diff}'.format(
                 a = files[i].name,

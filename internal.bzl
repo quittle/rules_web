@@ -1,15 +1,73 @@
 # Copyright (c) 2016 Dustin Doloff
 # Licensed under Apache License v2.0
 
+# Default methods and attributes associated with Targets. This is due to limitations in Bazel being
+# unable to detect if an attribute of an object is a method or really an attribute
+_DEFAULT_TARGET_STRUCT_KEYS = [
+    "data_runfiles",
+    "default_runfiles",
+    "files",
+    "files_to_run",
+    "label",
+    "output_group",
+]
+
+# Due to restrictions of the language, the only loop supported is a for-in loop. This huge loop is a
+# substitute for a while-do loop. Make sure to terminate the loop when complete.
+_LONG_LIST = 10000 * "."
+
+# Converts a dictionary into a json-like dict, simplifying Bazel objects into strings and sets into
+# lists.
+# dictionary - dict - The dict to simplify
+# dict - Returns a dict that contains only dicts, lists, strings, and numbers.
+def simple_dict_(dictionary):
+    result = {}
+    stack = [ (result, key, value if type(value) != "set" else list(value))
+            for key, value in dictionary.items() ]
+    for i in _LONG_LIST:
+        if len(stack) == 0:
+            break
+        obj, key, value = stack.pop()
+
+        type_value = type(value)
+        simple_value = None
+        if type_value == "list":
+            simple_value = []
+            stack.extend([ (simple_value, None, sub_value) for sub_value in value ])
+        elif type_value == "dict":
+            simple_value = {}
+            stack.extend([ (simple_value, sub_key, sub_value)
+                    for sub_key, sub_value in value.items() ])
+        elif type_value == "File":
+            simple_value = value.path
+        elif type_value in ["number", "string"]:
+            simple_value = value
+        else:
+            fail("Unable to handle type: " + type_value)
+
+        type_obj = type(obj)
+        if type_obj == "dict":
+            if type(key) != "string":
+                fail("Key is not a string: " + type(key))
+            obj[key] = simple_value
+        elif type_obj == "list":
+            if key != None:
+                fail("Key should have been None: " + key)
+            obj.append(simple_value)
+        else:
+            fail("Obj of invalid type: " + type_obj)
+
+    return result
+
 # Converts a struct to a dict
 # structure - struct - The struct to convert
 # dict - Returns a dict representation of the struct
 def struct_to_dict_(structure):
-    default_struct_methods = set(dir(struct()))
+    default_struct_methods = set(dir(struct()) + _DEFAULT_TARGET_STRUCT_KEYS)
     ret = {}
     for key in dir(structure):
         if key not in default_struct_methods:
-            ret[key] = getattr(structure, key)
+            ret[key] = getattr(structure, key, None)
     return ret
 
 # Converts a dict to a struct

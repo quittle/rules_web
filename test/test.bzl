@@ -2,6 +2,8 @@
 # Licensed under Apache License v2.0
 
 load("//:internal.bzl",
+    "simple_dict_",
+    "struct_to_dict_",
     "web_internal_python_script_label",
 )
 
@@ -54,6 +56,19 @@ def _assert_valid_type_impl(ctx):
         outputs = [
             ctx.outputs.stamp_file,
         ],
+    )
+
+def _assert_label_struct_impl(ctx):
+    actual_dict = str(simple_dict_(struct_to_dict_(ctx.attr.label)))
+    expected_dict = ctx.attr.expected_struct_string.replace("{BIN_DIR}", ctx.bin_dir.path)
+    if actual_dict != expected_dict:
+        fail("label struct does not match expected struct. " +
+             "Expected: {expected} Actual: {actual}".format(expected = expected_dict,
+                                                            actual = actual_dict))
+
+    ctx.file_action(
+        content = "",
+        output = ctx.outputs.stamp_file,
     )
 
 _assert_descending_sizes = rule(
@@ -111,8 +126,30 @@ _assert_valid_type = rule(
     implementation = _assert_valid_type_impl,
 )
 
+_assert_label_struct = rule(
+    attrs = {
+        "label": attr.label(
+            mandatory = True,
+        ),
+        "expected_struct_string": attr.string(
+            mandatory = True,
+        ),
+    },
+    outputs = {
+        "stamp_file": "assert/valid_type/%{name}.stamp",
+    },
+    implementation = _assert_label_struct_impl,
+)
+
 def _normalize_name(name):
-    return name.replace(":", "__")
+    return (name
+            .replace(" ", "-")
+            .replace(":", "__colon__")
+            .replace("\"", "__quote__")
+            .replace("{", "__open-bracket__")
+            .replace("}", "__close-bracket__")
+            .replace("[", "__open-bracket__")
+            .replace("]", "__close-bracket__"))
 
 def assert_descending_sizes(files):
     if type(files) != "list":
@@ -142,4 +179,19 @@ def assert_valid_type(files, type):
         name = name,
         files = files,
         type = type,
+    )
+
+def assert_label_struct(label, expected_struct):
+    if type(expected_struct) != "dict":
+        fail("expected_struct is not a dict")
+
+    expected_struct_string = str(expected_struct)
+    name = "assert_label_struct_{label}_{expected_struct}".format(
+            label = label,
+            expected_struct = expected_struct_string)
+    name = _normalize_name(name)
+    _assert_label_struct(
+        name = name,
+        label = label,
+        expected_struct_string = expected_struct_string,
     )
