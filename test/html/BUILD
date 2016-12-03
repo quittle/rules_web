@@ -88,3 +88,14 @@ minify_html(
 assert_equal("expected.html", ":test_minify_html")
 assert_valid_type(":test_minify_html", "html")
 assert_descending_sizes([ "test.html", ":test_minify_html" ])
+assert_label_struct(
+    ":test_minify_html",
+    {
+        "resources": [
+            "{BIN_DIR}/test/html/test_minify_html.min.html",
+        ],
+        "source_map": {
+            "test/html/test.html": "{BIN_DIR}/test/html/test_minify_html.min.html",
+        },
+    },
+)
