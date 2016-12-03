@@ -3,6 +3,7 @@
 
 load("//:internal.bzl",
     "copy_",
+    "transitive_resources_",
 )
 
 def web_internal_font_generator(ctx):
@@ -10,19 +11,25 @@ def web_internal_font_generator(ctx):
     single_source = ""
     # CSS  src line with multiple fonts for non-ie support. Contains tupples of (url, type)
     multi_source = []
+    # Resources for transitive dependencies
+    resources = []
     if ctx.file.eot != None:
         eot = ctx.file.eot.path
         single_source = "src: url('{eot}');".format(eot = eot)
         multi_source.append(("{eot}?#iefix".format(eot = eot), "embedded-opentype"))
+        resources.append(eot)
     if ctx.file.ttf != None:
         ttf = ctx.file.ttf.path
         multi_source.append((ttf, "truetype"))
+        resources.append(ttf)
     if ctx.file.woff != None:
         woff = ctx.file.woff.path
         multi_source.append((woff, "woff"))
+        resources.append(woff)
     if ctx.file.woff2 != None:
         woff2 = ctx.file.woff2.path
         multi_source.append((woff2, "woff2"))
+        resources.append(woff2)
     if ctx.file.svg != None:
         svg = ctx.file.svg.path
         multi_source.append((
@@ -32,6 +39,7 @@ def web_internal_font_generator(ctx):
                         weight = ctx.attr.weight,
                         style = ctx.attr.style),
                 "svg"))
+        resources.append(svg)
 
     multi_source = [
             "url('{path}') format('{type}')".format(path=path,type=type)
@@ -62,7 +70,7 @@ def web_internal_font_generator(ctx):
         content = content
     )
 
-    return struct(
+    ret = struct(
         resources = set(
             [ file for file in
                 [
@@ -77,6 +85,11 @@ def web_internal_font_generator(ctx):
             ctx.outputs.out_css,
         ]),
     )
+
+    for resource in resources:
+        ret = transitive_resources_(ret, resource)
+
+    return ret
 
 def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
     if (type(ctx) != "ctx"):
@@ -133,9 +146,14 @@ def web_internal_minify_ttf(ctx):
         outputs = [ ctx.outputs.out_ttf ],
     )
 
-    return struct(
+    ret = struct(
         resources = set([ ctx.outputs.out_ttf ]),
+        source_map = { ctx.file.ttf.short_path: ctx.outputs.out_ttf }
     )
+
+    ret = transitive_resources_(ret, ctx.attr.ttf)
+
+    return ret
 
 def web_internal_ttf_to_eot(ctx):
     ctx.action(
@@ -149,9 +167,13 @@ def web_internal_ttf_to_eot(ctx):
         outputs = [ ctx.outputs.out_eot ],
     )
 
-    return struct(
+    ret = struct(
         resources = set([ ctx.outputs.out_eot ]),
     )
+
+    ret = transitive_resources_(ret, ctx.attr.ttf)
+
+    return ret
 
 def web_internal_ttf_to_woff(ctx):
     name = ctx.label.name
@@ -172,9 +194,13 @@ def web_internal_ttf_to_woff(ctx):
         outputs = [ ctx.outputs.out_woff ],
     )
 
-    return struct(
+    ret = struct(
         resources = set([ ctx.outputs.out_woff ]),
     )
+
+    ret = transitive_resources_(ret, ctx.attr.ttf)
+
+    return ret
 
 def web_internal_ttf_to_woff2(ctx):
     # The tool unfortunately does not take the output path as an argument and simply creates a new
@@ -193,6 +219,10 @@ def web_internal_ttf_to_woff2(ctx):
         outputs = [ ctx.outputs.out_woff2 ],
     )
 
-    return struct(
+    ret = struct(
         resources = set([ ctx.outputs.out_woff2 ]),
     )
+
+    ret = transitive_resources_(ret, ctx.attr.ttf)
+
+    return ret

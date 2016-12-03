@@ -9,6 +9,7 @@ load("//html:html.bzl",
 load("//test:test.bzl",
     "assert_equal",
     "assert_descending_sizes",
+    "assert_label_struct",
     "assert_valid_type",
 )
 
@@ -24,9 +25,55 @@ html_page(
     deps = [ "dep.txt" ],
 )
 assert_valid_type(":test_html_page", "html")
+assert_label_struct(
+    ":test_html_page",
+    {
+        "css_resources": [
+            "test/html/test.css",
+        ],
+        "deferred_js_resources": [
+            "test/html/test_deferred.js",
+        ],
+        "js_resources": [
+            "test/html/test.js",
+        ],
+        "resources": [
+            "test/html/dep.txt",
+            "test/html/favicon.png",
+            "{BIN_DIR}/test/html/test_html_page.html",
+        ],
+        "source_map": {
+            "test/html/dep.txt": "test/html/dep.txt",
+            "test/html/test_html_page.html": "{BIN_DIR}/test/html/test_html_page.html",
+        },
+    },
+)
 minify_html(
     name = "minify_test_html_page",
     src = ":test_html_page",
+)
+assert_label_struct(
+    ":minify_test_html_page",
+    {
+        "css_resources": [
+            "test/html/test.css",
+        ],
+        "deferred_js_resources": [
+            "test/html/test_deferred.js",
+        ],
+        "js_resources": [
+            "test/html/test.js",
+        ],
+        "resources": [
+            "{BIN_DIR}/test/html/minify_test_html_page.min.html",
+            "test/html/favicon.png",
+            "test/html/dep.txt",
+        ],
+        "source_map": {
+            "test/html/dep.txt": "test/html/dep.txt",
+            "test/html/test_html_page.html": "{BIN_DIR}/test/html/minify_test_html_page.min.html",
+        },
+    },
 )
 minify_html(
     name = "minify_expected_test_html_page",

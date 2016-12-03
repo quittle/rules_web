@@ -40,6 +40,21 @@ def _assert_equal_impl(ctx):
         outputs = [ ctx.outputs.stamp_file ]
     )
 
+def _assert_label_struct_impl(ctx):
+    actual_dict = str(simple_dict_(struct_to_dict_(ctx.attr.label)))
+    expected_dict = (ctx.attr.expected_struct_string
+            .replace("{BIN_DIR}", ctx.bin_dir.path)
+            .replace("{GEN_DIR}", ctx.genfiles_dir.path))
+    if actual_dict != expected_dict:
+        fail("label struct does not match expected struct. " +
+             "Expected: {expected} Actual: {actual}".format(expected = expected_dict,
+                                                            actual = actual_dict))
+
+    ctx.file_action(
+        content = "",
+        output = ctx.outputs.stamp_file,
+    )
+
 def _assert_valid_type_impl(ctx):
     ctx.action(
         mnemonic = "AssertingValidFile",
@@ -56,19 +71,6 @@ def _assert_valid_type_impl(ctx):
         outputs = [
             ctx.outputs.stamp_file,
         ],
-    )
-
-def _assert_label_struct_impl(ctx):
-    actual_dict = str(simple_dict_(struct_to_dict_(ctx.attr.label)))
-    expected_dict = ctx.attr.expected_struct_string.replace("{BIN_DIR}", ctx.bin_dir.path)
-    if actual_dict != expected_dict:
-        fail("label struct does not match expected struct. " +
-             "Expected: {expected} Actual: {actual}".format(expected = expected_dict,
-                                                            actual = actual_dict))
-
-    ctx.file_action(
-        content = "",
-        output = ctx.outputs.stamp_file,
     )
 
 _assert_descending_sizes = rule(
@@ -105,6 +107,21 @@ _assert_equal = rule(
     implementation = _assert_equal_impl,
 )
 
+_assert_label_struct = rule(
+    attrs = {
+        "label": attr.label(
+            mandatory = True,
+        ),
+        "expected_struct_string": attr.string(
+            mandatory = True,
+        ),
+    },
+    outputs = {
+        "stamp_file": "assert/valid_type/%{name}.stamp",
+    },
+    implementation = _assert_label_struct_impl,
+)
+
 _assert_valid_type = rule(
     attrs = {
         "files": attr.label(
@@ -126,30 +143,16 @@ _assert_valid_type = rule(
     implementation = _assert_valid_type_impl,
 )
 
-_assert_label_struct = rule(
-    attrs = {
-        "label": attr.label(
-            mandatory = True,
-        ),
-        "expected_struct_string": attr.string(
-            mandatory = True,
-        ),
-    },
-    outputs = {
-        "stamp_file": "assert/valid_type/%{name}.stamp",
-    },
-    implementation = _assert_label_struct_impl,
-)
-
 def _normalize_name(name):
+    # These names can make the paths extra long so use abbreviations
     return (name
             .replace(" ", "-")
-            .replace(":", "__colon__")
-            .replace("\"", "__quote__")
-            .replace("{", "__open-bracket__")
-            .replace("}", "__close-bracket__")
-            .replace("[", "__open-bracket__")
-            .replace("]", "__close-bracket__"))
+            .replace(":", "_cln_")
+            .replace("\"", "_qte_")
+            .replace("{", "_ocbr_")
+            .replace("}", "_ccbr_")
+            .replace("[", "_osbr_")
+            .replace("]", "_csbr_"))
 
 def assert_descending_sizes(files):
     if type(files) != "list":
@@ -172,15 +175,6 @@ def assert_equal(expected_file, actual_file):
         actual_file = actual_file,
     )
 
-def assert_valid_type(files, type):
-    name = "assert_valid_type_{files}_{type}".format(files = files, type = type)
-    name = _normalize_name(name)
-    _assert_valid_type(
-        name = name,
-        files = files,
-        type = type,
-    )
-
 def assert_label_struct(label, expected_struct):
     if type(expected_struct) != "dict":
         fail("expected_struct is not a dict")
@@ -194,4 +188,13 @@ def assert_label_struct(label, expected_struct):
         name = name,
         label = label,
         expected_struct_string = expected_struct_string,
+    )
+
+def assert_valid_type(files, type):
+    name = "assert_valid_type_{files}_{type}".format(files = files, type = type)
+    name = _normalize_name(name)
+    _assert_valid_type(
+        name = name,
+        files = files,
+        type = type,
     )

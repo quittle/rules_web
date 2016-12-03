@@ -15,7 +15,6 @@ minify_css(
     name = "test_minify_css",
     srcs = [ "test.css" ],
 )
-
 assert_equal(":expected_minify.css", ":test_minify_css")
 assert_descending_sizes([ "test.css", ":test_minify_css" ])
 assert_label_struct(
@@ -24,5 +23,9 @@ assert_label_struct(
         "css_resources": [
             "{BIN_DIR}/test/css/test_minify_css.min.css",
         ],
+        "deferred_js_resources": [],
+        "js_resources": [],
+        "resources": [],
+        "source_map": {},
     },
 )

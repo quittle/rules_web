@@ -3,14 +3,13 @@
 
 load("//:internal.bzl",
     "optional_arg_",
-    "struct_to_dict_",
     "transitive_resources_",
 )
 
 def web_internal_resource_map_impl(ctx):
     source_map = {}
     for dep in ctx.attr.deps:
-        source_map += struct_to_dict_(getattr(dep, "source_map", struct()))
+        source_map += getattr(dep, "source_map", {})
         for file in dep.files:
             if file.is_source:
                 source_map[file.short_path] = file

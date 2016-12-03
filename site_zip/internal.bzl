@@ -2,9 +2,7 @@
 # Licensed under Apache License v2.
 
 load("//:internal.bzl",
-    "dict_to_struct_",
     "optional_arg_",
-    "struct_to_dict_",
     "web_internal_python_script_label",
     "web_internal_generate_jinja_file",
 )
@@ -13,7 +11,7 @@ def web_internal_zip_site(ctx):
     resources = set()
     source_map = {}
     for resource in ctx.attr.root_files + ctx.attr.resources:
-        source_map += struct_to_dict_(getattr(resource, "source_map", struct()))
+        source_map += getattr(resource, "source_map", {})
         resources += getattr(resource, "resources", set())
         resources += getattr(resource, "css_resources", set())
         resources += getattr(resource, "js_resources", set())
@@ -40,7 +38,7 @@ def web_internal_zip_site(ctx):
 
 
     return struct(
-        source_map = dict_to_struct_(source_map),
+        source_map = source_map,
     )
 
 def web_internal_minify_site_zip(ctx):

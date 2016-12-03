@@ -3,6 +3,7 @@
 
 load("//:internal.bzl",
     "dict_to_struct_",
+    "merge_structs_",
     "optional_arg_",
     "struct_to_dict_",
     "transitive_resources_",
@@ -14,6 +15,9 @@ def web_internal_minify_html_impl(ctx):
         "head", "script", "style", "meta", "title",
         "body", "br", "p",
     ]
+
+    source_file = ctx.file.src
+    out_file = ctx.outputs.min_html_file
 
     ctx.action(
         mnemonic = "MinifyHTML",
@@ -28,26 +32,38 @@ def web_internal_minify_html_impl(ctx):
             "--remove-http-protocol",
             "--remove-https-protocol",
             "--remove-surrounding-spaces", ",".join(whitespace_agnostic_tags),
-            "--output", ctx.outputs.min_html_file.path,
-            ctx.file.src.path
+            "--output", out_file.path,
+            source_file.path
         ],
         inputs = [
             ctx.executable._html_compressor,
-            ctx.file.src,
+            source_file,
         ],
         executable = ctx.executable._html_compressor,
-        outputs = [ ctx.outputs.min_html_file ],
+        outputs = [ out_file ],
     )
 
-    source_map = {}
-    source_map[ctx.file.src.short_path] = ctx.outputs.min_html_file
+    source_dict = struct_to_dict_(ctx.attr.src)
 
-    ret = struct(
-        source_map = dict_to_struct_(source_map),
-        resources = set([ ctx.outputs.min_html_file ]),
-    )
+    # Replace the original mapping to the source file with a mapping to the minfied file
+    # Basically, convert:
+    # { Original: Generated } -> { Original: Minified, Generated: Minified }
+    source_map = source_dict.get("source_map", {})
+    for source, destination in source_map.items():
+        if destination == source_file:
+            source_map[source] = out_file
 
-    ret = transitive_resources_(ret, ctx.attr.src)
+    # Sets are immutable so replace with a new set that does not contain the source file as it will
+    # be replaced with the minified file
+    source_dict["resources"] = set([ resource
+            for resource in source_dict.get("resources", set([]))
+                if resource != ctx.file.src ])
+
+    ret = dict_to_struct_(source_dict)
+    ret = merge_structs_(ret, struct(
+        source_map = { source_file.short_path: out_file },
+        resources = set([ out_file ]),
+    ))
 
     return ret
 
@@ -67,12 +83,12 @@ def web_internal_html_page_impl(ctx):
     js_files = ctx.files.js_files
     for dep in ctx.attr.deps:
         if hasattr(dep, "source_map"):
-            source_map += struct_to_dict_(dep.source_map)
+            source_map += dep.source_map
         if hasattr(dep, "resources"):
             resources.extend(list(dep.resources))
         if hasattr(dep, "css_resources"):
             css_files.extend(list(dep.css_resources))
-        if hasattr(dep, "deferred_js_files"):
+        if hasattr(dep, "deferred_js_resources"):
             deferred_js_files.extend(list(dep.deferred_js_files))
         if hasattr(dep, "js_resources"):
             js_files.extend(list(dep.js_resources))
@@ -115,8 +131,13 @@ def web_internal_html_page_impl(ctx):
 
     source_map[ctx.outputs.html_file.short_path] = ctx.outputs.html_file
 
-    ret = struct(
-        source_map = dict_to_struct_(source_map),
+    ret = struct()
+
+    for resource in resources + ctx.attr.css_files + ctx.attr.deferred_js_files + ctx.attr.js_files:
+        ret = transitive_resources_(ret, resource)
+
+    ret = merge_structs_(ret, struct(
+        source_map = source_map,
         resources = set(
             resources +
             ctx.files.favicon_images +
@@ -125,9 +146,6 @@ def web_internal_html_page_impl(ctx):
         css_resources = set(css_files),
         deferred_js_resources = set(deferred_js_files),
         js_resources = set(js_files),
-    )
-
-    for resource in resources + ctx.attr.css_files + ctx.attr.deferred_js_files + ctx.attr.js_files:
-        ret = transitive_resources_(ret, resource)
+    ))
 
     return ret
