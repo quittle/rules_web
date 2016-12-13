@@ -309,25 +309,6 @@ def transitive_resources_(orig_struct, resource, opt_ignore_types=[]):
                 (getattr(resource, "js_resources", set()) if "js_resources" not in opt_ignore_types else set()),
     )
 
-# Helper function to define a label for a python script
-# label - string - The label of the script
-# Label - Returns a Label the the correct arguments
-def web_internal_python_script_label(label):
-    if (type(label) != "string"):
-        fail("label was not a string")
-
-    return attr.label(
-        default = Label(label),
-        executable = True,
-        cfg = "host",
-        allow_files = True,
-
-        # single_file cannot be used while py_binary produces multiple
-        # files, the binary of which is not selectable as a specific target
-        # the way java_binary is
-        #single_file = True,
-    )
-
 # Helper function to define a label for a tool
 # label - string - The label of the tool
 # Label - Returns a Label with the correct arguments
@@ -339,7 +320,6 @@ def web_internal_tool_label(label):
         default = Label(label),
         executable = True,
         cfg = "host",
-        single_file = True,
         allow_files = True,
     )
 

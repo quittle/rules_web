@@ -155,6 +155,22 @@ cc_binary(
 
 """
 
+_PILLOW_BUILD_FILE = """
+
+py_library(
+    name = "pillow",
+    srcs = glob([
+        "PIL/*.py"
+    ]),
+    data = glob([
+        "PIL/.libs/*",
+        "PIL/*.so"
+    ]),
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
 def rules_web_repositories():
     native.new_git_repository(
         name = "yui_compressor",
@@ -241,6 +257,7 @@ def rules_web_repositories():
         build_file_content = _FONT_TOOLS_BUILD_FILE,
     )
 
+    # This repo includes the patch to fix the build
     native.new_git_repository(
         name = "woff2",
         commit = "3cca6ff8a9a0d63b0224d5d28aa0e3e1e0639308", # master
@@ -248,7 +265,6 @@ def rules_web_repositories():
         build_file_content = _WOFF_2_BUILD_FILE,
     )
 
-    # This repo includes the patch to fix the build
     native.new_git_repository(
         name = "ttf2eot",
         commit = "0133021ec33552b0b6ae7b3c8f052d067f4b4193", # master
@@ -266,4 +282,12 @@ def rules_web_repositories():
         name = "com_google_javascript_closure_compiler",
         artifact = "com.google.javascript:closure-compiler:v20160208",
         sha1 = "5a2f4be6cf41e27ed7119d26cb8f106300d87d91",
+    )
+
+    native.new_http_archive(
+        name = "pillow",
+        url = "https://pypi.python.org/packages/c0/47/6900d13aa6112610df4c9b34d57f50a96b35308796a3a27458d0c9ac87f7/Pillow-3.4.2-cp27-cp27mu-manylinux1_x86_64.whl",
+        type = "zip",
+        sha256 = "fdc641ac432115e35d31441dbb253b016beea467dff402259d74b4df5e5f0f63",
+        build_file_content = _PILLOW_BUILD_FILE,
     )

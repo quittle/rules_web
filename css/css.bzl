@@ -20,7 +20,7 @@ minify_css = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
+        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor"),
     },
     outputs = {
         "min_css_file": "%{name}.min.css",

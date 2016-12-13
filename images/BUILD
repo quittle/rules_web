@@ -15,6 +15,7 @@ py_binary(
     srcs = [
         "scripts/resize_image.py",
     ],
+    deps = [ "@pillow//:pillow" ],
     visibility = [ "//visibility:public" ],
 )
 

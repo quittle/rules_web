@@ -10,7 +10,6 @@ load(":internal.bzl",
 )
 
 load("//:internal.bzl",
-    "web_internal_python_script_label",
     "web_internal_tool_label",
 )
 
@@ -79,8 +78,8 @@ minify_ttf = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttx": web_internal_python_script_label("@font_tools//:ttx"),
-        "_minify_ttx": web_internal_python_script_label("//fonts:minify_ttx"),
+        "_ttx": web_internal_tool_label("@font_tools//:ttx"),
+        "_minify_ttx": web_internal_tool_label("//fonts:minify_ttx"),
     },
     implementation = web_internal_minify_ttf,
     output_to_genfiles = True,
@@ -112,7 +111,7 @@ ttf_to_woff = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttx": web_internal_python_script_label("@font_tools//:ttx"),
+        "_ttx": web_internal_tool_label("@font_tools//:ttx"),
     },
     implementation = web_internal_ttf_to_woff,
     output_to_genfiles = True,
@@ -129,7 +128,7 @@ ttf_to_woff2 = rule(
             mandatory = True,
         ),
         "_ttf2woff2": web_internal_tool_label("@woff2//:ttf2woff2"),
-        "_file_copy": web_internal_python_script_label("//:file_copy"),
+        "_file_copy": web_internal_tool_label("//:file_copy"),
     },
     implementation = web_internal_ttf_to_woff2,
     output_to_genfiles = True,

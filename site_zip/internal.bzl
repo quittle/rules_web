@@ -3,7 +3,6 @@
 
 load("//:internal.bzl",
     "optional_arg_",
-    "web_internal_python_script_label",
     "web_internal_generate_jinja_file",
 )
 

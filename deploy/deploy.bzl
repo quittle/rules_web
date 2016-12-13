@@ -2,7 +2,6 @@
 # Licensed under Apache License v2.0
 
 load(":internal.bzl",
-    "web_internal_python_script_label",
     "web_internal_generate_deploy_site_zip_s3_script",
 )
 

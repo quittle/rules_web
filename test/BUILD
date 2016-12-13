@@ -26,5 +26,6 @@ py_binary(
     srcs = [
         "scripts/assert_valid_type.py",
     ],
+    deps = [ "@pillow//:pillow" ],
     visibility = [ "//visibility:public" ],
 )

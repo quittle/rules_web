@@ -9,7 +9,6 @@ load("//:constants.bzl",
 )
 
 load("//:internal.bzl",
-    "web_internal_python_script_label",
     "web_internal_tool_label",
 )
 
@@ -25,7 +24,7 @@ minify_html = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_html_compressor": web_internal_tool_label("//html:html_compressor_deploy.jar"),
+        "_html_compressor": web_internal_tool_label("//html:html_compressor"),
     },
     outputs = {
         "min_html_file": "%{name}.min.html",
@@ -69,7 +68,7 @@ html_page = rule(
         "deps": attr.label_list(
             allow_files = True,
         ),
-        "_html_template_script": web_internal_python_script_label("//html:html_template"),
+        "_html_template_script": web_internal_tool_label("//html:html_template"),
     },
     outputs = {
         "html_file": "%{name}.html",

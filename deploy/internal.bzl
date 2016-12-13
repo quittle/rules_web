@@ -2,7 +2,7 @@
 # Licensed under Apache License v2.0
 
 load("//:internal.bzl",
-    "web_internal_python_script_label",
+    "web_internal_tool_label",
 )
 
 def _generate_deploy_site_zip_s3_script(ctx):
@@ -50,9 +50,9 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
             allow_files = True,
             single_file = True,
         ),
-        "_s3_website_deploy": web_internal_python_script_label("//deploy:s3_website_deploy"),
-        "_s3_website_deploy_script_builder": web_internal_python_script_label(
-                "//deploy:s3_website_deploy_script_builder"),
+        "_s3_website_deploy": web_internal_tool_label("//deploy:s3_website_deploy"),
+        "_s3_website_deploy_script_builder":
+                web_internal_tool_label("//deploy:s3_website_deploy_script_builder"),
     },
     implementation = _generate_deploy_site_zip_s3_script,
     outputs = {

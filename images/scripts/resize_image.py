@@ -2,7 +2,7 @@
 # Licensed under Apache License v2.0
 
 import argparse
-import Image
+from PIL import Image
 import sys
 
 def parse_args():

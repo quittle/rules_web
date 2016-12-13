@@ -8,7 +8,6 @@ load(":internal.bzl",
 )
 
 load("//:internal.bzl",
-    "web_internal_python_script_label",
     "web_internal_tool_label",
 )
 
@@ -32,8 +31,8 @@ favicon_image_generator = rule(
         "allow_stretching": attr.bool(
             default = False,
         ),
-        "_resize_image": web_internal_python_script_label("//images:resize_image"),
-        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic_deploy.jar"),
+        "_resize_image": web_internal_tool_label("//images:resize_image"),
+        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic"),
     },
     implementation = web_internal_favicon_image_generator,
     output_to_genfiles = True,
@@ -46,7 +45,7 @@ minify_png = rule(
             allow_files = True,
             mandatory = True,
         ),
-        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic_deploy.jar"),
+        "_pngtastic": web_internal_tool_label("//images:simplified_pngtastic"),
     },
     outputs = {
         "min_png": "minified_png/%{name}.png",
@@ -69,7 +68,7 @@ _generate_ico = rule(
         "allow_upsizing": attr.bool(
             default = False,
         ),
-        "_generate_ico": web_internal_python_script_label("//images:generate_ico"),
+        "_generate_ico": web_internal_tool_label("//images:generate_ico"),
     },
     outputs = {
         # Due to limitations of pngtastic, we will create an intermediate file without the

@@ -9,7 +9,6 @@ load("@io_bazel_rules_sass//sass:sass.bzl",
 load("//:internal.bzl",
     "simple_dict_",
     "struct_to_dict_",
-    "web_internal_python_script_label",
     "web_internal_tool_label",
 )
 
@@ -108,7 +107,7 @@ _assert_descending_sizes = rule(
             mandatory = True,
         ),
         "_assert_descending_sizes":
-                web_internal_python_script_label("//test:assert_descending_sizes"),
+                web_internal_tool_label("//test:assert_descending_sizes"),
     },
     outputs = {
         "stamp_file": "assert/descending_sizes/%{name}.stamp",
@@ -126,7 +125,7 @@ _assert_equal = rule(
             allow_single_file = True,
             mandatory = True,
         ),
-        "_assert_equal": web_internal_python_script_label("//test:assert_equal"),
+        "_assert_equal": web_internal_tool_label("//test:assert_equal"),
     },
     outputs = {
         "stamp_file": "assert/equal/%{name}.stamp",
@@ -165,8 +164,8 @@ _assert_valid_type = rule(
                 "scss",
             ]
         ),
-        "_assert_valid_type": web_internal_python_script_label("//test:assert_valid_type"),
-        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
+        "_assert_valid_type": web_internal_tool_label("//test:assert_valid_type"),
+        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor"),
     },
     outputs = {
         "stamp_file": "assert/valid_type/%{name}.stamp",
