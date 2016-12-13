@@ -1,10 +1,16 @@
 # Copyright (c) 2016 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("@io_bazel_rules_sass//sass:sass.bzl",
+    "sass_binary",
+    "sass_library",
+)
+
 load("//:internal.bzl",
     "simple_dict_",
     "struct_to_dict_",
     "web_internal_python_script_label",
+    "web_internal_tool_label",
 )
 
 def _assert_descending_sizes_impl(ctx):
@@ -56,22 +62,43 @@ def _assert_label_struct_impl(ctx):
     )
 
 def _assert_valid_type_impl(ctx):
-    ctx.action(
-        mnemonic = "AssertingValidFile",
-        arguments = [
-                "--type", ctx.attr.type,
-                "--stamp", ctx.outputs.stamp_file.path,
-            ] +
-            [ "--files" ] + [ file.path for file in ctx.files.files ],
-        inputs = [
-                ctx.executable._assert_valid_type,
-            ] +
-            ctx.files.files,
-        executable = ctx.executable._assert_valid_type,
-        outputs = [
-            ctx.outputs.stamp_file,
-        ],
-    )
+    if ctx.attr.type in ["html", "json", "png"]:
+        ctx.action(
+            mnemonic = "AssertingValidFile",
+            arguments = [
+                    "--type", ctx.attr.type,
+                    "--stamp", ctx.outputs.stamp_file.path,
+                ] +
+                [ "--files" ] + [ file.path for file in ctx.files.files ],
+            inputs = [
+                    ctx.executable._assert_valid_type,
+                ] +
+                ctx.files.files,
+            executable = ctx.executable._assert_valid_type,
+            outputs = [
+                ctx.outputs.stamp_file,
+            ],
+        )
+    elif ctx.attr.type in ["js", "css"]:
+        ctx.action(
+            mnemonic = "AssertingValidFile",
+            arguments = [ file.path for file in ctx.files.files ] +
+                [
+                    "--type", ctx.attr.type,
+                    "-o", ctx.outputs.stamp_file.path,
+                ],
+            inputs = [
+                    ctx.executable._yui_binary,
+                ] +
+                ctx.files.files,
+            executable = ctx.executable._yui_binary,
+            outputs = [
+                ctx.outputs.stamp_file,
+            ],
+        )
+    else:
+        fail("Unsupported type: " + ctx.attr.type)
+
 
 _assert_descending_sizes = rule(
     attrs = {
@@ -130,12 +157,16 @@ _assert_valid_type = rule(
         "type": attr.string(
             mandatory = True,
             values = [
+                "css",
                 "html",
+                "js",
                 "json",
                 "png",
+                "scss",
             ]
         ),
         "_assert_valid_type": web_internal_python_script_label("//test:assert_valid_type"),
+        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor_deploy.jar"),
     },
     outputs = {
         "stamp_file": "assert/valid_type/%{name}.stamp",
@@ -190,11 +221,23 @@ def assert_label_struct(label, expected_struct):
         expected_struct_string = expected_struct_string,
     )
 
-def assert_valid_type(files, type):
-    name = "assert_valid_type_{files}_{type}".format(files = files, type = type)
+def assert_valid_type(files, file_type):
+    name = "assert_valid_type_{files}_{type}".format(files = files, type = file_type)
     name = _normalize_name(name)
-    _assert_valid_type(
-        name = name,
-        files = files,
-        type = type,
-    )
+
+    if file_type == "scss":
+        if type(files) != "list":
+            files = [ files ]
+
+        for file in files:
+            sass_binary(
+                name = _normalize_name("{prefix}_{file}".format(prefix = name, file = file)),
+                src = file,
+            )
+        return
+    else:
+        _assert_valid_type(
+            name = name,
+            files = files,
+            type = file_type,
+        )

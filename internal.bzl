@@ -16,6 +16,7 @@ _DEFAULT_TARGET_STRUCT_KEYS = [
     "files_to_run",
     "label",
     "output_group",
+    "output_groups",
 ]
 
 # Due to restrictions of the language, the only loop supported is a for-in loop. This huge loop is a
@@ -77,6 +78,9 @@ def simple_dict_(dictionary):
             simple_value = value.path
         elif type_value in ["number", "string"]:
             simple_value = value
+        elif type_value == "OutputGroupProvider":
+            # Not currently iteratable
+            pass
         else:
             fail("Unable to handle type: " + type_value)
 

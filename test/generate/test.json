@@ -1,0 +1,10 @@
+{
+    "string": "value",
+    "number": 1,
+    "list": [ "a", 2 ],
+    "bool": true,
+    "dict": {
+        "key": 0,
+        "list": []
+    }
+}
