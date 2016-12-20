@@ -1,30 +1,32 @@
-# Web Rules for Bazel [![Build Status](https://api.travis-ci.org/quittle/rules_web.svg?branch=master)](https://travis-ci.org/travis-ci/travis.rb)
+# Web Rules for Bazel [![Build Status](https://api.travis-ci.org/quittle/rules_web.svg?branch=master)](https://travis-ci.org/quittle/rules_web)
 
 ## How to use
 1. Install [Bazel](https://bazel.build/versions/master/docs/install.html) and set up a workspace
 2. Add `rules_web` as a `git_repository` to the `WORKSPACE` file
-    ```python
+
+  ```
     git_repository(
         name = "rules_web",
         remote = "https://github.com/quittle/rules_web.git",
     )
-    ```
+  ```
 3. Add the dependencies as well in the `WORKSPACE`
-    ```python
+
+  ```
     load("@rules_web//:rules_web_repositories.bzl", "rules_web_repositories")
     rules_web_repositories()
-    ```
-4. Load rules files not named `internal.bzl`.
-    ```python
+  ```
+4. Load rule files from non-`internal.bzl` Bazel files.
+
+  ```
     load("@rules_web//html:html.bzl", "html_page")
     load("@rules_web//fonts:fonts.bzl", "font_generator", "minify_ttf")
-    ```
+  ```
 
 ## Rules
 `//css:css.bzl`
 * `minify_css` Minified a bunch of CSS files into one
   * `srcs` A label list of sources to merge and minify
-
 
 `//fonts:fonts.bzl`
 * `font_generator` Generates a CSS file with the `font-family` representing this group of font files.
