@@ -1,10 +1,13 @@
 # Copyright (c) 2016 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("//:internal.bzl",
+    "web_internal_tool_label",
+)
+
 load(":internal.bzl",
     "web_internal_generate_zip_server_python_file",
     "web_internal_minify_site_zip",
-    "web_internal_tool_label",
     "web_internal_rename_zip_paths",
     "web_internal_zip_site",
 )
