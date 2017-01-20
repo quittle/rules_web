@@ -1,13 +1,16 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//assert:assert.bzl",
+    "assert_files_equal",
+    "assert_label_providers",
+)
 
 load("//generate:generate.bzl",
     "generate_variables",
 )
 
 load("//test:test.bzl",
-    "assert_equal",
-    "assert_label_struct",
     "assert_valid_type",
 )
 
@@ -16,9 +19,9 @@ generate_variables(
     config = "test.json",
     out_js = "test_generate_variables.js",
 )
-assert_equal(":expected_generate_variables.js", ":test_generate_variables_js")
+assert_files_equal(":expected_generate_variables.js", ":test_generate_variables_js")
 assert_valid_type(":test_generate_variables_js", "js")
-assert_label_struct(
+assert_label_providers(
     ":test_generate_variables_js",
     {
         "css_resources": [],
@@ -36,9 +39,9 @@ generate_variables(
     config = "test.json",
     out_scss = "test_generate_variables.scss",
 )
-assert_equal(":expected_generate_variables.scss", ":test_generate_variables_scss")
+assert_files_equal(":expected_generate_variables.scss", ":test_generate_variables_scss")
 assert_valid_type(":test_generate_variables_scss", "scss")
-assert_label_struct(
+assert_label_providers(
     ":test_generate_variables_scss",
     {
         "css_resources": [],
@@ -56,9 +59,9 @@ generate_variables(
     config = "test.json",
     out_css = "test_generate_variables.css",
 )
-assert_equal(":expected_generate_variables.css", ":test_generate_variables_css")
+assert_files_equal(":expected_generate_variables.css", ":test_generate_variables_css")
 assert_valid_type(":test_generate_variables_css", "css")
-assert_label_struct(
+assert_label_providers(
     ":test_generate_variables_css",
     {
         "css_resources": [

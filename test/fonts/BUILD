@@ -1,5 +1,9 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//assert:assert.bzl",
+    "assert_label_providers",
+)
 
 load("//css:css.bzl",
     "minify_css",
@@ -15,7 +19,6 @@ load("//fonts:fonts.bzl",
 
 load("//test:test.bzl",
     "assert_descending_sizes",
-    "assert_label_struct",
     "assert_valid_type",
 )
 
@@ -29,7 +32,7 @@ font_generator(
     weight = "bolder",
     style = "italic",
 )
-assert_label_struct(
+assert_label_providers(
     ":test_font_generator",
     {
         "css_resources": [
@@ -50,7 +53,7 @@ minify_css(
     name = "validate_test_font_generator_css",
     srcs = [ ":test_font_generator" ],
 )
-assert_label_struct(
+assert_label_providers(
     ":validate_test_font_generator_css",
     {
         "css_resources": [
@@ -73,7 +76,7 @@ minify_ttf(
     ttf = "test_roboto.ttf",
 )
 assert_descending_sizes([ "test_roboto.ttf", ":test_minify_ttf_roboto" ])
-assert_label_struct(
+assert_label_providers(
     ":test_minify_ttf_roboto",
     {
         "css_resources": [],
@@ -93,7 +96,7 @@ minify_ttf(
     ttf = "test_raleway.ttf",
 )
 assert_descending_sizes([ "test_raleway.ttf", ":test_minify_ttf_raleway" ])
-assert_label_struct(
+assert_label_providers(
     ":test_minify_ttf_raleway",
     {
         "css_resources": [],
@@ -112,7 +115,7 @@ ttf_to_eot(
     name = "test_ttf_to_eot",
     ttf = "test_roboto.ttf",
 )
-assert_label_struct(
+assert_label_providers(
     ":test_ttf_to_eot",
     {
         "css_resources": [],
@@ -129,7 +132,7 @@ ttf_to_woff(
     name = "test_ttf_to_woff",
     ttf = "test_roboto.ttf",
 )
-assert_label_struct(
+assert_label_providers(
     ":test_ttf_to_woff",
     {
         "css_resources": [],
@@ -147,7 +150,7 @@ ttf_to_woff2(
     ttf = "test_roboto.ttf",
 )
 assert_descending_sizes([ ":test_ttf_to_woff", ":test_ttf_to_woff2" ])
-assert_label_struct(
+assert_label_providers(
     ":test_ttf_to_woff2",
     {
         "css_resources": [],

@@ -1,5 +1,9 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//assert:assert.bzl",
+    "assert_label_providers",
+)
 
 load("//images:images.bzl",
     "favicon_image_generator",
@@ -8,7 +12,6 @@ load("//images:images.bzl",
 
 load("//test:test.bzl",
     "assert_descending_sizes",
-    "assert_label_struct",
     "assert_valid_type",
 )
 
@@ -18,7 +21,7 @@ minify_png(
 )
 assert_valid_type(":test_minify_png", "png")
 assert_descending_sizes([ "test.png", ":test_minify_png" ])
-assert_label_struct(
+assert_label_providers(
     ":test_minify_png",
     {
         "resources": [
@@ -40,7 +43,7 @@ favicon_image_generator(
 )
 assert_valid_type(":test_favicon_image_generator", "png")
 assert_descending_sizes(":test_favicon_image_generator")
-assert_label_struct(
+assert_label_providers(
     ":test_favicon_image_generator",
     {
         "resources": [
@@ -63,7 +66,7 @@ favicon_image_generator(
 )
 assert_valid_type(":test_favicon_image_generator_upsize", "png")
 assert_descending_sizes([ ":test_favicon_image_generator_upsize", "test.png" ])
-assert_label_struct(
+assert_label_providers(
     ":test_favicon_image_generator_upsize",
     {
         "resources": [

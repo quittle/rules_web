@@ -1,11 +1,14 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("@bazel_toolbox//collections:collections.bzl",
+    "dict_to_struct",
+    "merge_structs",
+    "struct_to_dict",
+)
+
 load("//:internal.bzl",
-    "dict_to_struct_",
-    "merge_structs_",
     "optional_arg_",
-    "struct_to_dict_",
     "transitive_resources_",
 )
 
@@ -43,7 +46,7 @@ def web_internal_minify_html_impl(ctx):
         outputs = [ out_file ],
     )
 
-    source_dict = struct_to_dict_(ctx.attr.src)
+    source_dict = struct_to_dict(ctx.attr.src)
 
     # Replace the original mapping to the source file with a mapping to the minfied file
     # Basically, convert:
@@ -59,8 +62,8 @@ def web_internal_minify_html_impl(ctx):
             for resource in source_dict.get("resources", set([]))
                 if resource != ctx.file.src ])
 
-    ret = dict_to_struct_(source_dict)
-    ret = merge_structs_(ret, struct(
+    ret = dict_to_struct(source_dict)
+    ret = merge_structs(ret, struct(
         source_map = { source_file.short_path: out_file },
         resources = set([ out_file ]),
     ))
@@ -136,7 +139,7 @@ def web_internal_html_page_impl(ctx):
     for resource in resources + ctx.attr.css_files + ctx.attr.deferred_js_files + ctx.attr.js_files:
         ret = transitive_resources_(ret, resource)
 
-    ret = merge_structs_(ret, struct(
+    ret = merge_structs(ret, struct(
         source_map = source_map,
         resources = set(
             resources +

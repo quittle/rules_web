@@ -1,8 +1,11 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("@bazel_toolbox//actions:actions.bzl",
+    "file_copy",
+)
+
 load("//:internal.bzl",
-    "copy_",
     "transitive_resources_",
 )
 
@@ -207,7 +210,7 @@ def web_internal_ttf_to_woff2(ctx):
     # file next to the old one with a new extension
     copied_source = ctx.new_file(ctx.outputs.out_woff2.basename.replace(".woff2", ".ttf"))
 
-    copy_(ctx, ctx.executable._file_copy, ctx.file.ttf, copied_source)
+    file_copy(ctx, ctx.executable._file_copy, ctx.file.ttf, copied_source)
 
     ctx.action(
         mnemonic = "GenerateWOFF2",

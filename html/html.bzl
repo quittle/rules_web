@@ -1,15 +1,15 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//labels:labels.bzl",
+    "executable_label",
+)
 
 load("//:constants.bzl",
     "CSS_FILE_TYPE",
     "HTML_FILE_TYPE",
     "JS_FILE_TYPE",
     "JSON_FILE_TYPE",
-)
-
-load("//:internal.bzl",
-    "web_internal_tool_label",
 )
 
 load(":internal.bzl",
@@ -24,7 +24,7 @@ minify_html = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_html_compressor": web_internal_tool_label("//html:html_compressor"),
+        "_html_compressor": executable_label("//html:html_compressor"),
     },
     outputs = {
         "min_html_file": "%{name}.min.html",
@@ -68,7 +68,7 @@ html_page = rule(
         "deps": attr.label_list(
             allow_files = True,
         ),
-        "_html_template_script": web_internal_tool_label("//html:html_template"),
+        "_html_template_script": executable_label("//html:html_template"),
     },
     outputs = {
         "html_file": "%{name}.html",

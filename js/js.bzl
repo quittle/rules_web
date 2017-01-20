@@ -1,12 +1,12 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//labels:labels.bzl",
+    "executable_label",
+)
 
 load("//:constants.bzl",
     "JS_FILE_TYPE",
-)
-
-load("//:internal.bzl",
-    "web_internal_tool_label",
 )
 
 load(":internal.bzl",
@@ -24,7 +24,7 @@ resource_map = rule(
             allow_files = True,
             mandatory = True,
         ),
-        "_resource_map_script": web_internal_tool_label("//js:resource_map"),
+        "_resource_map_script": executable_label("//js:resource_map"),
     },
     outputs = {
         "resource_map": "resource_map/%{name}.js",
@@ -39,7 +39,7 @@ minify_js = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": web_internal_tool_label("@yui_compressor//:yui_compressor"),
+        "_yui_binary": executable_label("@yui_compressor//:yui_compressor"),
     },
     outputs = {
         "min_js_file": "minify_js/%{name}.min.js",
@@ -74,7 +74,7 @@ closure_compile = rule(
             ],
         ),
         "extra_args": attr.string_list(),
-        "_closure_compiler": web_internal_tool_label("//js:closure_compiler"),
+        "_closure_compiler": executable_label("//js:closure_compiler"),
     },
     outputs = {
         "compiled_js": "closure_compile/%{name}.js",

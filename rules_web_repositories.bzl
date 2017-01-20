@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 _YUI_BUILD_FILE = """
@@ -290,4 +290,10 @@ def rules_web_repositories():
         type = "zip",
         sha256 = "fdc641ac432115e35d31441dbb253b016beea467dff402259d74b4df5e5f0f63",
         build_file_content = _PILLOW_BUILD_FILE,
+    )
+
+    native.git_repository(
+        name = "bazel_toolbox",
+        commit = "b39cb7c4db0886a54b8163fca66956d6be4109f4",
+        remote = "https://github.com/quittle/bazel_toolbox.git",
     )

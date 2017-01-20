@@ -1,17 +1,5 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
-
-load(":internal_test.bzl", "run_all_tests")
-
-run_all_tests()
-
-py_binary(
-    name = "assert_equal",
-    srcs = [
-        "scripts/assert_equal.py",
-    ],
-    visibility = [ "//visibility:public" ],
-)
 
 py_binary(
     name = "assert_descending_sizes",

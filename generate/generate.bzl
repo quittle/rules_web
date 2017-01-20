@@ -1,8 +1,8 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("//:internal.bzl",
-    "web_internal_tool_label",
+load("@bazel_toolbox//labels:labels.bzl",
+    "executable_label",
 )
 
 load(":internal.bzl",
@@ -18,7 +18,7 @@ generate_variables = rule(
         "out_js": attr.output(),
         "out_css": attr.output(),
         "out_scss": attr.output(),
-        "_generate_variables_script": web_internal_tool_label("//generate:generate_variables"),
+        "_generate_variables_script": executable_label("//generate:generate_variables"),
     },
     implementation = web_internal_generate_variables,
 )

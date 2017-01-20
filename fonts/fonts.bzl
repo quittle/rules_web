@@ -1,5 +1,9 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_toolbox//labels:labels.bzl",
+    "executable_label",
+)
 
 load(":internal.bzl",
     "web_internal_font_generator",
@@ -7,10 +11,6 @@ load(":internal.bzl",
     "web_internal_ttf_to_eot",
     "web_internal_ttf_to_woff",
     "web_internal_ttf_to_woff2",
-)
-
-load("//:internal.bzl",
-    "web_internal_tool_label",
 )
 
 font_generator = rule(
@@ -78,8 +78,8 @@ minify_ttf = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttx": web_internal_tool_label("@font_tools//:ttx"),
-        "_minify_ttx": web_internal_tool_label("//fonts:minify_ttx"),
+        "_ttx": executable_label("@font_tools//:ttx"),
+        "_minify_ttx": executable_label("//fonts:minify_ttx"),
     },
     implementation = web_internal_minify_ttf,
     output_to_genfiles = True,
@@ -95,7 +95,7 @@ ttf_to_eot = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttf2eot": web_internal_tool_label("@ttf2eot//:ttf2eot"),
+        "_ttf2eot": executable_label("@ttf2eot//:ttf2eot"),
     },
     implementation = web_internal_ttf_to_eot,
     output_to_genfiles = True,
@@ -111,7 +111,7 @@ ttf_to_woff = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttx": web_internal_tool_label("@font_tools//:ttx"),
+        "_ttx": executable_label("@font_tools//:ttx"),
     },
     implementation = web_internal_ttf_to_woff,
     output_to_genfiles = True,
@@ -127,8 +127,8 @@ ttf_to_woff2 = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_ttf2woff2": web_internal_tool_label("@woff2//:ttf2woff2"),
-        "_file_copy": web_internal_tool_label("//:file_copy"),
+        "_ttf2woff2": executable_label("@woff2//:ttf2woff2"),
+        "_file_copy": executable_label("@bazel_toolbox//actions:file_copy"),
     },
     implementation = web_internal_ttf_to_woff2,
     output_to_genfiles = True,
