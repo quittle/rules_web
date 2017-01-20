@@ -21,19 +21,7 @@ jdk:
     - oraclejdk8
 
 before_install:
-    # Local variables
-    - BAZEL_FILE='bazel.sh'
-    - BAZEL_CHECKSUM_FILE='bazel_checksum.txt'
-    # Download Bazel installer
-    - wget --quiet --output-document "${BAZEL_FILE}" "https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh"
-    # Check checksum
-    - echo "${BAZEL_SHA256}  ${BAZEL_FILE}" > "${BAZEL_CHECKSUM_FILE}"
-    - sha256sum --check "${BAZEL_CHECKSUM_FILE}"
-    # Install Bazel
-    - chmod +x "${BAZEL_FILE}"
-    - ./"${BAZEL_FILE}" --user
+    - ./travis/before_install.sh
 
 script:
-     # Sandbox is currently broken when run on travis so disable it
-     # https://groups.google.com/d/msg/bazel-discuss/ddymoZ_Ed_g/Ap4LvSD-DQAJ
-    - bazel build --spawn_strategy=standalone --jobs=4 //...
+    - ./travis/bazel_build.sh
