@@ -3,22 +3,7 @@ env:
 
 dist: trusty
 
-sudo: false
-
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - wget
-            # Package list from http://bazel.io/docs/install.html
-            - pkg-config
-            - unzip
-            - zip
-            - zlib1g-dev
-
-jdk:
-    - oraclejdk8
+sudo: true
 
 before_install:
     - ./travis/before_install.sh
