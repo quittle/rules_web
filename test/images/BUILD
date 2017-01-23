@@ -24,6 +24,7 @@ assert_descending_sizes([ "test.png", ":test_minify_png" ])
 assert_label_providers(
     ":test_minify_png",
     {
+        "aspect_ids": [],
         "resources": [
             "{BIN_DIR}/test/images/minified_png/test_minify_png.png",
         ],
@@ -46,6 +47,7 @@ assert_descending_sizes(":test_favicon_image_generator")
 assert_label_providers(
     ":test_favicon_image_generator",
     {
+        "aspect_ids": [],
         "resources": [
             "{GEN_DIR}/test/images/1.png",
             "{GEN_DIR}/test/images/16.png",
@@ -69,6 +71,7 @@ assert_descending_sizes([ ":test_favicon_image_generator_upsize", "test.png" ])
 assert_label_providers(
     ":test_favicon_image_generator_upsize",
     {
+        "aspect_ids": [],
         "resources": [
             "{GEN_DIR}/test/images/1000.png",
         ],

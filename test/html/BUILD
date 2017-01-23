@@ -31,6 +31,7 @@ assert_valid_type(":test_html_page", "html")
 assert_label_providers(
     ":test_html_page",
     {
+        "aspect_ids": [],
         "css_resources": [
             "test/html/test.css",
         ],
@@ -58,6 +59,7 @@ minify_html(
 assert_label_providers(
     ":minify_test_html_page",
     {
+        "aspect_ids": [],
         "css_resources": [
             "test/html/test.css",
         ],
@@ -73,8 +75,8 @@ assert_label_providers(
             "test/html/dep.txt",
         ],
         "source_map": {
-            "test/html/dep.txt": "test/html/dep.txt",
             "test/html/test_html_page.html": "{BIN_DIR}/test/html/minify_test_html_page.min.html",
+            "test/html/dep.txt": "test/html/dep.txt",
         },
     },
 )
@@ -94,6 +96,7 @@ assert_descending_sizes([ "test.html", ":test_minify_html" ])
 assert_label_providers(
     ":test_minify_html",
     {
+        "aspect_ids": [],
         "resources": [
             "{BIN_DIR}/test/html/test_minify_html.min.html",
         ],

@@ -294,6 +294,6 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "398c657322c4fdea63924eed673cd80c20b0a6af",
+        commit = "943fd6299bf944d7e49d651b2ba604675e41e25e",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )
