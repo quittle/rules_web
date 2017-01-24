@@ -79,7 +79,7 @@ minify_ttf = rule(
             mandatory = True,
         ),
         "_ttx": executable_label("@font_tools//:ttx"),
-        "_minify_ttx": executable_label("//fonts:minify_ttx"),
+        "_minify_ttx": executable_label(Label("//fonts:minify_ttx")),
     },
     implementation = web_internal_minify_ttf,
     output_to_genfiles = True,

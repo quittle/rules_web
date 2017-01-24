@@ -1,8 +1,8 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("//:internal.bzl",
-    "web_internal_tool_label",
+load("@bazel_toolbox//labels:labels.bzl",
+    "executable_label",
 )
 
 load(":internal.bzl",
@@ -19,7 +19,7 @@ zip_site = rule(
         "out_zip": attr.output(
             mandatory = True,
         ),
-        "_zip_site_script": web_internal_tool_label("//site_zip:zip_site"),
+        "_zip_site_script": executable_label(Label("//site_zip:zip_site")),
     },
     implementation = web_internal_zip_site,
 )
@@ -35,7 +35,7 @@ minify_site_zip = rule(
         "minified_zip": attr.output(
             mandatory = True,
         ),
-        "_minify_site_zip_script": web_internal_tool_label("//site_zip:minify_site_zip"),
+        "_minify_site_zip_script": executable_label(Label("//site_zip:minify_site_zip")),
     },
     implementation = web_internal_minify_site_zip,
 )
@@ -55,7 +55,7 @@ rename_zip_paths = rule(
         "out_zip": attr.output(
             mandatory = True,
         ),
-        "_rename_zip_paths_script": web_internal_tool_label("//site_zip:rename_zip_paths"),
+        "_rename_zip_paths_script": executable_label(Label("//site_zip:rename_zip_paths")),
     },
     implementation = web_internal_rename_zip_paths,
 )
@@ -72,7 +72,7 @@ generate_zip_server_python_file = rule(
             allow_files = True,
             single_file = True,
         ),
-        "_generate_jinja_file": web_internal_tool_label("//:generate_templated_file"),
+        "_generate_jinja_file": executable_label("@bazel_toolbox//actions:generate_templated_file"),
     },
     output_to_genfiles = True,
     implementation = web_internal_generate_zip_server_python_file,

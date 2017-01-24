@@ -24,7 +24,7 @@ resource_map = rule(
             allow_files = True,
             mandatory = True,
         ),
-        "_resource_map_script": executable_label("//js:resource_map"),
+        "_resource_map_script": executable_label(Label("//js:resource_map")),
     },
     outputs = {
         "resource_map": "resource_map/%{name}.js",
@@ -74,7 +74,7 @@ closure_compile = rule(
             ],
         ),
         "extra_args": attr.string_list(),
-        "_closure_compiler": executable_label("//js:closure_compiler"),
+        "_closure_compiler": executable_label(Label("//js:closure_compiler")),
     },
     outputs = {
         "compiled_js": "closure_compile/%{name}.js",

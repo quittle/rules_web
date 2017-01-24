@@ -77,8 +77,7 @@ _assert_descending_sizes = rule(
             allow_files = True,
             mandatory = True,
         ),
-        "_assert_descending_sizes":
-                executable_label("//test:assert_descending_sizes"),
+        "_assert_descending_sizes": executable_label(Label("//test:assert_descending_sizes")),
     },
     outputs = {
         "stamp_file": "assert/descending_sizes/%{name}.stamp",
@@ -102,7 +101,7 @@ _assert_valid_type = rule(
                 "scss",
             ]
         ),
-        "_assert_valid_type": executable_label("//test:assert_valid_type"),
+        "_assert_valid_type": executable_label(Label("//test:assert_valid_type")),
         "_yui_binary": executable_label("@yui_compressor//:yui_compressor"),
     },
     outputs = {

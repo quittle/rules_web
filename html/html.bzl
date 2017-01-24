@@ -24,7 +24,7 @@ minify_html = rule(
             single_file = True,
             mandatory = True,
         ),
-        "_html_compressor": executable_label("//html:html_compressor"),
+        "_html_compressor": executable_label(Label("//html:html_compressor")),
     },
     outputs = {
         "min_html_file": "%{name}.min.html",
@@ -68,7 +68,7 @@ html_page = rule(
         "deps": attr.label_list(
             allow_files = True,
         ),
-        "_html_template_script": executable_label("//html:html_template"),
+        "_html_template_script": executable_label(Label("//html:html_template")),
     },
     outputs = {
         "html_file": "%{name}.html",

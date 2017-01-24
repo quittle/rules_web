@@ -1,9 +1,12 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.
+
+load("@bazel_toolbox//actions:actions.bzl",
+    "generate_templated_file",
+)
 
 load("//:internal.bzl",
     "optional_arg_",
-    "web_internal_generate_jinja_file",
 )
 
 def web_internal_zip_site(ctx):
@@ -96,4 +99,4 @@ def web_internal_generate_zip_server_python_file(ctx):
         "zip": ctx.file.zip.basename,
     }
 
-    web_internal_generate_jinja_file(ctx, ctx.file._template, config, ctx.outputs.out_file)
+    generate_templated_file(ctx, ctx.executable._generate_jinja_file, ctx.file._template, config, ctx.outputs.out_file)

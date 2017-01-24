@@ -31,8 +31,8 @@ favicon_image_generator = rule(
         "allow_stretching": attr.bool(
             default = False,
         ),
-        "_resize_image": executable_label("//images:resize_image"),
-        "_pngtastic": executable_label("//images:simplified_pngtastic"),
+        "_resize_image": executable_label(Label("//images:resize_image")),
+        "_pngtastic": executable_label(Label("//images:simplified_pngtastic")),
     },
     implementation = web_internal_favicon_image_generator,
     output_to_genfiles = True,
@@ -45,7 +45,7 @@ minify_png = rule(
             allow_files = True,
             mandatory = True,
         ),
-        "_pngtastic": executable_label("//images:simplified_pngtastic"),
+        "_pngtastic": executable_label(Label("//images:simplified_pngtastic")),
     },
     outputs = {
         "min_png": "minified_png/%{name}.png",
@@ -68,7 +68,7 @@ _generate_ico = rule(
         "allow_upsizing": attr.bool(
             default = False,
         ),
-        "_generate_ico": executable_label("//images:generate_ico"),
+        "_generate_ico": executable_label(Label("//images:generate_ico")),
     },
     outputs = {
         # Due to limitations of pngtastic, we will create an intermediate file without the
