@@ -7,8 +7,9 @@ load("@bazel_toolbox//labels:labels.bzl",
 
 load(":internal.bzl",
     "web_internal_favicon_image_generator",
-    "web_internal_minify_png",
     "web_internal_generate_ico",
+    "web_internal_minify_png",
+    "web_internal_resize_image",
 )
 
 favicon_image_generator = rule(
@@ -51,6 +52,24 @@ minify_png = rule(
         "min_png": "minified_png/%{name}.png",
     },
     implementation = web_internal_minify_png,
+)
+
+resize_image = rule(
+    attrs = {
+        "image": attr.label(
+            single_file = True,
+            allow_files = True,
+            mandatory = True,
+        ),
+        "width": attr.int(default = -1),
+        "height": attr.int(default = -1),
+        "scale": attr.string(),
+        "_resize_image": executable_label(Label("//images:resize_image")),
+    },
+    outputs = {
+        "resized_image": "resize_image/%{name}",
+    },
+    implementation = web_internal_resize_image,
 )
 
 # BUG: This doesn't work as PIL does not support writing out ICO files

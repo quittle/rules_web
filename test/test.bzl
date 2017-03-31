@@ -32,7 +32,7 @@ def _assert_descending_sizes_impl(ctx):
     )
 
 def _assert_valid_type_impl(ctx):
-    if ctx.attr.type in ["html", "json", "png"]:
+    if ctx.attr.type in ["bmp", "html", "json", "png"]:
         ctx.action(
             mnemonic = "AssertingValidFile",
             arguments = [
@@ -93,6 +93,7 @@ _assert_valid_type = rule(
         "type": attr.string(
             mandatory = True,
             values = [
+                "bmp",
                 "css",
                 "html",
                 "js",

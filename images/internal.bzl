@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 load("//:internal.bzl",
@@ -102,4 +102,35 @@ def web_internal_favicon_image_generator(ctx):
 
     return struct(
         resources = set(outputs),
+    )
+
+def web_internal_resize_image(ctx):
+    additional_args = None
+
+    if ctx.attr.width != -1 and ctx.attr.height != -1 and ctx.attr.scale == "":
+        additional_args = [ "--width", str(ctx.attr.width), "--height", str(ctx.attr.height) ]
+    elif ctx.attr.width == -1 and ctx.attr.height == -1 and ctx.attr.scale != "":
+        additional_args = [ "--scale", ctx.attr.scale ]
+    else:
+        fail("Either width and height need to be set or just scale")
+
+    output = ctx.outputs.resized_image
+
+    ctx.action(
+        mnemonic = "ResizingImage",
+        arguments = [
+            "--source", ctx.file.image.path,
+            "--output", ctx.outputs.resized_image.path,
+            "--allow-upsizing",
+            "--allow-stretching",
+        ] + additional_args,
+        inputs = [
+            ctx.file.image,
+        ],
+        executable = ctx.executable._resize_image,
+        outputs = [ output ],
+    )
+
+    return struct(
+        resources = set([output]),
     )

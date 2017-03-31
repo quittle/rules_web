@@ -77,6 +77,11 @@
   * `allow_stretching` An optional boolean of whether the build should not fail if the image needs to be distorted to a different aspect-ratio. Defaults to `False`.
 * `minify_png` Minimizes the size of a PNG image
   * `png` The PNG the shrink.
+* `resize_image` Resizes an image
+  * `image` The image to resize
+  * `width` Optionally the width of the image to output. If set, height must also be set.
+  * `height` Optionally the height of the image to output. If set, width must also be set.
+  * `scale` Optionally the scaling ratio of the image as a string. If set, width and height must not be set.
 
 `//js/js.bzl`
 * `resource_map` Generates a Javascript file mapping resources to a deeply nested dictionary representing the file system structure. For example if `["src/path/file.txt", "src/other-path/image.png"]` were mapped, it would generate `{ "src": { "path": "file.txt", "other-path": "image.png" } }`.

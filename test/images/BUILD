@@ -2,12 +2,14 @@
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//assert:assert.bzl",
+    "assert_files_equal",
     "assert_label_providers",
 )
 
 load("//images:images.bzl",
     "favicon_image_generator",
     "minify_png",
+    "resize_image",
 )
 
 load("//test:test.bzl",
@@ -74,6 +76,41 @@ assert_label_providers(
         "aspect_ids": [],
         "resources": [
             "{GEN_DIR}/test/images/1000.png",
+        ],
+    },
+)
+
+resize_image(
+    name = "test_resize_image_exact",
+    image = "white-10x10.bmp",
+    width = 5,
+    height = 20,
+)
+assert_valid_type(":test_resize_image_exact", "bmp")
+assert_files_equal("white-5x20.bmp", ":test_resize_image_exact")
+assert_label_providers(
+    ":test_resize_image_exact",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/resize_image/test_resize_image_exact",
+        ],
+    },
+)
+
+resize_image(
+    name = "test_resize_image_scale",
+    image = "white-10x10.bmp",
+    scale = ".5"
+)
+assert_valid_type(":test_resize_image_scale", "bmp")
+assert_files_equal("white-5x5.bmp", ":test_resize_image_scale")
+assert_label_providers(
+    ":test_resize_image_scale",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/resize_image/test_resize_image_scale",
         ],
     },
 )

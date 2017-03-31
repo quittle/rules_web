@@ -6,13 +6,14 @@ from HTMLParser import HTMLParser
 import json
 import os
 from PIL import Image
+import sys
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Asserts files are valid')
     parser.add_argument('--stamp', type=argparse.FileType('w+'), required=True,
                                    help='Stamp file to record action completed')
     parser.add_argument('--files', type=argparse.FileType('rb'), nargs='+', required=True)
-    parser.add_argument('--type', type=str, choices=['html', 'json','png'], required=True)
+    parser.add_argument('--type', type=str, choices=['bmp', 'html', 'json', 'png'], required=True)
     return parser.parse_args()
 
 # This is not a great parser. It does not support strict parsing
@@ -28,6 +29,10 @@ def validate_json(file):
 def validate_image(file):
     Image.open(file).verify()
 
+def validate_bmp(file):
+    validate_image(file)
+    assert Image.open(file).format == 'BMP'
+
 def validate_png(file):
     validate_image(file)
     assert Image.open(file).format == 'PNG'
@@ -39,12 +44,17 @@ def main():
 
     for file in args.files:
         with file as fp:
-            if file_type == 'html':
+            if file_type == 'bmp':
+                validate_bmp(fp)
+            elif file_type == 'html':
                 validate_html(fp)
             elif file_type == 'json':
                 validate_json(fp)
             elif file_type == 'png':
                 validate_png(fp)
+            else:
+                print 'Invalid file type: ' + file_type
+                sys.exit(1)
 
     with args.stamp as stamp_file:
         stamp_file.write(str(args))
