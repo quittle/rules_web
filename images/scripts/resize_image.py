@@ -36,6 +36,12 @@ def main():
         if args.scale:
             width = int(image_width * args.scale)
             height = int(image_height * args.scale)
+        elif args.width and not args.height:
+            width = args.width
+            height = int(image_height * (width / float(image_width)))
+        elif args.height and not args.width:
+            height = args.height
+            width = int(image_width * (height / float(image_height)))
         else:
             width = args.width
             height = args.height

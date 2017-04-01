@@ -107,8 +107,12 @@ def web_internal_favicon_image_generator(ctx):
 def web_internal_resize_image(ctx):
     additional_args = None
 
-    if ctx.attr.width != -1 and ctx.attr.height != -1 and ctx.attr.scale == "":
-        additional_args = [ "--width", str(ctx.attr.width), "--height", str(ctx.attr.height) ]
+    if (ctx.attr.width != -1 or ctx.attr.height != -1) and ctx.attr.scale == "":
+        additional_args = []
+        if ctx.attr.width != -1:
+            additional_args +=  [ "--width", str(ctx.attr.width)]
+        if ctx.attr.height != -1:
+            additional_args += [ "--height", str(ctx.attr.height) ]
     elif ctx.attr.width == -1 and ctx.attr.height == -1 and ctx.attr.scale != "":
         additional_args = [ "--scale", ctx.attr.scale ]
     else:

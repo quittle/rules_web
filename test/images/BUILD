@@ -99,6 +99,40 @@ assert_label_providers(
 )
 
 resize_image(
+    name = "test_resize_image_given_width",
+    image = "white-10x10.bmp",
+    width = 5,
+)
+assert_valid_type(":test_resize_image_given_width", "bmp")
+assert_files_equal("white-5x5.bmp", ":test_resize_image_given_width")
+assert_label_providers(
+    ":test_resize_image_given_width",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/resize_image/test_resize_image_given_width",
+        ],
+    },
+)
+
+resize_image(
+    name = "test_resize_image_given_height",
+    image = "white-5x5.bmp",
+    height = 10,
+)
+assert_valid_type(":test_resize_image_given_height", "bmp")
+assert_files_equal("white-10x10.bmp", ":test_resize_image_given_height")
+assert_label_providers(
+    ":test_resize_image_given_height",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/resize_image/test_resize_image_given_height",
+        ],
+    },
+)
+
+resize_image(
     name = "test_resize_image_scale",
     image = "white-10x10.bmp",
     scale = ".5"

@@ -79,8 +79,8 @@
   * `png` The PNG the shrink.
 * `resize_image` Resizes an image
   * `image` The image to resize
-  * `width` Optionally the width of the image to output. If set, height must also be set.
-  * `height` Optionally the height of the image to output. If set, width must also be set.
+  * `width` Optionally the width of the image to output. If set without height, height will scale proportional to width.
+  * `height` Optionally the height of the image to output. If set without width, width will scale proportional to height.
   * `scale` Optionally the scaling ratio of the image as a string. If set, width and height must not be set.
 
 `//js/js.bzl`
