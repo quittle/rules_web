@@ -152,3 +152,40 @@ def web_internal_html_page_impl(ctx):
     ))
 
     return ret
+
+def web_internal_inject_html_impl(ctx):
+    ctx.action(
+        mnemonic = "InjectHtmlSection",
+        arguments = [
+                "--outer-html", ctx.file.outer_html.path,
+                "--inner-html", ctx.file.inner_html.path,
+                "--query-selector", ctx.attr.query_selector,
+                "--insertion-mode", ctx.attr.insertion_mode,
+                "--output", ctx.outputs.html_file.path,
+            ],
+        inputs = [
+                ctx.executable._inject_html_script,
+                ctx.file.outer_html,
+                ctx.file.inner_html,
+            ],
+        executable = ctx.executable._inject_html_script,
+        outputs = [ ctx.outputs.html_file ],
+    )
+
+    ret = struct()
+    for resource in [ ctx.attr.outer_html, ctx.attr.inner_html ]:
+        ret = transitive_resources_(ret, resource)
+    ret = merge_structs(ret, struct(
+        resources = set([ ctx.outputs.html_file ]),
+    ))
+
+    ret_dict = struct_to_dict(ret)
+    resources_copy = list(ret_dict["resources"])
+    if ctx.file.outer_html in resources_copy:
+        resources_copy.remove(ctx.file.outer_html)
+    if ctx.file.inner_html in resources_copy:
+        resources_copy.remove(ctx.file.inner_html)
+    ret_dict["resources"] = set(resources_copy)
+    ret = dict_to_struct(ret_dict)
+
+    return ret

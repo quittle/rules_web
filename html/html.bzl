@@ -14,22 +14,8 @@ load("//:constants.bzl",
 
 load(":internal.bzl",
     "web_internal_html_page_impl",
+    "web_internal_inject_html_impl",
     "web_internal_minify_html_impl",
-)
-
-minify_html = rule(
-    attrs = {
-        "src": attr.label(
-            allow_files = HTML_FILE_TYPE,
-            single_file = True,
-            mandatory = True,
-        ),
-        "_html_compressor": executable_label(Label("//html:html_compressor")),
-    },
-    outputs = {
-        "min_html_file": "%{name}.min.html",
-    },
-    implementation = web_internal_minify_html_impl,
 )
 
 html_page = rule(
@@ -74,4 +60,51 @@ html_page = rule(
         "html_file": "%{name}.html",
     },
     implementation = web_internal_html_page_impl,
+)
+
+inject_html = rule(
+    attrs = {
+        "outer_html": attr.label(
+            single_file = True,
+            allow_files = True,
+            mandatory = True,
+        ),
+        "inner_html": attr.label(
+            single_file = True,
+            allow_files = True,
+            mandatory = True,
+        ),
+        "query_selector": attr.string(
+            mandatory = True,
+        ),
+        "insertion_mode": attr.string(
+            default = "replace_contents",
+            values = [
+                "append",
+                "prepend",
+                "replace_contents",
+                "replace_node",
+            ],
+        ),
+        "_inject_html_script": executable_label(Label("//html:inject_html")),
+    },
+    outputs = {
+        "html_file": "%{name}.html",
+    },
+    implementation = web_internal_inject_html_impl,
+)
+
+minify_html = rule(
+    attrs = {
+        "src": attr.label(
+            allow_files = HTML_FILE_TYPE,
+            single_file = True,
+            mandatory = True,
+        ),
+        "_html_compressor": executable_label(Label("//html:html_compressor")),
+    },
+    outputs = {
+        "min_html_file": "%{name}.min.html",
+    },
+    implementation = web_internal_minify_html_impl,
 )

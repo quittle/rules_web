@@ -67,6 +67,11 @@
   * `favicon_images` A list of favicon images at various sizes. This must be the same length as `favicon_sizes`
   * `favicon_sizes` A list of ints that represent the square-size of the images in `favicon_images`. Must be the same length as `favicon_images`.
   * `deps` Other files that may be referrenced by resources in the page.
+* `inject_html` Inject an HTML fragment inside another HTML fragment.
+  * `outer_html` The outer HTML fragment to be inject into.
+  * `inner_html` The inner HTML fragment to inject in.
+  * `query_selector` The CSS selector query to find the element in `outer_html` in which to inject.
+  * `insertion_mode` The method by which `inner_html` will be injected into `outer_html`.
 
 `//images/images.bzl`
 * `favicon_image_generator` Generates favicons of various sizes

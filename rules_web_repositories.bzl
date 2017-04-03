@@ -25,6 +25,20 @@ java_library(
 
 """
 
+_JERICHO_SELECTOR_BUILD_FILE = """
+
+java_library(
+    name = "jericho_selector",
+    srcs = glob([ "src/main/java/**/*.java" ]),
+    deps = [
+        "@br_com_starcode_parccser_parccser//jar",
+        "@net_htmlparser_jericho_jericho_html//jar",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+"""
+
 _RHINO_BUILD_FILE = """
 
 filegroup(
@@ -219,10 +233,23 @@ def rules_web_repositories():
         url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/htmlcompressor/htmlcompressor-1.5.3.jar",
     )
 
+    native.new_git_repository(
+        name = "utluiz_jericho_selector",
+        commit = "3214ba810595d7d0be94a104496bb7ae7f409165",
+        remote = "https://github.com/utluiz/jericho-selector.git",
+        build_file_content = _JERICHO_SELECTOR_BUILD_FILE,
+    )
+
     native.maven_jar(
         name = "org_apache_commons_cli",
-        artifact = "commons-cli:commons-cli:1.3.1",
-        sha1 = "1303efbc4b181e5a58bf2e967dc156a3132b97c0",
+        artifact = "commons-cli:commons-cli:1.4",
+        sha1 = "c51c00206bb913cd8612b24abd9fa98ae89719b1",
+    )
+
+    native.maven_jar(
+        name = "org_apache_commons_io",
+        artifact = "commons-io:commons-io:2.5",
+        sha1 = "2852e6e05fbb95076fc091f6d1780f1f8fe35e0f",
     )
 
     native.maven_jar(
@@ -284,6 +311,18 @@ def rules_web_repositories():
         sha1 = "5a2f4be6cf41e27ed7119d26cb8f106300d87d91",
     )
 
+    native.maven_jar(
+        name = "br_com_starcode_parccser_parccser",
+        artifact = "br.com.starcode.parccser:parccser:1.1.1-RELEASE",
+        sha1 = "98f9db564ba8887e9f36ec0ac7e2f9f3693606f0",
+    )
+
+    native.maven_jar(
+        name = "net_htmlparser_jericho_jericho_html",
+        artifact = "net.htmlparser.jericho:jericho-html:3.4",
+        sha1 = "0799191f451f5a6910ce37b0147771489ab46fed",
+    )
+
     native.new_http_archive(
         name = "pillow",
         url = "https://pypi.python.org/packages/c0/47/6900d13aa6112610df4c9b34d57f50a96b35308796a3a27458d0c9ac87f7/Pillow-3.4.2-cp27-cp27mu-manylinux1_x86_64.whl",
@@ -294,6 +333,6 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "0c8c3f527010c2874a2023f66562e66e6d1a45c8",
+        commit = "5bfc7704088e2d8f4510230a06be0fc19cb2f7d7",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )
