@@ -21,6 +21,19 @@ def parse_args():
     parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
     return parser.parse_args()
 
+def dict_extend(dictionary, key, extension):
+    extension_type = type(extension)
+    if extension_type == list:
+        dictionary[key] = dictionary.get(key, []) + extension
+    elif extension_type == set:
+        dictionary[key] = dictionary.get(key, set([])) + extension
+    elif extension_type == dict:
+        dictionary[key] = dictionary.get(key, {})
+        dictionary[key].update(extension)
+    else:
+        print 'Unrecognized extension type: ' + str(extension_type)
+        sys.exit(2)
+
 def main():
     args = parse_args()
 
@@ -36,11 +49,12 @@ def main():
     config = None
     with args.config as config_file:
         config = json.load(config_file)
-    config['favicons'] = favicons
+
     config['body'] = body_filename
-    config['css_files'] = args.css_files
-    config['deferred_js_files'] = args.deferred_js_files
-    config['js_files'] = args.js_files
+    dict_extend(config, 'favicons', favicons)
+    dict_extend(config, 'css_files', args.css_files)
+    dict_extend(config, 'deferred_js_files', args.deferred_js_files)
+    dict_extend(config, 'js_files', args.js_files)
 
     env = jinja2.Environment(loader = jinja2.FileSystemLoader([template_path, body_path]))
     template = env.get_template(template_filename)

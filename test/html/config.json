@@ -5,5 +5,8 @@
             "key": "fruit",
             "value": "oranges"
         }
+    ],
+    "css_files": [
+        "https://external.site.com/helper.css"
     ]
 }
