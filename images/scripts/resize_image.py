@@ -46,9 +46,9 @@ def main():
             width = args.width
             height = args.height
 
-        resized_image = image.resize((width, height))
+        resized_image = image.resize((width, height), resample=Image.LANCZOS)
         with args.output as output_file:
-            resized_image.save(output_file, format=image.format, mode=image.mode, fake='tacos')
+            resized_image.save(output_file, format=image.format, mode=image.mode)
 
 
 if __name__ == '__main__':

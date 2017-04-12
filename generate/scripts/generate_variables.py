@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 import argparse
@@ -27,12 +27,12 @@ def stringify_scss(json):
                 ')')
     elif isinstance(json, dict):
         return ('(' +
-                ', '.join(key + ': ' + stringify_scss(value) for key, value in json.iteritems()) +
+                ', '.join(stringify_scss(key) + ': ' + stringify_scss(value) for key, value in json.iteritems()) +
                 ')')
     elif isinstance(json, bool):
         return 'true' if json else 'false'
     else:
-        return str(json)
+        return '\'' + str(json) + '\''
 
 class VariableWriter:
     def __init__(self, file, config):

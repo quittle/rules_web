@@ -20,5 +20,6 @@ generate_variables = rule(
         "out_scss": attr.output(),
         "_generate_variables_script": executable_label(Label("//generate:generate_variables")),
     },
+    output_to_genfiles = True,
     implementation = web_internal_generate_variables,
 )
