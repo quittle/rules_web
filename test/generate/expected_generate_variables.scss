@@ -1,5 +1,7 @@
 $bool: true;
-$dict: (list: (), key: 0);
-$list: (a, 2);
-$string: value;
 $number: 1;
+$decimal: 1.2;
+$zerolead: 0.1;
+$string: 'value';
+$list: ('a', 2);
+$dict: ('key': 0, 'list': ());

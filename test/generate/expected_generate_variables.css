@@ -1,5 +1,7 @@
 :root { --bool: true; }
-:root { --dict: {list: [], key: 0}; }
-:root { --list: [a, 2]; }
-:root { --string: value; }
 :root { --number: 1; }
+:root { --decimal: 1.2; }
+:root { --zerolead: 0.1; }
+:root { --string: value; }
+:root { --list: [a, 2]; }
+:root { --dict: {key: 0, list: []}; }

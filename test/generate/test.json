@@ -1,8 +1,10 @@
 {
-    "string": "value",
-    "number": 1,
-    "list": [ "a", 2 ],
     "bool": true,
+    "number": 1,
+    "decimal": 1.2,
+    "zerolead": 0.1,
+    "string": "value",
+    "list": [ "a", 2 ],
     "dict": {
         "key": 0,
         "list": []

@@ -28,7 +28,7 @@ assert_label_providers(
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [
-            "{BIN_DIR}/test/generate/test_generate_variables.js",
+            "{GEN_DIR}/test/generate/test_generate_variables.js",
         ],
         "resources": [],
         "source_map": {},
@@ -50,7 +50,7 @@ assert_label_providers(
         "deferred_js_resources": [],
         "js_resources": [],
         "resources": [
-            "{BIN_DIR}/test/generate/test_generate_variables.scss",
+            "{GEN_DIR}/test/generate/test_generate_variables.scss",
         ],
         "source_map": {},
     },
@@ -68,7 +68,7 @@ assert_label_providers(
     {
         "aspect_ids": [],
         "css_resources": [
-            "{BIN_DIR}/test/generate/test_generate_variables.css",
+            "{GEN_DIR}/test/generate/test_generate_variables.css",
         ],
         "deferred_js_resources": [],
         "js_resources": [],

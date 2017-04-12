@@ -2,6 +2,7 @@
 # Licensed under Apache License v2.0
 
 import argparse
+import collections
 import json
 import os
 import sys
@@ -31,8 +32,10 @@ def stringify_scss(json):
                 ')')
     elif isinstance(json, bool):
         return 'true' if json else 'false'
-    else:
+    elif isinstance(json, unicode):
         return '\'' + str(json) + '\''
+    else:
+        return str(json)
 
 class VariableWriter:
     def __init__(self, file, config):
@@ -84,7 +87,7 @@ def main():
 
     config = None
     with args.config as config_file:
-        config = json.load(config_file, encoding='ascii')
+        config = json.load(config_file, encoding='ascii', object_pairs_hook=collections.OrderedDict)
 
     assert all(isinstance(key, basestring) for key in config.iterkeys()), 'Expected all keys to be strings'
 
