@@ -32,6 +32,10 @@ minify_site_zip = rule(
             single_file = True,
         ),
         "root_files": attr.label_list(),
+        "keep_extensions": attr.bool(),
+        "allow_multicase": attr.bool(
+            default = False,
+        ),
         "minified_zip": attr.output(
             mandatory = True,
         ),
