@@ -1,11 +1,14 @@
 {#
- # Copyright (c) 2016 Dustin Doloff
+ # Copyright (c) 2016-2017 Dustin Doloff
  # Licensed under Apache License v2.0
  #}
 
 {{ doctype or '<!DOCTYPE HTML>'}}
 <html>
     <head>
+        {% for content in inline_js_files_contents %}
+            <script type="text/javascript">{{ content }}</script>
+        {% endfor %}
         <meta charset="{{ charset or 'UTF-8' }}" />
         {% if title %}
             <title>{{ title }}</title>
@@ -45,5 +48,5 @@
             <script src="{{ file }}" defer type="text/javascript"></script>
         {% endfor %}
     </head>
-    {% include body without context %}
+    {{ include_body() }}
 </html>

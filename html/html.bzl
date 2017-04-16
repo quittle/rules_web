@@ -43,6 +43,10 @@ html_page = rule(
             default = [],
             allow_files = JS_FILE_TYPE,
         ),
+        "inline_js_files": attr.label_list(
+            default = [],
+            allow_files = JS_FILE_TYPE,
+        ),
         "css_files": attr.label_list(
             default = [],
             allow_files = CSS_FILE_TYPE,

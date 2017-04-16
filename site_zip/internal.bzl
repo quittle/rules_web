@@ -17,15 +17,19 @@ def web_internal_zip_site(ctx):
         resources += getattr(resource, "resources", set())
         resources += getattr(resource, "css_resources", set())
         resources += getattr(resource, "js_resources", set())
+        resources += getattr(resource, "deferred_resources", set())
     resources += ctx.files.resources
 
     root_files = [ page.path for page in ctx.files.root_files ]
     resource_paths = [ resource.path for resource in resources ]
 
+    simple_source_map = { key: value.path for key, value in source_map.items() }
+
     ctx.action(
         mnemonic = "ZipSite",
         arguments = [
                 "--output", ctx.outputs.out_zip.path,
+                "--source-map", str(simple_source_map),
             ] +
             optional_arg_("--root-files", root_files) +
             optional_arg_("--resources", resource_paths),

@@ -27,6 +27,7 @@ html_page(
     body = "body.html",
     deferred_js_files = [ "test_deferred.js" ],
     js_files = [ "test.js" ],
+    inline_js_files = [ "test.js" ],
     css_files = [ "test.css" ],
     favicon_images = [ "favicon.png" ],
     favicon_sizes = [ 16 ],
@@ -46,6 +47,7 @@ assert_label_providers(
         "js_resources": [
             "test/html/test.js",
         ],
+        # No inline_js_files as it has been inlined
         "resources": [
             "test/html/dep.txt",
             "test/html/favicon.png",

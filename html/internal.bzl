@@ -70,6 +70,14 @@ def web_internal_minify_html_impl(ctx):
 
     return ret
 
+def _explode_deps(deps):
+    ret = []
+    for dep in deps:
+        ret.append(dep)
+        if hasattr(dep, "files"):
+            ret.extend(list(dep.files))
+    return ret
+
 def web_internal_html_page_impl(ctx):
     if len(ctx.attr.favicon_sizes) != len(ctx.files.favicon_images):
         fail("Favicon sizes list length does not match favicon images list length")
@@ -84,7 +92,8 @@ def web_internal_html_page_impl(ctx):
     css_files = ctx.files.css_files
     deferred_js_files = ctx.files.deferred_js_files
     js_files = ctx.files.js_files
-    for dep in ctx.attr.deps:
+    inline_js_files = ctx.files.inline_js_files
+    for dep in _explode_deps(ctx.attr.deps):
         if hasattr(dep, "source_map"):
             source_map += dep.source_map
         if hasattr(dep, "resources"):
@@ -95,15 +104,17 @@ def web_internal_html_page_impl(ctx):
             deferred_js_files.extend(list(dep.deferred_js_files))
         if hasattr(dep, "js_resources"):
             js_files.extend(list(dep.js_resources))
-        for file in dep.files:
-            if file.is_source:
-                source_map[file.short_path] = file
-                resources.append(file)
+        if type(dep) == "Target":
+            for file in dep.files:
+                if file.is_source:
+                    source_map[file.short_path] = file
+                    resources.append(file)
 
     resource_paths = [ resource.path for resource in resources ]
     css_paths = [ css_file.path for css_file in css_files ]
     deferred_js_paths = [ js_file.path for js_file in deferred_js_files ]
     js_paths = [ js_file.path for js_file in js_files ]
+    inline_js_paths = [ js_file.path for js_file in inline_js_files ]
 
     ctx.action(
         mnemonic = "GenerateHTMLPage",
@@ -115,8 +126,9 @@ def web_internal_html_page_impl(ctx):
             ] +
             optional_arg_("--favicons", favicons) +
             optional_arg_("--css-files", css_paths) +
+            optional_arg_("--deferred-js-files", deferred_js_paths) +
             optional_arg_("--js-files", js_paths) +
-            optional_arg_("--deferred-js-files", deferred_js_paths),
+            optional_arg_("--inline-js-files", inline_js_paths),
         inputs = [
                 ctx.executable._html_template_script,
                 ctx.file.template,
@@ -126,6 +138,7 @@ def web_internal_html_page_impl(ctx):
             css_files +
             deferred_js_files +
             js_files +
+            inline_js_files +
             resources +
             ctx.files.favicon_images,
         executable = ctx.executable._html_template_script,
@@ -136,7 +149,14 @@ def web_internal_html_page_impl(ctx):
 
     ret = struct()
 
-    for resource in resources + ctx.attr.css_files + ctx.attr.deferred_js_files + ctx.attr.js_files:
+    all_resouces = (
+        resources +
+        ctx.attr.css_files +
+        ctx.attr.deferred_js_files +
+        ctx.attr.js_files +
+        ctx.attr.inline_js_files
+    )
+    for resource in all_resouces:
         ret = transitive_resources_(ret, resource)
 
     ret = merge_structs(ret, struct(

@@ -15,9 +15,10 @@ def parse_args():
     parser.add_argument('--css-files', type=str, nargs='+', default=[])
     parser.add_argument('--deferred-js-files', type=str, nargs='+', default=[])
     parser.add_argument('--js-files', type=str, nargs='+', default=[])
+    parser.add_argument('--inline-js-files', type=argparse.FileType('r'), nargs='+', default=[])
     parser.add_argument('--favicons', type=str, nargs='+', default=[],
             help='A list of size and file pairs. e.g. "16 favicon-16x16.png 32 favicon-32x32.png"')
-    parser.add_argument('--body', type=str, required=True)
+    parser.add_argument('--body', type=argparse.FileType('r'), required=True)
     parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
     return parser.parse_args()
 
@@ -34,6 +35,9 @@ def dict_extend(dictionary, key, extension):
         print 'Unrecognized extension type: ' + str(extension_type)
         sys.exit(2)
 
+def include_body():
+    return jinja2.Markup(loader.get_source(env, ))
+
 def main():
     args = parse_args()
 
@@ -44,19 +48,28 @@ def main():
     favicons = dict(zip((int(size) for size in args.favicons[0::2]), args.favicons[1::2]))
 
     template_path, template_filename = os.path.split(args.template)
-    body_path, body_filename = os.path.split(args.body)
 
     config = None
     with args.config as config_file:
         config = json.load(config_file)
 
-    config['body'] = body_filename
+    body_content = None
+    with args.body as body:
+        body_content = body.read()
+
+    inline_js_contents = []
+    for inline_js_file in args.inline_js_files:
+        with inline_js_file as fp:
+            inline_js_contents.append(fp.read())
+
     dict_extend(config, 'favicons', favicons)
     dict_extend(config, 'css_files', args.css_files)
     dict_extend(config, 'deferred_js_files', args.deferred_js_files)
     dict_extend(config, 'js_files', args.js_files)
+    dict_extend(config, 'inline_js_files_contents', inline_js_contents)
 
-    env = jinja2.Environment(loader = jinja2.FileSystemLoader([template_path, body_path]))
+    env = jinja2.Environment(loader = jinja2.FileSystemLoader([template_path]))
+    env.globals['include_body'] = lambda: jinja2.Markup(body_content)
     template = env.get_template(template_filename)
     rendered_output = template.render(config)
 

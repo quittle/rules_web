@@ -36,7 +36,6 @@ def web_internal_minify_png(ctx):
 
     source_map = {}
     source_map[ctx.file.png.short_path] = ctx.outputs.min_png
-
     return struct(
         source_map = source_map,
         resources = set([ ctx.outputs.min_png ]),
