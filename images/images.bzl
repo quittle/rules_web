@@ -6,10 +6,30 @@ load("@bazel_toolbox//labels:labels.bzl",
 )
 
 load(":internal.bzl",
+    "web_internal_crop_image",
     "web_internal_favicon_image_generator",
     "web_internal_generate_ico",
     "web_internal_minify_png",
     "web_internal_resize_image",
+)
+
+crop_image = rule(
+    attrs = {
+        "image": attr.label(
+            single_file = True,
+            allow_files = True,
+            mandatory = True,
+        ),
+        "width": attr.string(default = "100%"),
+        "height": attr.string(default = "100%"),
+        "x_offset": attr.string(default = "0"),
+        "y_offset": attr.string(default = "0"),
+        "_crop_image": executable_label(Label("//images:crop_image")),
+    },
+    outputs = {
+        "cropped_image": "crop_image/%{name}",
+    },
+    implementation = web_internal_crop_image,
 )
 
 favicon_image_generator = rule(

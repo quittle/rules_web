@@ -58,7 +58,8 @@ def web_internal_minify_site_zip(ctx):
             ] +
             optional_arg_("--root-files", root_files) +
             optional_arg_("--keep-extensions", ctx.attr.keep_extensions) +
-            optional_arg_("--allow-multicase", ctx.attr.allow_multicase),
+            optional_arg_("--allow-multicase", ctx.attr.allow_multicase) +
+            optional_arg_("--use-content-hash", ctx.attr.use_content_hash),
         inputs = [
                 ctx.executable._minify_site_zip_script,
                 ctx.file.site_zip,

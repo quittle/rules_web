@@ -33,9 +33,8 @@ minify_site_zip = rule(
         ),
         "root_files": attr.label_list(),
         "keep_extensions": attr.bool(),
-        "allow_multicase": attr.bool(
-            default = False,
-        ),
+        "allow_multicase": attr.bool(),
+        "use_content_hash": attr.bool(),
         "minified_zip": attr.output(
             mandatory = True,
         ),

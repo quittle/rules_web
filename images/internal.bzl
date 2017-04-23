@@ -26,6 +26,31 @@ def _minify_png(ctx, pngtastic, in_png, out_png):
         outputs = [ out_png ],
     )
 
+def web_internal_crop_image(ctx):
+    output = ctx.outputs.cropped_image
+
+    ctx.action(
+        mnemonic = "CroppingImage",
+        arguments = [
+            "--source", ctx.file.image.path,
+            "--width", ctx.attr.width,
+            "--height", ctx.attr.height,
+            "--x-offset", ctx.attr.x_offset,
+            "--y-offset", ctx.attr.y_offset,
+            "--output", output.path,
+        ],
+        inputs = [
+            ctx.file.image,
+        ],
+        executable = ctx.executable._crop_image,
+        outputs = [ output ],
+    )
+
+    return struct(
+        resources = set([output]),
+    )
+
+
 def web_internal_minify_png(ctx):
     _minify_png(
         ctx,
@@ -123,7 +148,7 @@ def web_internal_resize_image(ctx):
         mnemonic = "ResizingImage",
         arguments = [
             "--source", ctx.file.image.path,
-            "--output", ctx.outputs.resized_image.path,
+            "--output", output.path,
             "--allow-upsizing",
             "--allow-stretching",
         ] + additional_args,

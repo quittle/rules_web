@@ -7,6 +7,7 @@ load("@bazel_toolbox//assert:assert.bzl",
 )
 
 load("//images:images.bzl",
+    "crop_image",
     "favicon_image_generator",
     "minify_png",
     "resize_image",
@@ -16,6 +17,52 @@ load("//test:test.bzl",
     "assert_descending_sizes",
     "assert_valid_type",
 )
+
+crop_image(
+    name = "test_crop_image_nothing",
+    image = "gradient-20x20.bmp",
+)
+assert_valid_type(":test_crop_image_nothing", "bmp")
+assert_label_providers(
+    ":test_crop_image_nothing",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/crop_image/test_crop_image_nothing",
+        ],
+    },
+)
+assert_files_equal("gradient-20x20.bmp", ":test_crop_image_nothing")
+
+crop_image(
+    name = "test_crop_image_pixels",
+    image = "gradient-20x20.bmp",
+    width = "10",
+    height = "20",
+    x_offset = "10",
+    y_offset = "0",
+)
+assert_files_equal("gradient-10x20-10x0.bmp", ":test_crop_image_pixels")
+
+crop_image(
+    name = "test_crop_image_percent",
+    image = "gradient-20x20.bmp",
+    width = "50%",
+    height = "100%",
+    x_offset = "50%",
+    y_offset = "0%",
+)
+assert_files_equal("gradient-10x20-10x0.bmp", ":test_crop_image_percent")
+
+crop_image(
+    name = "test_crop_image_mix",
+    image = "gradient-20x20.bmp",
+    width = "70%",
+    height = "2",
+    x_offset = "0",
+    y_offset = "40%",
+)
+assert_files_equal("gradient-14x2-0x8.bmp", ":test_crop_image_mix")
 
 minify_png(
     name = "test_minify_png",

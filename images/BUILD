@@ -11,6 +11,15 @@ py_binary(
 )
 
 py_binary(
+    name = "crop_image",
+    srcs = [
+        "scripts/crop_image.py",
+    ],
+    deps = [ "@pillow//:pillow" ],
+    visibility = [ "//visibility:public" ],
+)
+
+py_binary(
     name = "resize_image",
     srcs = [
         "scripts/resize_image.py",
