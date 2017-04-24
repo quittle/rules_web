@@ -1,6 +1,10 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("@bazel_toolbox//collections:collections.bzl",
+    "merge_dicts",
+)
+
 load("//:internal.bzl",
     "optional_arg_",
 )
@@ -46,8 +50,11 @@ def web_internal_crop_image(ctx):
         outputs = [ output ],
     )
 
+    source_map = { ctx.file.image.short_path: output} if ctx.attr.map_source else {}
+
     return struct(
         resources = set([output]),
+        source_map = source_map,
     )
 
 
@@ -159,6 +166,15 @@ def web_internal_resize_image(ctx):
         outputs = [ output ],
     )
 
+    source_map = getattr(ctx.attr.image, "source_map", {})
+
+    source_map = merge_dicts(source_map, { ctx.file.image.short_path: output} if ctx.attr.map_source else {})
+
+    for key, value in source_map.items():
+        if value == ctx.file.image:
+            source_map[key] = output
+
     return struct(
         resources = set([output]),
+        source_map = source_map,
     )

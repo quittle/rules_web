@@ -24,6 +24,7 @@ crop_image = rule(
         "height": attr.string(default = "100%"),
         "x_offset": attr.string(default = "0"),
         "y_offset": attr.string(default = "0"),
+        "map_source": attr.bool(),
         "_crop_image": executable_label(Label("//images:crop_image")),
     },
     outputs = {
@@ -84,6 +85,7 @@ resize_image = rule(
         "width": attr.int(default = -1),
         "height": attr.int(default = -1),
         "scale": attr.string(),
+        "map_source": attr.bool(),
         "_resize_image": executable_label(Label("//images:resize_image")),
     },
     outputs = {

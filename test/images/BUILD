@@ -30,6 +30,7 @@ assert_label_providers(
         "resources": [
             "{BIN_DIR}/test/images/crop_image/test_crop_image_nothing",
         ],
+        "source_map": {},
     },
 )
 assert_files_equal("gradient-20x20.bmp", ":test_crop_image_nothing")
@@ -41,6 +42,21 @@ crop_image(
     height = "20",
     x_offset = "10",
     y_offset = "0",
+    map_source = True,
+)
+assert_valid_type(":test_crop_image_pixels", "bmp")
+assert_label_providers(
+    ":test_crop_image_pixels",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/crop_image/test_crop_image_pixels",
+        ],
+        "source_map": {
+            "test/images/gradient-20x20.bmp":
+                    "{BIN_DIR}/test/images/crop_image/test_crop_image_pixels",
+        },
+    },
 )
 assert_files_equal("gradient-10x20-10x0.bmp", ":test_crop_image_pixels")
 
@@ -52,6 +68,17 @@ crop_image(
     x_offset = "50%",
     y_offset = "0%",
 )
+assert_valid_type(":test_crop_image_percent", "bmp")
+assert_label_providers(
+    ":test_crop_image_percent",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/crop_image/test_crop_image_percent",
+        ],
+        "source_map": {},
+    },
+)
 assert_files_equal("gradient-10x20-10x0.bmp", ":test_crop_image_percent")
 
 crop_image(
@@ -61,6 +88,17 @@ crop_image(
     height = "2",
     x_offset = "0",
     y_offset = "40%",
+)
+assert_valid_type(":test_crop_image_mix", "bmp")
+assert_label_providers(
+    ":test_crop_image_mix",
+    {
+        "aspect_ids": [],
+        "resources": [
+            "{BIN_DIR}/test/images/crop_image/test_crop_image_mix",
+        ],
+        "source_map": {},
+    },
 )
 assert_files_equal("gradient-14x2-0x8.bmp", ":test_crop_image_mix")
 
@@ -132,6 +170,7 @@ resize_image(
     image = "white-10x10.bmp",
     width = 5,
     height = 20,
+    map_source = True,
 )
 assert_valid_type(":test_resize_image_exact", "bmp")
 assert_files_equal("white-5x20.bmp", ":test_resize_image_exact")
@@ -142,6 +181,10 @@ assert_label_providers(
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_exact",
         ],
+        "source_map": {
+            "test/images/white-10x10.bmp":
+                    "{BIN_DIR}/test/images/resize_image/test_resize_image_exact",
+        },
     },
 )
 
@@ -159,6 +202,7 @@ assert_label_providers(
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_given_width",
         ],
+        "source_map": {},
     },
 )
 
@@ -176,6 +220,7 @@ assert_label_providers(
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_given_height",
         ],
+        "source_map": {},
     },
 )
 
@@ -193,5 +238,6 @@ assert_label_providers(
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_scale",
         ],
+        "source_map": {},
     },
 )
