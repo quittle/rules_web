@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 py_binary(
@@ -8,6 +8,9 @@ py_binary(
     ],
     deps = [
         "@jinja//:jinja",
+    ],
+    data = [
+        ":s3_website_deploy",
     ],
     visibility = [ "//visibility:public" ],
 )
@@ -22,7 +25,15 @@ java_binary(
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_kms//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
+        "@joda_time_joda_time//jar",
         "@org_apache_commons_cli//jar",
+        "@org_apache_commons_io//jar",
+        "@org_apache_commons_logging//jar",
+        "@org_apache_httpcomponents_httpclient//jar",
+        "@org_apache_httpcomponents_httpcore//jar",
     ],
     visibility = [ "//visibility:public" ],
 )

@@ -241,6 +241,30 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
+        name = "com_fasterxml_jackson_core_jackson_annotations",
+        artifact = "com.fasterxml.jackson.core:jackson-annotations:2.6.6",
+        sha1 = "7ef6440e71531604aa44a5eb62d4b466ffbf7e8f",
+    )
+
+    native.maven_jar(
+        name = "com_fasterxml_jackson_core_jackson_core",
+        artifact = "com.fasterxml.jackson.core:jackson-core:2.6.6",
+        sha1 = "02eb801df67aacaf5b1deb4ac626e1964508e47b",
+    )
+
+    native.maven_jar(
+        name = "com_fasterxml_jackson_core_jackson_databind",
+        artifact = "com.fasterxml.jackson.core:jackson-databind:2.6.6",
+        sha1 = "5108dde6049374ba980b360e1ecff49847baba4a",
+    )
+
+    native.maven_jar(
+        name = "joda_time_joda_time",
+        artifact = "joda-time:joda-time:2.8.1",
+        sha1 = "f5bfc718c95a7b1d3c371bb02a188a4df18361a9",
+    )
+
+    native.maven_jar(
         name = "org_apache_commons_cli",
         artifact = "commons-cli:commons-cli:1.4",
         sha1 = "c51c00206bb913cd8612b24abd9fa98ae89719b1",
@@ -253,21 +277,39 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
+        name = "org_apache_commons_logging",
+        artifact = "commons-logging:commons-logging:1.1.3",
+        sha1 = "f6f66e966c70a83ffbdb6f17a0919eaf7c8aca7f",
+    )
+
+    native.maven_jar(
+        name = "org_apache_httpcomponents_httpclient",
+        artifact = "org.apache.httpcomponents:httpclient:4.5.2",
+        sha1 = "733db77aa8d9b2d68015189df76ab06304406e50",
+    )
+
+    native.maven_jar(
+        name = "org_apache_httpcomponents_httpcore",
+        artifact = "org.apache.httpcomponents:httpcore:4.4.4",
+        sha1 = "b31526a230871fbe285fbcbe2813f9c0839ae9b0",
+    )
+
+    native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_core",
-        artifact = "com.amazonaws:aws-java-sdk-core:1.11.38",
-        sha1 = "a42c623900d372a3df72c4d44f9c2c420ff64dbc",
+        artifact = "com.amazonaws:aws-java-sdk-core:1.11.123",
+        sha1 = "98b8c58fc94959573dd5a956b443c298a3b84d3b",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_kms",
-        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.38",
-        sha1 = "34e8a0a665c7db51265b10824fb0b11eb062fc1a",
+        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.123",
+        sha1 = "698c3bd2a89ad453885cdad8c35598be8a4f7fc9",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_s3",
-        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.38",
-        sha1 = "96e88f07d8fcba7f87a9d68ccd8282a28bb3d88c",
+        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.123",
+        sha1 = "5cd717be3ee465095b131863596d52b5fabcba6e",
     )
 
     native.new_git_repository(
@@ -333,6 +375,6 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "5bfc7704088e2d8f4510230a06be0fc19cb2f7d7",
+        commit = "c8c2a639f96224ba099be13eac147eb4ed5f6375",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )

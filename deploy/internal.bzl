@@ -1,26 +1,28 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
 
+load("//:internal.bzl",
+    "optional_arg_",
+)
+
 def _generate_deploy_site_zip_s3_script(ctx):
+    additional_args = []
+    additional_args += optional_arg_("--cache-duration", ctx.attr.cache_duration)
     ctx.action(
         mnemonic = "GeneratingS3DeployScript",
         arguments = [
-            "--aws-access-key", ctx.attr.aws_access_key,
-            "--aws-secret-key", ctx.attr.aws_secret_key,
             "--bucket", ctx.attr.bucket,
-            "--deploy-executable", ctx.executable._s3_website_deploy.path,
             "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
             "--generated-file", ctx.outputs.generated_script.path,
             "--website-zip", ctx.file.zip.path,
-        ],
+        ] + additional_args,
         inputs = [
             ctx.file.zip,
             ctx.file._deploy_site_zip_to_s3_template,
-            ctx.executable._s3_website_deploy,
             ctx.executable._s3_website_deploy_script_builder,
         ],
         outputs = [ ctx.outputs.generated_script ],
@@ -29,12 +31,6 @@ def _generate_deploy_site_zip_s3_script(ctx):
 
 web_internal_generate_deploy_site_zip_s3_script = rule(
     attrs = {
-        "aws_access_key": attr.string(
-            mandatory = True,
-        ),
-        "aws_secret_key": attr.string(
-            mandatory = True,
-        ),
         "bucket": attr.string(
             mandatory = True,
         ),
@@ -43,6 +39,9 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
             allow_files = True,
             single_file = True,
         ),
+        "cache_duration": attr.int(
+            default = 60 * 60 * 24 * 7, # 1 week
+        ),
         "_deploy_site_zip_to_s3_template": attr.label(
             default = Label("//deploy/templates:deploy_site_zip_to_s3.py.jinja2"),
             executable = True,
@@ -50,7 +49,6 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
             allow_files = True,
             single_file = True,
         ),
-        "_s3_website_deploy": executable_label(Label("//deploy:s3_website_deploy")),
         "_s3_website_deploy_script_builder":
                 executable_label(Label("//deploy:s3_website_deploy_script_builder")),
     },
