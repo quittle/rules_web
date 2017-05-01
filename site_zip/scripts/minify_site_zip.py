@@ -73,7 +73,7 @@ def main():
     with zipfile.ZipFile(args.in_zip, mode='r') as in_zip:
         paths = set(in_zip.namelist())
 
-        assert paths >= args.root_files
+        assert paths >= set(args.root_files)
 
         file_name_map = {
             path: get_name(in_zip, path, args.root_files, name_generator, args.keep_extensions, args.use_content_hash)
