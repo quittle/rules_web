@@ -4,9 +4,11 @@
 package com.dustindoloff.s3websitedeploy;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.DefaultAwsRegionProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.BucketWebsiteConfiguration;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
@@ -102,6 +104,17 @@ public final class Main {
         } while (result.isTruncated());
 
         return true;
+    }
+
+    private static boolean makeBucketWebsite(final AmazonS3 s3Client, final String bucket) {
+        final BucketWebsiteConfiguration configuration =
+                new BucketWebsiteConfiguration("index.html");
+        try {
+            s3Client.setBucketWebsiteConfiguration(bucket, configuration);
+            return true;
+        } catch (final SdkClientException e) {
+            return false;
+        }
     }
 
     private static String getCacheControlValue(final int cacheDuration) {
@@ -257,9 +270,15 @@ public final class Main {
             return;
         }
 
+        if (!makeBucketWebsite(s3Client, s3Bucket)) {
+            System.out.println("Unable to make bucket a website");
+            System.exit(5);
+            return;
+        }
+
         if (!upload(s3Client, s3Bucket, zipFile, cacheDuration)) {
             System.out.println("Unable to upload to S3.");
-            System.exit(5);
+            System.exit(6);
             return;
         }
 
