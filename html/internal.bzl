@@ -32,8 +32,6 @@ def web_internal_minify_html_impl(ctx):
             "--remove-input-attr",
             "--simple-bool-attr",
             "--remove-js-protocol",
-            "--remove-http-protocol",
-            "--remove-https-protocol",
             "--remove-surrounding-spaces", ",".join(whitespace_agnostic_tags),
             "--output", out_file.path,
             source_file.path
