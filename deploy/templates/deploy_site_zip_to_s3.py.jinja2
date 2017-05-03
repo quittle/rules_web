@@ -21,7 +21,7 @@ def main():
     subprocess.check_call([
         os.path.join('external', 'rules_web', 'deploy', 's3_website_deploy'),
             '--bucket', '''{{ bucket }}''',
-            {{ "'--cache-duration', '{}',".format(cache_duration) if cache_duration else '' }}
+            {{ "'--cache-durations', '{}',".format(cache_durations) if cache_durations else '' }}
             '--website-zip', '''{{ website_zip }}''',
     ])
 if __name__ == '__main__':

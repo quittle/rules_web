@@ -10,16 +10,15 @@ load("//:internal.bzl",
 )
 
 def _generate_deploy_site_zip_s3_script(ctx):
-    additional_args = []
-    additional_args += optional_arg_("--cache-duration", ctx.attr.cache_duration)
     ctx.action(
         mnemonic = "GeneratingS3DeployScript",
         arguments = [
             "--bucket", ctx.attr.bucket,
+            "--cache-durations", ctx.attr.cache_durations,
             "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
             "--generated-file", ctx.outputs.generated_script.path,
             "--website-zip", ctx.file.zip.path,
-        ] + additional_args,
+        ],
         inputs = [
             ctx.file.zip,
             ctx.file._deploy_site_zip_to_s3_template,
@@ -39,8 +38,13 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
             allow_files = True,
             single_file = True,
         ),
-        "cache_duration": attr.int(
-            default = 60 * 60 * 24 * 7, # 1 week
+        # Because this should never be called directly, we use string serialization to pass in the
+        # cache values
+        "cache_durations": attr.string(
+            default = repr([
+                # 15 minutes
+                "60 * 15", [ "*" ],
+            ]),
         ),
         "_deploy_site_zip_to_s3_template": attr.label(
             default = Label("//deploy/templates:deploy_site_zip_to_s3.py.jinja2"),

@@ -3,6 +3,7 @@
 
 import argparse
 import jinja2
+import json
 import os
 import sys
 
@@ -12,16 +13,29 @@ def parse_args():
     parser.add_argument('--bucket', type=str, required=True)
     parser.add_argument('--deployment-jinja-template', type=str, required=True)
     parser.add_argument('--generated-file', type=argparse.FileType('w'), required=True)
-    parser.add_argument('--cache-duration', type=int, required=True)
+    parser.add_argument('--cache-durations', type=json.loads, required=True)
     parser.add_argument('--website-zip', type=str, required=True)
     return parser.parse_args()
 
 def main():
     args = parse_args()
 
+    # Convert a list representation of a dictionary to an actual dict
+    # [
+    #   1, 2,
+    #   "a", false,
+    # ]
+    #
+    # {
+    #   1: 2,
+    #   "a": false,
+    # }
+    cd_list = args.cache_durations
+    cache_durations = dict(zip(cd_list[::2], cd_list[1::2]))
+
     config = {
         'bucket': args.bucket,
-        'cache_duration': args.cache_duration,
+        'cache_durations': json.dumps(cache_durations),
         'website_zip': os.path.realpath(args.website_zip),
     }
 

@@ -7,13 +7,22 @@ load(":internal.bzl",
 
 CACHE_DURATION_IMMUTABLE = -1
 
-def deploy_site_zip_s3_script(name, bucket, zip_file, cache_duration = None):
+def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations = []):
+    """
+        cache_durations should be a list that mirrors a dictionary. Cannot be represented by a
+        `dict` because they do not maintain order
+        [
+            123: [ "index.hml" ],
+            999: [ "*" ],
+        ]
+    """
+
     script_name = name + "_script"
     web_internal_generate_deploy_site_zip_s3_script(
         name = script_name,
         bucket = bucket,
         zip = zip_file,
-        cache_duration = cache_duration
+        cache_durations = str(cache_durations),
     )
 
     native.py_binary(

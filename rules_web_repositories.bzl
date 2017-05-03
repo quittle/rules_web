@@ -259,6 +259,12 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
+        name = "com_google_code_gson_gson",
+        artifact = "com.google.code.gson:gson:2.8.0",
+        sha1 = "c4ba5371a29ac9b2ad6129b1d39ea38750043eff",
+    )
+
+    native.maven_jar(
         name = "joda_time_joda_time",
         artifact = "joda-time:joda-time:2.8.1",
         sha1 = "f5bfc718c95a7b1d3c371bb02a188a4df18361a9",

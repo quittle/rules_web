@@ -17,12 +17,18 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.regions.Regions;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URLConnection;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.time.temporal.ChronoUnit;
@@ -44,11 +50,14 @@ public final class Main {
 
     private static final String ARG_WEBSITE_ZIP = "website-zip";
     private static final String ARG_BUCKET = "bucket";
-    private static final String ARG_CACHE_DURATION = "cache-duration";
+    private static final String ARG_CACHE_DURATIONS = "cache-durations";
     private static final String ARG_AWS_ACCESS_KEY = "aws-access-key";
     private static final String ARG_AWS_SECRET_KEY = "aws-secret-key";
 
-    private static long ONE_YEAR_SECONDS = ChronoUnit.YEARS.getDuration().getSeconds();
+    private static final long ONE_YEAR_SECONDS = ChronoUnit.YEARS.getDuration().getSeconds();
+    private static final Type CACHE_DURATION_FORMAT =
+            new TypeToken<LinkedHashMap<Integer, List<String>>>(){}.getType();
+
 
     private static Options buildOptions() {
         return new Options()
@@ -67,11 +76,10 @@ public final class Main {
                     .hasArg()
                     .build())
             .addOption(Option.builder()
-                    .argName("Cache Control Duration")
-                    .longOpt(ARG_CACHE_DURATION)
-                    .desc("Whether or not the site uses immutably named paths")
+                    .argName("Cache Control Durations")
+                    .longOpt(ARG_CACHE_DURATIONS)
+                    .desc("Json object representing how long to cache each entry")
                     .hasArg()
-                    .type(Number.class)
                     .build());
     }
 
@@ -184,20 +192,75 @@ public final class Main {
     }
 
     private static PutObjectRequest getPutObjectRequest(final ObjectMetadata metadata,
-                                                        final String bucket,
-                                                        final int cacheDuration) {
-        metadata.setCacheControl(getCacheControlValue(cacheDuration));
-
+                                                        final String bucket) {
         return new PutObjectRequest(bucket, null, (File) null)
                 .withMetadata(metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
     }
 
-    private static boolean upload(final AmazonS3 s3Client, final String bucket,
-                                  final ZipFile zipFile, final int cacheDuration) {
+    public static boolean patternMatches(final String key, final String pattern) {
+        return patternMatches(key, 0, pattern, 0);
+    }
+
+    private static boolean patternMatches(final String key, final int keyIndex,
+                                          final String pattern, final int patternIndex) {
+        // If both are at the end, it is a match
+        if (keyIndex == key.length() && patternIndex == pattern.length()) {
+            return true;
+        }
+
+        // If there's no more pattern, it is not a match
+        if (patternIndex >= pattern.length()) {
+            return false;
+        }
+
+        // If there's no more key, it is only a match on wildcard
+        if (keyIndex >= key.length()) {
+            for (int i = patternIndex; i < pattern.length(); i++) {
+                if (pattern.charAt(i) != '*') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        char c = key.charAt(keyIndex);
+        char p = pattern.charAt(patternIndex);
+        if (p == '*') {
+            return patternMatches(key, keyIndex + 1, pattern, patternIndex) ||
+                    patternMatches(key, keyIndex, pattern, patternIndex + 1) ||
+                    patternMatches(key, keyIndex + 1, pattern, patternIndex + 1);
+        } else if (p == c) {
+            return patternMatches(key, keyIndex + 1, pattern, patternIndex + 1);
+        } else {
+            return false;
+        }
+    }
+
+    private static String getCacheControlValue(final String key,
+                                               final LinkedHashMap<Integer, List<String>>
+                                                    cacheDurations) {
+        final Optional<Integer> cacheDuration = cacheDurations.entrySet().stream()
+            .filter(entry ->
+                entry.getValue().stream().anyMatch(pattern -> patternMatches(key, pattern))
+            )
+            .map(entry -> entry.getKey())
+            .findFirst();
+        if (!cacheDuration.isPresent()) {
+            throw new IllegalArgumentException(
+                    String.format("'%s' not matched in cache duration patterns", key));
+        }
+
+        return getCacheControlValue(cacheDuration.get());
+    }
+
+    private static boolean upload(final AmazonS3 s3Client,
+                                  final String bucket,
+                                  final ZipFile zipFile,
+                                  final LinkedHashMap<Integer, List<String>> cacheDurations) {
 
         final ObjectMetadata metadata = new ObjectMetadata();
-        final PutObjectRequest request = getPutObjectRequest(metadata, bucket, cacheDuration);
+        final PutObjectRequest request = getPutObjectRequest(metadata, bucket);
 
         boolean failed = false;
         final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -205,6 +268,7 @@ public final class Main {
             final ZipEntry entry = entries.nextElement();
             final String key = entry.getName();
             request.setKey(key);
+            metadata.setCacheControl(getCacheControlValue(key, cacheDurations));
             metadata.setContentType(getContentType(key));
             if (metadata.getContentType() == null) {
                 System.out.println("Unrecognized file type: " + key);
@@ -214,7 +278,8 @@ public final class Main {
             try {
                 request.setInputStream(zipFile.getInputStream(entry));
 
-                System.out.println(String.format("Uploading %s", key));
+                System.out.println(
+                        String.format("Uploading %s: %s", key, metadata.getCacheControl()));
                 s3Client.putObject(request);
             } catch (final AmazonClientException|IOException e) {
                 System.err.println(String.format("Failed to upload %s due to %s",
@@ -240,15 +305,10 @@ public final class Main {
 
         final File websiteZip = new File(commandLine.getOptionValue(ARG_WEBSITE_ZIP));
         final String s3Bucket = commandLine.getOptionValue(ARG_BUCKET);
-        final int cacheDuration;
-        try {
-            cacheDuration = ((Number) commandLine.getParsedOptionValue(ARG_CACHE_DURATION)).intValue();
-        } catch (final ParseException e) {
-            System.out.println("Invalid cache duration");
-            System.out.println(e.getMessage());
-            System.exit(2);
-            return;
-        }
+
+        final String cacheDurationSerialized = commandLine.getOptionValue(ARG_CACHE_DURATIONS);
+        final LinkedHashMap<Integer, List<String>> cacheDurations =
+                new Gson().fromJson(cacheDurationSerialized, CACHE_DURATION_FORMAT);
 
         final ZipFile zipFile = getAsValidZip(websiteZip);
         if (zipFile == null) {
@@ -276,7 +336,7 @@ public final class Main {
             return;
         }
 
-        if (!upload(s3Client, s3Bucket, zipFile, cacheDuration)) {
+        if (!upload(s3Client, s3Bucket, zipFile, cacheDurations)) {
             System.out.println("Unable to upload to S3.");
             System.exit(6);
             return;
