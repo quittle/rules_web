@@ -61,3 +61,40 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
         "generated_script": "deploy_site_zip_s3_%{name}.py",
     },
 )
+
+def _generate_wrapper_script(ctx):
+    label_to_target = { value: key for key, value in ctx.attr.label_replacements.items() }
+
+    arguments = []
+    for arg in ctx.attr.arguments:
+        arguments.push(label_to_target.get(arg, arg))
+
+    ctx.action(
+        mnemonic = "GeneratingWrapperScript",
+        arguments = [
+            "--executable", ctx.file.binary.path,
+            "--generated-file", ctx.outputs.generated_script.path,
+        ] + [ "--arguments" ] + arguments,
+        inputs = [ ctx.file.binary ],
+        executable = ctx.executable._execute_script_wrapper_builder,
+        outputs = [ ctx.outputs.generated_script ],
+    )
+
+web_internal_generate_wrapper_script = rule(
+    attrs = {
+        "binary": attr.label(
+            executable = True,
+            mandatory = True,
+        ),
+        "arguments": attr.string_list(
+            mandatory = True,
+        ),
+        "label_replacements": attr.label_keyed_string_dict(
+            allow_files = True,
+        ),
+        "generated_script" = attr.output(),
+        "_execute_script_wrapper_builder":
+                executable_label(Label("//deploy:execute_script_wrapper_builder")),
+    },
+    implementation = _generate_wrapper_script,
+)

@@ -15,6 +15,21 @@ py_binary(
     visibility = [ "//visibility:public" ],
 )
 
+py_binary(
+    name = "execute_script_wrapper_builder",
+    srcs = [
+        "scripts/execute_script_wrapper_builder.py",
+    ],
+    deps = [
+        "@jinja//:jinja",
+    ],
+    data = [
+        "//deploy/templates:execute_script_wrapper.py.jinja2",
+    ],
+    visibility = [ "//visibility:public" ],
+
+)
+
 java_library(
     name = "s3_website_deploy_library",
     srcs = glob([ "s3_website_deploy/java/src/**/*.java" ]),
