@@ -9,4 +9,4 @@ before_install:
     - ./travis/before_install.sh
 
 script:
-    - ./travis/bazel_build.sh
+    - bazel build //...
