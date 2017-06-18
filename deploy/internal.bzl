@@ -85,6 +85,7 @@ web_internal_generate_wrapper_script = rule(
         "binary": attr.label(
             executable = True,
             mandatory = True,
+            cfg = "host",
         ),
         "arguments": attr.string_list(
             mandatory = True,
@@ -92,7 +93,7 @@ web_internal_generate_wrapper_script = rule(
         "label_replacements": attr.label_keyed_string_dict(
             allow_files = True,
         ),
-        "generated_script" = attr.output(),
+        "generated_script": attr.output(),
         "_execute_script_wrapper_builder":
                 executable_label(Label("//deploy:execute_script_wrapper_builder")),
     },
