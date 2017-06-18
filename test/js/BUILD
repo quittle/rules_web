@@ -24,7 +24,6 @@ assert_descending_sizes([ "test.js", ":test_minify_js" ])
 assert_label_providers(
     ":test_minify_js",
     {
-        "aspect_ids": [],
         "js_resources": [
             "{BIN_DIR}/test/js/minify_js/test_minify_js.min.js",
         ],
@@ -40,7 +39,6 @@ assert_descending_sizes([ "test.js", ":test_closure_compile" ])
 assert_label_providers(
     ":test_closure_compile",
     {
-        "aspect_ids": [],
         "js_resources": [
             "{BIN_DIR}/test/js/closure_compile/test_closure_compile.js",
         ],
