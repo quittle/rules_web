@@ -15,6 +15,7 @@ def _generate_deploy_site_zip_s3_script(ctx):
         arguments = [
             "--bucket", ctx.attr.bucket,
             "--cache-durations", ctx.attr.cache_durations,
+            "--path-redirects", repr(ctx.attr.path_redirects),
             "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
             "--generated-file", ctx.outputs.generated_script.path,
             "--website-zip", ctx.file.zip.path,
@@ -45,6 +46,9 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
                 # 15 minutes
                 "60 * 15", [ "*" ],
             ]),
+        ),
+        "path_redirects": attr.string_dict(
+            default = {},
         ),
         "_deploy_site_zip_to_s3_template": attr.label(
             default = Label("//deploy/templates:deploy_site_zip_to_s3.py.jinja2"),

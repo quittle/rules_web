@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -41,6 +42,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Contains the main function and argument parsing capabilities
@@ -51,12 +53,15 @@ public final class Main {
     private static final String ARG_WEBSITE_ZIP = "website-zip";
     private static final String ARG_BUCKET = "bucket";
     private static final String ARG_CACHE_DURATIONS = "cache-durations";
+    private static final String ARG_PATH_REDIRECTS = "path-redirects";
     private static final String ARG_AWS_ACCESS_KEY = "aws-access-key";
     private static final String ARG_AWS_SECRET_KEY = "aws-secret-key";
 
     private static final long ONE_YEAR_SECONDS = ChronoUnit.YEARS.getDuration().getSeconds();
     private static final Type CACHE_DURATION_FORMAT =
             new TypeToken<LinkedHashMap<Integer, List<String>>>(){}.getType();
+    private static final Type PATH_REDIRECTS_FORMAT =
+            new TypeToken<Map<String, String>>(){}.getType();
 
 
     private static Options buildOptions() {
@@ -79,6 +84,12 @@ public final class Main {
                     .argName("Cache Control Durations")
                     .longOpt(ARG_CACHE_DURATIONS)
                     .desc("Json object representing how long to cache each entry")
+                    .hasArg()
+                    .build())
+            .addOption(Option.builder()
+                    .argName("Path Redirects")
+                    .longOpt(ARG_PATH_REDIRECTS)
+                    .desc("Json object representing a map of paths to redirects")
                     .hasArg()
                     .build());
     }
@@ -290,6 +301,26 @@ public final class Main {
         return !failed;
     }
 
+    private static boolean updateRedirects(final AmazonS3 s3Client,
+                                           final String bucket,
+                                           final Map<String, String> pathRedirects) {
+        for (final Map.Entry<String, String> redirect : pathRedirects.entrySet()) {
+            final String key = StringUtils.stripStart(redirect.getKey(), "/");
+            final String value = redirect.getValue();
+            try {
+                System.out.println(String.format("Putting redirect %s -> %s", key, value));
+                s3Client.putObject(new PutObjectRequest(bucket, key, value)
+                        .withCannedAcl(CannedAccessControlList.PublicRead));
+            } catch (final SdkClientException e) {
+                System.err.println(String.format("Failed to setup redirect %s -> %s due to %s",
+                        key, value, e.getMessage()));
+                return false;
+            }
+        }
+        return true;
+
+    }
+
     public static void main(final String[] args) {
         final Options options = buildOptions();
         final CommandLineParser parser = new DefaultParser();
@@ -309,6 +340,10 @@ public final class Main {
         final String cacheDurationSerialized = commandLine.getOptionValue(ARG_CACHE_DURATIONS);
         final LinkedHashMap<Integer, List<String>> cacheDurations =
                 new Gson().fromJson(cacheDurationSerialized, CACHE_DURATION_FORMAT);
+
+        final String pathRedirectsSerialized = commandLine.getOptionValue(ARG_PATH_REDIRECTS);
+        final Map<String, String> pathRedirects =
+                new Gson().fromJson(pathRedirectsSerialized, PATH_REDIRECTS_FORMAT);
 
         final ZipFile zipFile = getAsValidZip(websiteZip);
         if (zipFile == null) {
@@ -331,8 +366,14 @@ public final class Main {
         }
 
         if (!makeBucketWebsite(s3Client, s3Bucket)) {
-            System.out.println("Unable to make bucket a website");
+            System.out.println("Unable to make bucket a website.");
             System.exit(5);
+            return;
+        }
+
+        if (!updateRedirects(s3Client, s3Bucket, pathRedirects)) {
+            System.out.println("Unable to setup redirects.");
+            System.exit(7);
             return;
         }
 

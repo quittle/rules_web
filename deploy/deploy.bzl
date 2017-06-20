@@ -8,7 +8,7 @@ load(":internal.bzl",
 
 CACHE_DURATION_IMMUTABLE = -1
 
-def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations = []):
+def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations=[], path_redirects={}):
     """
         cache_durations should be a list that mirrors a dictionary. Cannot be represented by a
         `dict` because they do not maintain order
@@ -18,12 +18,19 @@ def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations = []):
         ]
     """
 
+    for value in path_redirects.values():
+        if not (value.startswith("/") or
+                value.startswith("http://") or
+                value.startswith("https://")):
+            fail("Invalid redirect destination", value)
+
     script_name = name + "_script"
     web_internal_generate_deploy_site_zip_s3_script(
         name = script_name,
         bucket = bucket,
         zip = zip_file,
         cache_durations = str(cache_durations),
+        path_redirects = path_redirects,
     )
 
     native.py_binary(

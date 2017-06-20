@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('--deployment-jinja-template', type=str, required=True)
     parser.add_argument('--generated-file', type=argparse.FileType('w'), required=True)
     parser.add_argument('--cache-durations', type=json.loads, required=True)
+    parser.add_argument('--path-redirects', type=json.loads, required=True)
     parser.add_argument('--website-zip', type=str, required=True)
     return parser.parse_args()
 
@@ -36,6 +37,7 @@ def main():
     config = {
         'bucket': args.bucket,
         'cache_durations': json.dumps(cache_durations),
+        'path_redirects': json.dumps(args.path_redirects),
         'website_zip': os.path.realpath(args.website_zip),
     }
 

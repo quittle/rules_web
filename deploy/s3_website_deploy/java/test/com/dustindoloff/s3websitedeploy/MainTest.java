@@ -48,6 +48,8 @@ public class MainTest {
 
     @Test
     public void testPatternMatch() {
-        Assert.assertEquals(String.format("Matching '%s' against '%s'", key, pattern), shouldMatch, Main.patternMatches(key, pattern));
+        Assert.assertEquals(String.format("Matching '%s' against '%s'", key, pattern),
+                shouldMatch,
+                Main.patternMatches(key, pattern));
     }
 }

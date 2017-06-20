@@ -283,6 +283,12 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
+        name = "org_apache_commons_lang3",
+        artifact = "org.apache.commons:commons-lang3:3.6",
+        sha1 = "9d28a6b23650e8a7e9063c04588ace6cf7012c17",
+    )
+
+    native.maven_jar(
         name = "org_apache_commons_logging",
         artifact = "commons-logging:commons-logging:1.1.3",
         sha1 = "f6f66e966c70a83ffbdb6f17a0919eaf7c8aca7f",

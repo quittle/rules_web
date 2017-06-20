@@ -45,6 +45,7 @@ java_library(
         "@org_apache_commons_cli//jar",
         "@org_apache_commons_io//jar",
         "@org_apache_commons_logging//jar",
+        "@org_apache_commons_lang3//jar",
         "@org_apache_httpcomponents_httpclient//jar",
         "@org_apache_httpcomponents_httpcore//jar",
     ],

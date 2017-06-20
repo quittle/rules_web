@@ -22,6 +22,7 @@ def main():
         os.path.join('external', 'rules_web', 'deploy', 's3_website_deploy'),
             '--bucket', '''{{ bucket }}''',
             {{ "'--cache-durations', '{}',".format(cache_durations) if cache_durations else '' }}
+            {{ "'--path-redirects', '{}',".format(path_redirects) if path_redirects else '' }}
             '--website-zip', '''{{ website_zip }}''',
     ])
 if __name__ == '__main__':
