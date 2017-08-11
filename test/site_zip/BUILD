@@ -7,6 +7,7 @@ load("@bazel_toolbox//assert:assert.bzl",
 )
 
 load("//site_zip:site_zip.bzl",
+    "zip_server",
     "zip_site",
 )
 
@@ -19,3 +20,15 @@ zip_site(
     out_zip = "empty_zip_site_test_out",
 )
 assert_files_equal("empty.zip", ":empty_zip_site_test")
+
+zip_server(
+    name = "basic_zip_server",
+    zip = "empty.zip",
+)
+
+zip_server(
+    name = "full_zip_server",
+    zip = ":empty_zip_site_test",
+    host = "example.com",
+    port = 1234,
+)

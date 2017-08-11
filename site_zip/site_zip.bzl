@@ -66,9 +66,15 @@ rename_zip_paths = rule(
 generate_zip_server_python_file = rule(
     attrs = {
         "zip": attr.label(
+            allow_files = True,
             single_file = True,
         ),
-        "port": attr.int(),
+        "host": attr.string(
+            mandatory = True,
+        ),
+        "port": attr.int(
+            mandatory = True,
+        ),
         "out_file": attr.output(),
         "_template": attr.label(
             default = Label("//site_zip/templates:zip_server.py.jinja2"),
@@ -81,13 +87,14 @@ generate_zip_server_python_file = rule(
     implementation = web_internal_generate_zip_server_python_file,
 )
 
-def zip_server(name, zip, port = 80):
+def zip_server(name, zip, host = 'localhost', port = 80):
     generated_file_target = "{name}__args".format(name=name)
     generated_file_name = "zip_server_{name}.py".format(name=name)
 
     generate_zip_server_python_file(
         name = generated_file_target,
         zip = zip,
+        host = host,
         port = port,
         out_file = generated_file_name,
     )

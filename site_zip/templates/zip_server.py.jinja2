@@ -1,8 +1,9 @@
 {#
- # Copyright (c) 2016 Dustin Doloff
+ # Copyright (c) 2016-2017 Dustin Doloff
  # Licensed under Apache License v2.0
  #}
 
+import argparse
 import http.server
 import zipfile
 
@@ -21,9 +22,17 @@ class ZipRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(404)
         return
 
+def parse_args():
+    parser = argparse.ArgumentParser(description=
+            'A local server, serving the contents of a zip file.')
+    parser.add_argument('--host', type=str, default='''{{ host }}''', help='Override for the host name or IP address')
+    parser.add_argument('--port', type=int, default={{ port }}, help='Override for the port the server listens on')
+    return parser.parse_args()
+
 def main():
-    server = http.server.HTTPServer(('localhost', {{ port }}), ZipRequestHandler)
-    server.zip = zipfile.ZipFile("""{{ zip }}""")
+    args = parse_args()
+    server = http.server.HTTPServer((args.host, args.port), ZipRequestHandler)
+    server.zip = zipfile.ZipFile('''{{ zip }}''')
     server.serve_forever()
 
 if __name__ == '__main__':
