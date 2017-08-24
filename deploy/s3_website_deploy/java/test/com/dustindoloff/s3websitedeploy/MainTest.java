@@ -37,7 +37,8 @@ public class MainTest {
         });
     }
 
-    private final String key, pattern;
+    private final String key;
+    private final String pattern;
     private final boolean shouldMatch;
 
     public MainTest(final String key, final String pattern, final boolean shouldMatch) {

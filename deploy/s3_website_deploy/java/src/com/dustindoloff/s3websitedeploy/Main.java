@@ -5,7 +5,6 @@ package com.dustindoloff.s3websitedeploy;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.regions.DefaultAwsRegionProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.BucketWebsiteConfiguration;
@@ -136,21 +135,6 @@ public final class Main {
         }
     }
 
-    private static String getCacheControlValue(final int cacheDuration) {
-        List<String> cacheControl = new LinkedList<>();
-        cacheControl.add("public");
-        if (cacheDuration >= 0) {
-            cacheControl.add(String.format("max-age=%d", cacheDuration));
-        } else if (cacheDuration == CACHE_DURATION_IMMUTABLE) {
-            cacheControl.add(String.format("max-age=%d", ONE_YEAR_SECONDS));
-            cacheControl.add("immutable");
-        } else {
-            throw new IllegalArgumentException(String.format("Cache duration invalid: %d",
-                    cacheDuration));
-        }
-        return String.join(", ", cacheControl);
-    }
-
     private static String getContentType(final String fileName) {
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
         if (mimeType != null) {
@@ -246,6 +230,21 @@ public final class Main {
         } else {
             return false;
         }
+    }
+
+    private static String getCacheControlValue(final int cacheDuration) {
+        List<String> cacheControl = new LinkedList<>();
+        cacheControl.add("public");
+        if (cacheDuration >= 0) {
+            cacheControl.add(String.format("max-age=%d", cacheDuration));
+        } else if (cacheDuration == CACHE_DURATION_IMMUTABLE) {
+            cacheControl.add(String.format("max-age=%d", ONE_YEAR_SECONDS));
+            cacheControl.add("immutable");
+        } else {
+            throw new IllegalArgumentException(String.format("Cache duration invalid: %d",
+                    cacheDuration));
+        }
+        return String.join(", ", cacheControl);
     }
 
     private static String getCacheControlValue(final String key,
@@ -385,4 +384,6 @@ public final class Main {
 
         System.out.println("Deployment Complete");
     }
+
+    private Main() {}
 }

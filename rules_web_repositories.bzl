@@ -1,35 +1,44 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-_YUI_BUILD_FILE = """
+_THIRD_PARTY_JAVACOPTS = [ "-XepDisableAllChecks", "-XepAllErrorsAsWarnings", "-nowarn" ]
+_THIRD_PARTY_COPTS = [ "-w" ]
+
+def _build_file(build_file):
+    return (build_file
+            .replace("_THIRD_PARTY_JAVACOPTS", str(_THIRD_PARTY_JAVACOPTS))
+            .replace("_THIRD_PARTY_COPTS", str(_THIRD_PARTY_COPTS)))
+
+_YUI_BUILD_FILE = _build_file("""
 
 java_binary(
     name = "yui_compressor",
     main_class = "com.yahoo.platform.yui.compressor.Bootstrap",
     srcs = glob([ "src/**/*.java" ]) + [ "@rhino//:rhino_sources_for_yui_compiler" ],
     deps = [ "@jargs//:jargs" ],
-    javacopts = [ "-extra_checks:off", "-nowarn" ],
+    javacopts = _THIRD_PARTY_JAVACOPTS,
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_JARGS_BUILD_FILE = """
+_JARGS_BUILD_FILE = _build_file("""
 
 java_library(
     name = "jargs",
     srcs = glob([ "src/jargs/gnu/**/*.java" ]),
-    javacopts = [ "-extra_checks:off", "-nowarn" ],
+    javacopts = _THIRD_PARTY_JAVACOPTS,
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_JERICHO_SELECTOR_BUILD_FILE = """
+_JERICHO_SELECTOR_BUILD_FILE = _build_file("""
 
 java_library(
     name = "jericho_selector",
     srcs = glob([ "src/main/java/**/*.java" ]),
+    javacopts = _THIRD_PARTY_JAVACOPTS,
     deps = [
         "@br_com_starcode_parccser_parccser//jar",
         "@net_htmlparser_jericho_jericho_html//jar",
@@ -37,9 +46,9 @@ java_library(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_RHINO_BUILD_FILE = """
+_RHINO_BUILD_FILE = _build_file("""
 
 filegroup(
     name = "rhino_sources_for_yui_compiler",
@@ -58,13 +67,13 @@ filegroup(
 java_library(
     name = "rhino",
     srcs = glob([ "src/**/*.java" ]),
-    javacopts = [ "-extra_checks:off" ],
+    javacopts = _THIRD_PARTY_JAVACOPTS,
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_JINJA_BUILD_FILE = """
+_JINJA_BUILD_FILE = _build_file("""
 
 py_library(
     name = "jinja",
@@ -75,9 +84,9 @@ py_library(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_MARKUP_SAFE_BUILD_FILE = """
+_MARKUP_SAFE_BUILD_FILE = _build_file("""
 
 py_library(
     name = "markup_safe",
@@ -85,9 +94,9 @@ py_library(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_PY_BASIC_HTTP_SERVER_FILE = """
+_PY_BASIC_HTTP_SERVER_FILE = _build_file("""
 
 py_library(
     name = "basic_http_server",
@@ -97,10 +106,9 @@ py_library(
     visibility = [ "//visibility:public" ],
 )
 
+""")
 
-"""
-
-_FONT_TOOLS_BUILD_FILE = """
+_FONT_TOOLS_BUILD_FILE = _build_file("""
 
 py_binary(
     name = "ttx",
@@ -113,9 +121,9 @@ py_binary(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_IO_BROTLI_BUILD_FILE = """
+_IO_BROTLI_BUILD_FILE = _build_file("""
 
 cc_library(
     name = "brotli_enc",
@@ -124,9 +132,9 @@ cc_library(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_WOFF_2_BUILD_FILE = """
+_WOFF_2_BUILD_FILE = _build_file("""
 
 cc_binary(
     name = "ttf2woff2",
@@ -140,9 +148,7 @@ cc_binary(
             "src/woff2_dec.cc",
         ],
     ),
-    copts = [
-        "-w",
-    ],
+    copts = _THIRD_PARTY_COPTS,
     deps = [
         "@io_brotli//:brotli_enc",
     ],
@@ -150,9 +156,9 @@ cc_binary(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_TTF_2_EOT_BUILD_FILE = """
+_TTF_2_EOT_BUILD_FILE = _build_file("""
 
 cc_binary(
     name = "ttf2eot",
@@ -161,15 +167,13 @@ cc_binary(
         "OpenTypeUtilities.h",
         "ttf2eot.cpp",
     ],
-    copts = [
-        "-w",
-    ],
+    copts = _THIRD_PARTY_COPTS,
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
-_PILLOW_BUILD_FILE = """
+_PILLOW_BUILD_FILE = _build_file("""
 
 py_library(
     name = "pillow",
@@ -183,7 +187,7 @@ py_library(
     visibility = [ "//visibility:public" ],
 )
 
-"""
+""")
 
 def rules_web_repositories():
     native.new_git_repository(
@@ -387,6 +391,6 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "d0d5b4771744d0819beb0e4c41e9a2db710f212e",
+        commit = "024f0c1fef50d86fb18d030ffe16bbccfc3a72bf",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )

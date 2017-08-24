@@ -1,4 +1,4 @@
-// Copyright (c) 2016 Dustin Doloff
+// Copyright (c) 2016-2017 Dustin Doloff
 // Licensed under Apache License v2.0
 
 package com.dustindoloff.pngtastic;
@@ -6,11 +6,9 @@ package com.dustindoloff.pngtastic;
 import com.googlecode.pngtastic.core.PngImage;
 import com.googlecode.pngtastic.core.PngOptimizer;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -19,7 +17,7 @@ import org.apache.commons.cli.ParseException;
 
 /**
  * Contains the main function and argument parsing capabilities.  This main class is necessary
- * because the original tool si too clunky and simply outputs the input file to the same filename
+ * because the original tool is too clunky and simply outputs the input file to the same filename
  * plus a suffix.
  */
 public final class Main {
@@ -98,7 +96,7 @@ public final class Main {
      * @return an integer version of {@code value} or null if {@code value} is null.
      * @throws RuntimeException if {@code value} is not parsable.
      */
-    private static Integer toInteger(final String value) throws RuntimeException {
+    private static Integer toInteger(final String value) {
         if (value == null) {
             return null;
         }
@@ -110,7 +108,7 @@ public final class Main {
         }
     }
 
-    public static void main(final String[] args) throws FileNotFoundException, IOException {
+    public static void main(final String[] args) throws IOException {
         final CommandLine commandLine = parseArgs(args);
 
         final String in = commandLine.getOptionValue(ARG_INPUT_PNG);
@@ -127,4 +125,6 @@ public final class Main {
         final PngImage pngImage = new PngImage(in, logLevel);
         pngOptimizer.optimize(pngImage, out, removeGamma, compressionLevel);
     }
+
+    private Main() {}
 }

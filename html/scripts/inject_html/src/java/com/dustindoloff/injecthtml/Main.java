@@ -6,8 +6,6 @@ package com.dustindoloff.injecthtml;
 import br.com.starcode.parccser.ParserException;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -118,7 +116,7 @@ public final class Main {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     private static <T> T getOption(final CommandLine commandLine, final String arg) {
         try {
             return (T) commandLine.getParsedOptionValue(arg);
@@ -177,4 +175,6 @@ public final class Main {
         }
         FileUtils.writeStringToFile(output, outputDocument.toString(), StandardCharsets.UTF_8);
     }
+
+    private Main() {}
 }
