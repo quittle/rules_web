@@ -27,34 +27,41 @@ py_binary(
         "//deploy/templates:execute_script_wrapper.py.jinja2",
     ],
     visibility = [ "//visibility:public" ],
+)
 
+java_import(
+    name = "aws_sdk_core",
+    jars = [],
+    deps = [
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_fasterxml_jackson_core_jackson_annotations//jar",
+        "@com_fasterxml_jackson_core_jackson_core//jar",
+        "@com_fasterxml_jackson_core_jackson_databind//jar",
+        "@joda_time_joda_time//jar",
+        "@org_apache_commons_logging//jar",
+        "@org_apache_httpcomponents_httpclient//jar",
+        "@org_apache_httpcomponents_httpcore//jar",
+    ],
 )
 
 java_library(
     name = "s3_website_deploy_library",
     srcs = glob([ "s3_website_deploy/java/src/**/*.java" ]),
     deps = [
+        ":aws_sdk_core",
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_kms//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
-        "@com_fasterxml_jackson_core_jackson_annotations//jar",
-        "@com_fasterxml_jackson_core_jackson_core//jar",
-        "@com_fasterxml_jackson_core_jackson_databind//jar",
         "@com_google_code_gson_gson//jar",
-        "@joda_time_joda_time//jar",
         "@org_apache_commons_cli//jar",
         "@org_apache_commons_io//jar",
-        "@org_apache_commons_logging//jar",
         "@org_apache_commons_lang3//jar",
-        "@org_apache_httpcomponents_httpclient//jar",
-        "@org_apache_httpcomponents_httpcore//jar",
     ],
-
 )
 
 java_binary(
     name = "s3_website_deploy",
-    main_class = "com.dustindoloff.s3websitedeploy.Main",
+    main_class = "com.dustindoloff.bazel.deploy.s3website.Main",
     runtime_deps = [
         ":s3_website_deploy_library",
     ],
@@ -64,8 +71,33 @@ java_binary(
 java_test(
     name = "s3_website_deploy_test",
     srcs = glob([ "s3_website_deploy/java/test/**/*.java" ]),
-    test_class = "com.dustindoloff.s3websitedeploy.MainTest",
+    test_class = "com.dustindoloff.bazel.deploy.s3website.MainTest",
     deps = [
         ":s3_website_deploy_library",
     ],
+)
+
+java_binary(
+    name = "lambda_function_deploy",
+    main_class = "com.dustindoloff.bazel.deploy.lambda.Main",
+    srcs = glob([ "lambda_function_deploy/java/src/**/*.java" ]),
+    deps = [
+        ":aws_sdk_core",
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_amazonaws_aws_java_sdk_lambda//jar",
+        "@org_apache_commons_cli//jar",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+java_library(
+    name = "lambda_function_deploy_validation",
+    srcs = glob([ "lambda_function_deploy_validation/java/src/**/*.java" ]),
+    deps = [
+        ":aws_sdk_core",
+        "@com_amazonaws_aws_java_sdk_core//jar",
+        "@com_amazonaws_aws_java_sdk_lambda//jar",
+        "@junit//jar",
+    ],
+    visibility = [ "//visibility:public" ],
 )

@@ -1,6 +1,10 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
+load("@bazel_toolbox//actions:actions.bzl",
+    "generate_templated_file",
+)
+
 load("@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
@@ -63,6 +67,62 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
     implementation = _generate_deploy_site_zip_s3_script,
     outputs = {
         "generated_script": "deploy_site_zip_s3_%{name}.py",
+    },
+)
+
+def _generate_lambda_function_script(ctx):
+    generate_templated_file(
+        ctx = ctx,
+        generate_templated_file_script = ctx.executable._generate_templated_file_script,
+        template = ctx.file._deploy_lambda_function_template,
+        config = {
+            "function_name": ctx.attr.function_name,
+            "function_handler": ctx.attr.function_handler,
+            "function_role": ctx.attr.function_role,
+            "function_runtime": ctx.attr.function_runtime,
+            "function_zip": ctx.file.bundle.short_path,
+            "region": ctx.attr.region,
+        },
+        out_file = ctx.outputs.generated_script,
+    )
+
+web_internal_generate_deploy_lambda_function_script = rule(
+    attrs = {
+        "function_name": attr.string(
+            mandatory = True,
+        ),
+        "function_handler": attr.string(
+            mandatory = True,
+        ),
+        "function_role": attr.string(
+            mandatory = True,
+        ),
+        "function_runtime": attr.string(
+            mandatory = True,
+            values = [
+                "java8",
+                "python27",
+            ],
+        ),
+        "bundle": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+            providers = [
+                [ "java" ],
+                [ "py" ],
+            ],
+        ),
+        "region": attr.string(),
+        "_deploy_lambda_function_template": attr.label(
+            default = Label("//deploy/templates:deploy_lambda_function_template.py.jinja2"),
+            allow_single_file = True,
+        ),
+        "_generate_templated_file_script":
+                executable_label(Label("@bazel_toolbox//actions:generate_templated_file")),
+    },
+    implementation = _generate_lambda_function_script,
+    outputs = {
+        "generated_script": "deploy_lambda_function_%{name}.py",
     },
 )
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Dustin Doloff
 // Licensed under Apache License v2.0
 
-package com.dustindoloff.s3websitedeploy;
+package com.dustindoloff.bazel.deploy.s3website;
 
 import java.util.Arrays;
 import java.util.Collection;

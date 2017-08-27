@@ -1,5 +1,5 @@
 {#
- # Copyright (c) 2016-2017 Dustin Doloff
+ # Copyright (c) 2017 Dustin Doloff
  # Licensed under Apache License v2.0
  #}
 
@@ -19,16 +19,17 @@ import subprocess
 
 def main():
     subprocess.check_call([
-        os.path.join('external', 'rules_web', 'deploy', 's3_website_deploy'),
-            '--bucket', '''{{ bucket }}''',
-            {% if cache_durations %}
-                '--cache-durations', '''{{ cache_durations }}''',
+        os.path.join('external', 'rules_web', 'deploy', 'lambda_function_deploy'),
+            '--function-name', '''{{ function_name }}''',
+            '--function-handler', '''{{ function_handler }}''',
+            '--function-role', '''{{ function_role }}''',
+            '--function-runtime', '''{{ function_runtime }}''',
+            '--function-zip', '''{{ function_zip }}''',
+            {% if region %}
+                '--region', '''{{ region }}''',
             {% endif %}
-            {% if path_redirects %}
-                '--path-redirects', '''{{ path_redirects }}''',
-            {% endif %}
-            '--website-zip', '''{{ website_zip }}''',
-    ])
+        ]
+    )
 if __name__ == '__main__':
     main()
 

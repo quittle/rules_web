@@ -2,6 +2,7 @@
 # Licensed under Apache License v2.0
 
 exports_files([
+    "deploy_lambda_function_template.py.jinja2",
     "deploy_site_zip_to_s3.py.jinja2",
     "execute_script_wrapper.py.jinja2",
 ])

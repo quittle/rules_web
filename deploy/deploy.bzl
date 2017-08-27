@@ -2,6 +2,7 @@
 # Licensed under Apache License v2.0
 
 load(":internal.bzl",
+    "web_internal_generate_deploy_lambda_function_script",
     "web_internal_generate_deploy_site_zip_s3_script",
     "web_internal_generate_wrapper_script",
 )
@@ -39,6 +40,59 @@ def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations=[], path_r
         srcs = [ ":" + script_name ],
         data =  [
             "@rules_web//deploy:s3_website_deploy",
+        ],
+        visibility = [ "//visibility:public" ],
+    )
+
+def deploy_lambda_function_script(name, function_name, function_handler, function_role, library,
+                                  language, region = None):
+    function_runtime = None
+    bundle = None
+    if language == "java":
+        function_runtime = "java8"
+
+        binary_name = name + "__binary"
+        native.java_binary(
+            name = binary_name,
+            main_class = ".", # Not real or actually used
+            runtime_deps = [ library ],
+        )
+        bundle = binary_name + "_deploy.jar"
+
+        native.java_test(
+            name = name + "__lambda_function_deploy_validation",
+            test_class = "com.dustindoloff.bazel.deploy.lambda.ValidationTest",
+            jvm_flags = [
+                    "-Dhandler={handler}".format(handler=function_handler),
+                    "-Druntime={runtime}".format(runtime=function_runtime),
+                ] +
+                ([ "-Dregion={region}".format(region=region) ] if region != None else []),
+            runtime_deps = [
+                bundle,
+                "@rules_web//deploy:lambda_function_deploy_validation",
+            ],
+        )
+    else:
+        fail("Unsupported language", language)
+
+    script_name = name + "_script"
+    web_internal_generate_deploy_lambda_function_script(
+        name = script_name,
+        function_name = function_name,
+        function_handler = function_handler,
+        function_role = function_role,
+        function_runtime = function_runtime,
+        region = region,
+        bundle = ":" + bundle,
+    )
+
+    native.py_binary(
+        name = name,
+        main = "deploy_lambda_function_" + script_name + ".py",
+        srcs = [ ":" + script_name ],
+        data =  [
+            ":" + bundle,
+            "@rules_web//deploy:lambda_function_deploy",
         ],
         visibility = [ "//visibility:public" ],
     )

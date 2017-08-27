@@ -314,6 +314,12 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
+        name = "com_amazonaws_aws_java_sdk_lambda",
+        artifact = "com.amazonaws:aws-java-sdk-lambda:1.11.123",
+        sha1 = "04d7adf30778264f2c32b00532b31bd86556d2f5",
+    )
+
+    native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_s3",
         artifact = "com.amazonaws:aws-java-sdk-s3:1.11.184",
         sha1 = "21c34af4d83fe8156b0c3ae33324de532ad2b216",
@@ -374,6 +380,12 @@ def rules_web_repositories():
         name = "net_htmlparser_jericho_jericho_html",
         artifact = "net.htmlparser.jericho:jericho-html:3.4",
         sha1 = "0799191f451f5a6910ce37b0147771489ab46fed",
+    )
+
+    native.maven_jar(
+        name = "junit",
+        artifact = "junit:junit:4.12",
+        sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",
     )
 
     native.new_http_archive(
