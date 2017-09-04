@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 import argparse
@@ -10,7 +10,7 @@ import xml.etree.ElementTree
 PPEM_KEY = 'ppem'
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Creates an ico file')
+    parser = argparse.ArgumentParser(description='Minifies a TTX file')
     parser.add_argument('--in-ttx', type=argparse.FileType('r'), required=True)
     parser.add_argument('--out-ttx', type=argparse.FileType('w+'), required=True)
     return parser.parse_args()
@@ -29,7 +29,8 @@ def replace_element_attribute_if_found(element, attribute, new_value):
         element.set(attribute, new_value)
 
 def rename_value_from_name_map(element, key, name_map):
-    replace_element_attribute_if_found(element, key, name_map.get(element.attrib.get(key)))
+    name = element.attrib.get(key)
+    replace_element_attribute_if_found(element, key, name_map.get(name))
 
 def replace_element_value(element, tag, new_value):
     if element.tag == tag:
@@ -42,7 +43,9 @@ def main():
 
     name_generator = next_name()
 
-    name_map = {}
+    name_map = {
+        '.notdef': '.notdef', # This glyph must not be changed as it is a well-known value.
+    }
     root = tree.getroot()
 
     # Remove font-forge tables

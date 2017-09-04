@@ -4,10 +4,27 @@
  #}
 
 import argparse
-import http.server
+import signal
+import SimpleHTTPServer
+import SocketServer
+import sys
+import threading
 import zipfile
 
-class ZipRequestHandler(http.server.BaseHTTPRequestHandler):
+def perror(msg):
+    sys.stderr.write(msg + '\n')
+
+def shutdown_server(server):
+    server.shutdown()
+    perror('Server shut down')
+
+def handler(signum, frame, server):
+    threading.Thread(target=shutdown_server, args=[server]).start()
+
+class ReuseAddrTCPServer(SocketServer.TCPServer):
+    allow_reuse_address = True
+
+class ZipRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_HEAD(s):
         s.send_response(200)
         s.end_headers()
@@ -23,16 +40,23 @@ class ZipRequestHandler(http.server.BaseHTTPRequestHandler):
         return
 
 def parse_args():
-    parser = argparse.ArgumentParser(description=
-            'A local server, serving the contents of a zip file.')
-    parser.add_argument('--host', type=str, default='''{{ host }}''', help='Override for the host name or IP address')
-    parser.add_argument('--port', type=int, default={{ port }}, help='Override for the port the server listens on')
+    parser = argparse.ArgumentParser(
+            description='A local server, serving the contents of a zip file.')
+    parser.add_argument('--host', type=str, default='''{{ host }}''',
+            help='Override for the host name or IP address')
+    parser.add_argument('--port', type=int, default={{ port }},
+            help='Override for the port the server listens on')
     return parser.parse_args()
 
 def main():
     args = parse_args()
-    server = http.server.HTTPServer((args.host, args.port), ZipRequestHandler)
+    server = ReuseAddrTCPServer((args.host, args.port), ZipRequestHandler)
     server.zip = zipfile.ZipFile('''{{ zip }}''')
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, lambda signum, frame: handler(signum, frame, server))
+
+    perror('Server starting...')
     server.serve_forever()
 
 if __name__ == '__main__':

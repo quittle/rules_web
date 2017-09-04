@@ -115,7 +115,5 @@ def zip_server(name, zip, host = 'localhost', port = 80):
         data = [
             fg_name,
         ],
-        srcs_version = "PY3",
-        default_python_version = "PY3",
         main = generated_file_name,
     )

@@ -123,17 +123,6 @@ py_binary(
 
 """)
 
-_IO_BROTLI_BUILD_FILE = _build_file("""
-
-cc_library(
-    name = "brotli_enc",
-    srcs = glob(["common/*.c", "enc/*.c", "enc/*.cc" ]),
-    hdrs = glob(["common/*.h", "enc/*.h"]),
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
 _WOFF_2_BUILD_FILE = _build_file("""
 
 cc_binary(
@@ -144,15 +133,17 @@ cc_binary(
             "src/*.h",
         ],
         exclude = [
+            "src/convert_woff2ttf_fuzzer*.cc",
             "src/woff2_decompress.cc",
             "src/woff2_dec.cc",
+            "src/woff2_info.cc",
         ],
     ),
     copts = _THIRD_PARTY_COPTS,
     deps = [
-        "@io_brotli//:brotli_enc",
+        "@org_brotli//:brotlienc",
     ],
-    includes = [ "@io_brotli//:enc" ],
+    includes = [ "@org_brotli//:enc" ],
     visibility = [ "//visibility:public" ],
 )
 
@@ -192,7 +183,7 @@ py_library(
 def rules_web_repositories():
     native.new_git_repository(
         name = "yui_compressor",
-        commit = "b3de528f45966e418d6e3e2f6f8135db4d0be7f1", # master
+        commit = "958491db9bff77fe97d3ea0b8af38953aa1f6216", # master
         remote = "https://github.com/yui/yuicompressor.git",
         build_file_content = _YUI_BUILD_FILE,
     )
@@ -219,14 +210,14 @@ def rules_web_repositories():
 
     native.new_git_repository(
         name = "jinja",
-        commit = "966e1a409f02de57b75a0463fc953d54dad2a205", # 2.8
+        commit = "d78a1b079cd985eea7d636f79124ab4fc44cb538", # 2.9.6
         remote = "https://github.com/pallets/jinja.git",
         build_file_content = _JINJA_BUILD_FILE,
     )
 
     native.new_git_repository(
         name = "markup_safe",
-        commit = "feb1d70c16df62f60dcb521d127fdad8819fc036", # 0.23
+        commit = "d2a40c41dd1930345628ea9412d97e159f828157", # 1.0
         remote = "https://github.com/pallets/markupsafe.git",
         build_file_content = _MARKUP_SAFE_BUILD_FILE,
     )
@@ -246,32 +237,32 @@ def rules_web_repositories():
 
     native.maven_jar(
         name = "com_fasterxml_jackson_core_jackson_annotations",
-        artifact = "com.fasterxml.jackson.core:jackson-annotations:2.6.6",
-        sha1 = "7ef6440e71531604aa44a5eb62d4b466ffbf7e8f",
+        artifact = "com.fasterxml.jackson.core:jackson-annotations:2.9.0",
+        sha1 = "07c10d545325e3a6e72e06381afe469fd40eb701",
     )
 
     native.maven_jar(
         name = "com_fasterxml_jackson_core_jackson_core",
-        artifact = "com.fasterxml.jackson.core:jackson-core:2.6.6",
-        sha1 = "02eb801df67aacaf5b1deb4ac626e1964508e47b",
+        artifact = "com.fasterxml.jackson.core:jackson-core:2.9.0",
+        sha1 = "88e7c6220be3b3497b3074d3fc7754213289b987",
     )
 
     native.maven_jar(
         name = "com_fasterxml_jackson_core_jackson_databind",
-        artifact = "com.fasterxml.jackson.core:jackson-databind:2.6.6",
-        sha1 = "5108dde6049374ba980b360e1ecff49847baba4a",
+        artifact = "com.fasterxml.jackson.core:jackson-databind:2.9.0",
+        sha1 = "14fb5f088cc0b0dc90a73ba745bcade4961a3ee3",
     )
 
     native.maven_jar(
         name = "com_google_code_gson_gson",
-        artifact = "com.google.code.gson:gson:2.8.0",
-        sha1 = "c4ba5371a29ac9b2ad6129b1d39ea38750043eff",
+        artifact = "com.google.code.gson:gson:2.8.1",
+        sha1 = "02a8e0aa38a2e21cb39e2f5a7d6704cbdc941da0",
     )
 
     native.maven_jar(
         name = "joda_time_joda_time",
-        artifact = "joda-time:joda-time:2.8.1",
-        sha1 = "f5bfc718c95a7b1d3c371bb02a188a4df18361a9",
+        artifact = "joda-time:joda-time:2.9.9",
+        sha1 = "f7b520c458572890807d143670c9b24f4de90897",
     )
 
     native.maven_jar(
@@ -294,59 +285,63 @@ def rules_web_repositories():
 
     native.maven_jar(
         name = "org_apache_commons_logging",
-        artifact = "commons-logging:commons-logging:1.1.3",
-        sha1 = "f6f66e966c70a83ffbdb6f17a0919eaf7c8aca7f",
+        artifact = "commons-logging:commons-logging:1.2",
+        sha1 = "4bfc12adfe4842bf07b657f0369c4cb522955686",
     )
 
     native.maven_jar(
         name = "org_apache_httpcomponents_httpclient",
-        artifact = "org.apache.httpcomponents:httpclient:4.5.2",
-        sha1 = "733db77aa8d9b2d68015189df76ab06304406e50",
+        artifact = "org.apache.httpcomponents:httpclient:4.5.3",
+        sha1 = "d1577ae15f01ef5438c5afc62162457c00a34713",
     )
 
     native.maven_jar(
         name = "org_apache_httpcomponents_httpcore",
-        artifact = "org.apache.httpcomponents:httpcore:4.4.4",
-        sha1 = "b31526a230871fbe285fbcbe2813f9c0839ae9b0",
+        artifact = "org.apache.httpcomponents:httpcore:4.4.6",
+        sha1 = "e3fd8ced1f52c7574af952e2e6da0df8df08eb82",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_core",
-        artifact = "com.amazonaws:aws-java-sdk-core:1.11.123",
-        sha1 = "98b8c58fc94959573dd5a956b443c298a3b84d3b",
+        artifact = "com.amazonaws:aws-java-sdk-core:1.11.184",
+        sha1 = "1c2b17dd004e9b721b6639b8a1797e64939cc700",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_kms",
-        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.123",
-        sha1 = "698c3bd2a89ad453885cdad8c35598be8a4f7fc9",
+        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.184",
+        sha1 = "f00b787f614aa061899adcb44b40c68f6a9fd4d3",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_s3",
-        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.123",
-        sha1 = "5cd717be3ee465095b131863596d52b5fabcba6e",
+        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.184",
+        sha1 = "21c34af4d83fe8156b0c3ae33324de532ad2b216",
     )
 
-    native.new_git_repository(
-        name = "io_brotli",
-        commit = "66c14517cf8afcc1a1649a7833ac789366eb0b51", # 0.5
+    native.git_repository(
+        name = "io_bazel_rules_go",
+        remote = "https://github.com/bazelbuild/rules_go.git",
+        tag = "0.4.4",
+    )
+
+    native.git_repository(
+        name = "org_brotli",
+        commit = "46c1a881b41bb638c76247558aa04b1591af3aa7", # 0.6.0
         remote = "https://github.com/google/brotli.git",
-        build_file_content = _IO_BROTLI_BUILD_FILE,
     )
 
     native.new_git_repository(
         name = "font_tools",
-        commit = "ea155757f4887422d93fe430a06a643cbe1bb94a", # 3.1.2
+        commit = "b7cfdaf367a7c8f05bde68bd665842b6c84031dc", # 3.15.1
         remote = "https://github.com/googlei18n/fonttools.git",
         build_file_content = _FONT_TOOLS_BUILD_FILE,
     )
 
-    # This repo includes the patch to fix the build
     native.new_git_repository(
         name = "woff2",
-        commit = "3cca6ff8a9a0d63b0224d5d28aa0e3e1e0639308", # master
-        remote = "https://github.com/quittle/woff2.git",
+        commit = "aa283a500aeb655834d77f3cf9cf1b093b0b4389", # master
+        remote = "https://github.com/google/woff2.git",
         build_file_content = _WOFF_2_BUILD_FILE,
     )
 
@@ -359,14 +354,14 @@ def rules_web_repositories():
 
     native.maven_jar(
         name = "pngtastic",
-        artifact = "com.github.depsypher:pngtastic:1.2",
-        sha1 = "ff40ec21712778285fc4977521ea3a6ba71354a2",
+        artifact = "com.github.depsypher:pngtastic:1.4",
+        sha1 = "3b101e1170c7bd09ef257681ea56808dca4b3823",
     )
 
     native.maven_jar(
         name = "com_google_javascript_closure_compiler",
-        artifact = "com.google.javascript:closure-compiler:v20160208",
-        sha1 = "5a2f4be6cf41e27ed7119d26cb8f106300d87d91",
+        artifact = "com.google.javascript:closure-compiler:v20170806",
+        sha1 = "708706764914ee53821d70f24db33c3b40c19812",
     )
 
     native.maven_jar(
@@ -383,14 +378,14 @@ def rules_web_repositories():
 
     native.new_http_archive(
         name = "pillow",
-        url = "https://pypi.python.org/packages/c0/47/6900d13aa6112610df4c9b34d57f50a96b35308796a3a27458d0c9ac87f7/Pillow-3.4.2-cp27-cp27mu-manylinux1_x86_64.whl",
+        url = "https://pypi.python.org/packages/43/5a/904f2cc20ef9f9ba05f9ff1fb3dfadb1e6923e3bf6f8c8363d5dc3a179ab/Pillow-4.2.1-cp27-cp27mu-manylinux1_x86_64.whl",
         type = "zip",
-        sha256 = "fdc641ac432115e35d31441dbb253b016beea467dff402259d74b4df5e5f0f63",
+        sha256 = "24e8bef1269598ef8f1f418575b12a15bb1a019ea177ad9445b197b8f209a7c8",
         build_file_content = _PILLOW_BUILD_FILE,
     )
 
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "024f0c1fef50d86fb18d030ffe16bbccfc3a72bf",
+        commit = "c12909cccdaef1d092652a49aedb928d4b2d90a3",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )

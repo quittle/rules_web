@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
 py_binary(
@@ -22,15 +22,5 @@ py_binary(
     srcs = [
         "scripts/rename_zip_paths.py",
     ],
-    visibility = [ "//visibility:public" ],
-)
-
-py_binary(
-    name = "zip_server",
-    srcs = [
-        "scripts/zip_server.py",
-    ],
-    srcs_version = "PY3",
-    default_python_version = "PY3",
     visibility = [ "//visibility:public" ],
 )

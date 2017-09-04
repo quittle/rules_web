@@ -104,7 +104,7 @@ def web_internal_generate_zip_server_python_file(ctx):
     config = {
         "host": ctx.attr.host,
         "port": ctx.attr.port,
-        "zip": ctx.file.zip.basename,
+        "zip": ctx.file.zip.short_path,
     }
 
     generate_templated_file(ctx, ctx.executable._generate_jinja_file, ctx.file._template, config, ctx.outputs.out_file)

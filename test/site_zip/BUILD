@@ -21,6 +21,10 @@ zip_site(
 )
 assert_files_equal("empty.zip", ":empty_zip_site_test")
 
+# Add minify_site_zip tests
+
+# Add rename_zip_paths tests
+
 zip_server(
     name = "basic_zip_server",
     zip = "empty.zip",
@@ -28,7 +32,13 @@ zip_server(
 
 zip_server(
     name = "full_zip_server",
-    zip = ":empty_zip_site_test",
-    host = "example.com",
+    zip = "data.zip",
+    host = "0.0.0.0",
     port = 1234,
+)
+
+py_test(
+    name = "test_full_zip_server",
+    srcs = [ "test_full_zip_server.py" ],
+    data = [ ":full_zip_server" ],
 )
