@@ -8,6 +8,9 @@ import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.CreateFunctionRequest;
 import com.amazonaws.services.lambda.model.FunctionCode;
+import com.amazonaws.services.lambda.model.ResourceConflictException;
+import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
+import com.amazonaws.services.lambda.model.UpdateFunctionConfigurationRequest;
 import com.amazonaws.regions.Regions;
 
 import java.io.File;
@@ -100,15 +103,31 @@ public final class Main {
             return false;
         }
 
-        final CreateFunctionRequest request = new CreateFunctionRequest()
-                .withFunctionName(functionName)
-                .withHandler(functionHandler)
-                .withRole(functionRole)
-                .withRuntime(functionRuntime)
-                .withCode(new FunctionCode()
-                        .withZipFile(functionZipBytes));
         try {
-            lambdaClient.createFunction(request);
+            lambdaClient.createFunction(new CreateFunctionRequest()
+                    .withFunctionName(functionName)
+                    .withHandler(functionHandler)
+                    .withRole(functionRole)
+                    .withRuntime(functionRuntime)
+                    .withCode(new FunctionCode()
+                            .withZipFile(functionZipBytes)));
+        } catch (final ResourceConflictException e) {
+            System.out.println("Unable to create function as it already exists. " +
+                               "Updating existing function.");
+            System.out.print("Updating code... ");
+            System.out.flush();
+            lambdaClient.updateFunctionCode(new UpdateFunctionCodeRequest()
+                    .withFunctionName(functionName)
+                    .withZipFile(functionZipBytes));
+            System.out.println("Done");
+            System.out.print("Updating configuration... ");
+            System.out.flush();
+            lambdaClient.updateFunctionConfiguration(new UpdateFunctionConfigurationRequest()
+                    .withFunctionName(functionName)
+                    .withHandler(functionHandler)
+                    .withRole(functionRole)
+                    .withRuntime(functionRuntime));
+            System.out.println("Done");
         } catch (final AmazonClientException e) {
             System.err.println(e.getMessage());
             return false;

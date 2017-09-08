@@ -32,7 +32,7 @@ py_binary(
 java_import(
     name = "aws_sdk_core",
     jars = [],
-    deps = [
+    exports = [
         "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_fasterxml_jackson_core_jackson_annotations//jar",
         "@com_fasterxml_jackson_core_jackson_core//jar",
@@ -44,26 +44,18 @@ java_import(
     ],
 )
 
-java_library(
-    name = "s3_website_deploy_library",
+java_binary(
+    name = "s3_website_deploy",
+    main_class = "com.dustindoloff.bazel.deploy.s3website.Main",
     srcs = glob([ "s3_website_deploy/java/src/**/*.java" ]),
     deps = [
         ":aws_sdk_core",
-        "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_kms//jar",
         "@com_amazonaws_aws_java_sdk_s3//jar",
         "@com_google_code_gson_gson//jar",
         "@org_apache_commons_cli//jar",
         "@org_apache_commons_io//jar",
         "@org_apache_commons_lang3//jar",
-    ],
-)
-
-java_binary(
-    name = "s3_website_deploy",
-    main_class = "com.dustindoloff.bazel.deploy.s3website.Main",
-    runtime_deps = [
-        ":s3_website_deploy_library",
     ],
     visibility = [ "//visibility:public" ],
 )
@@ -73,7 +65,7 @@ java_test(
     srcs = glob([ "s3_website_deploy/java/test/**/*.java" ]),
     test_class = "com.dustindoloff.bazel.deploy.s3website.MainTest",
     deps = [
-        ":s3_website_deploy_library",
+        ":s3_website_deploy_deploy.jar",
     ],
 )
 
@@ -83,7 +75,6 @@ java_binary(
     srcs = glob([ "lambda_function_deploy/java/src/**/*.java" ]),
     deps = [
         ":aws_sdk_core",
-        "@com_amazonaws_aws_java_sdk_core//jar",
         "@com_amazonaws_aws_java_sdk_lambda//jar",
         "@org_apache_commons_cli//jar",
     ],
