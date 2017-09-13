@@ -28,6 +28,9 @@ def main():
             {% if region %}
                 '--region', '''{{ region }}''',
             {% endif %}
+            {% if environment %}
+                '--environment', '''{{ environment | tojson }}''',
+            {% endif %}
         ]
     )
 if __name__ == '__main__':

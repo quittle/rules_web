@@ -76,6 +76,7 @@ java_binary(
     deps = [
         ":aws_sdk_core",
         "@com_amazonaws_aws_java_sdk_lambda//jar",
+        "@com_google_code_gson_gson//jar",
         "@org_apache_commons_cli//jar",
     ],
     visibility = [ "//visibility:public" ],

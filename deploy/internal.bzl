@@ -82,6 +82,7 @@ def _generate_lambda_function_script(ctx):
             "function_runtime": ctx.attr.function_runtime,
             "function_zip": ctx.file.bundle.short_path,
             "region": ctx.attr.region,
+            "environment": ctx.attr.environment,
         },
         out_file = ctx.outputs.generated_script,
     )
@@ -113,6 +114,9 @@ web_internal_generate_deploy_lambda_function_script = rule(
             ],
         ),
         "region": attr.string(),
+        "environment": attr.string_dict(
+            default = {},
+        ),
         "_deploy_lambda_function_template": attr.label(
             default = Label("//deploy/templates:deploy_lambda_function_template.py.jinja2"),
             allow_single_file = True,

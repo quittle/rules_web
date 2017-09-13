@@ -55,3 +55,16 @@ deploy_lambda_function_script(
     region = "eu-west-1",
     language = "java",
 )
+
+deploy_lambda_function_script(
+    name = "test_deploy_lambda_function_environment",
+    function_name = "test_function_name",
+    function_handler = "StaticHandler",
+    function_role = "arn:aws:iam::123456789012:role/role",
+    library = ":test_java_library",
+    language = "java",
+    environment = {
+        "key": "value",
+        "a": "b",
+    },
+)

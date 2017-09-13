@@ -7,17 +7,23 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.CreateFunctionRequest;
+import com.amazonaws.services.lambda.model.Environment;
 import com.amazonaws.services.lambda.model.FunctionCode;
 import com.amazonaws.services.lambda.model.ResourceConflictException;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
 import com.amazonaws.services.lambda.model.UpdateFunctionConfigurationRequest;
 import com.amazonaws.regions.Regions;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -37,6 +43,10 @@ public final class Main {
     private static final String ARG_FUNCTION_RUNTIME = "function-runtime";
     private static final String ARG_FUNCTION_ZIP = "function-zip";
     private static final String ARG_REGION = "region";
+    private static final String ARG_ENVIRONMENT = "environment";
+
+    private static final Gson GSON = new Gson();
+    private static final Type ENVIRONMENT_TYPE = new TypeToken<Map<String, String>>(){}.getType();
 
     private static Options buildOptions() {
         return new Options()
@@ -80,6 +90,13 @@ public final class Main {
                     .longOpt(ARG_REGION)
                     .desc("AWS region ithe function should live in")
                     .hasArg()
+                    .build())
+            .addOption(Option.builder()
+                    .argName("Environment Variables")
+                    .longOpt(ARG_ENVIRONMENT)
+                    .desc("Environment variables to run the function with. Must be a JSON object " +
+                            "of strings to strings.")
+                    .hasArg()
                     .build());
     }
 
@@ -89,11 +106,16 @@ public final class Main {
         return ByteBuffer.wrap(bytes);
     }
 
+    private static Map<String, String> parseEnvironment(final String environment) {
+        return GSON.fromJson(environment, ENVIRONMENT_TYPE);
+    }
+
     private static boolean createFunction(final AWSLambda lambdaClient,
                                           final String functionName,
                                           final String functionHandler,
                                           final String functionRole,
                                           final String functionRuntime,
+                                          final Map<String, String> functionEnvironment,
                                           final File functionZip) {
         final ByteBuffer functionZipBytes;
         try {
@@ -109,6 +131,8 @@ public final class Main {
                     .withHandler(functionHandler)
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
+                    .withEnvironment(new Environment()
+                            .withVariables(functionEnvironment))
                     .withCode(new FunctionCode()
                             .withZipFile(functionZipBytes)));
         } catch (final ResourceConflictException e) {
@@ -155,9 +179,11 @@ public final class Main {
         final String functionRuntime = commandLine.getOptionValue(ARG_FUNCTION_RUNTIME);
         final File functionZip = new File(commandLine.getOptionValue(ARG_FUNCTION_ZIP));
         final String regionString = commandLine.getOptionValue(ARG_REGION);
+        final String environmentString = commandLine.getOptionValue(ARG_ENVIRONMENT);
 
         final Regions region =
                 regionString == null ? Regions.DEFAULT_REGION : Regions.fromName(regionString);
+        final Map<String, String> environment = parseEnvironment(environmentString);
 
         System.out.println("Running Lambda Deploy");
 
@@ -165,7 +191,8 @@ public final class Main {
                 .withRegion(region)
                 .build();
 
-        if (!createFunction(lambdaClient, functionName, functionHandler, functionRole, functionRuntime, functionZip)) {
+        if (!createFunction(lambdaClient, functionName, functionHandler, functionRole,
+                functionRuntime, environment, functionZip)) {
             System.out.println("Unable to create function");
             System.exit(2);
             return;

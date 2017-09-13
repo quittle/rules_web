@@ -45,7 +45,7 @@ def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations=[], path_r
     )
 
 def deploy_lambda_function_script(name, function_name, function_handler, function_role, library,
-                                  language, region = None):
+                                  language, region = None, environment = {}):
     function_runtime = None
     bundle = None
     if language == "java":
@@ -83,6 +83,7 @@ def deploy_lambda_function_script(name, function_name, function_handler, functio
         function_role = function_role,
         function_runtime = function_runtime,
         region = region,
+        environment = environment,
         bundle = ":" + bundle,
     )
 
