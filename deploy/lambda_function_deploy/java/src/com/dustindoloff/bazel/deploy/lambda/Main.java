@@ -125,14 +125,15 @@ public final class Main {
             return false;
         }
 
+        final Environment environment = new Environment().withVariables(functionEnvironment);
+
         try {
             lambdaClient.createFunction(new CreateFunctionRequest()
                     .withFunctionName(functionName)
                     .withHandler(functionHandler)
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
-                    .withEnvironment(new Environment()
-                            .withVariables(functionEnvironment))
+                    .withEnvironment(environment)
                     .withCode(new FunctionCode()
                             .withZipFile(functionZipBytes)));
         } catch (final ResourceConflictException e) {
@@ -150,7 +151,8 @@ public final class Main {
                     .withFunctionName(functionName)
                     .withHandler(functionHandler)
                     .withRole(functionRole)
-                    .withRuntime(functionRuntime));
+                    .withRuntime(functionRuntime)
+                    .withEnvironment(environment));
             System.out.println("Done");
         } catch (final AmazonClientException e) {
             System.err.println(e.getMessage());
