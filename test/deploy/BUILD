@@ -67,6 +67,16 @@ deploy_lambda_function_script(
 )
 
 deploy_lambda_function_script(
+    name = "test_deploy_lambda_function_timeout",
+    function_name = "test_function_name",
+    function_handler = "StaticHandler",
+    function_role = "arn:aws:iam::123456789012:role/role",
+    library = ":test_java_library",
+    language = "java",
+    timeout = 10,
+)
+
+deploy_lambda_function_script(
     name = "test_deploy_lambda_function_environment",
     function_name = "test_function_name",
     function_handler = "StaticHandler",

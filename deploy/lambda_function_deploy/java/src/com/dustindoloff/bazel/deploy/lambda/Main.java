@@ -44,10 +44,11 @@ public final class Main {
     private static final String ARG_FUNCTION_ZIP = "function-zip";
     private static final String ARG_REGION = "region";
     private static final String ARG_MEMORY = "memory";
+    private static final String ARG_TIMEOUT = "timeout";
     private static final String ARG_ENVIRONMENT = "environment";
 
     private static final Gson GSON = new Gson();
-    private static final Type ENVIRONMENT_TYPE = new TypeToken<Map<String, String>>(){}.getType();
+    private static final Type STRING_MAP_TYPE = new TypeToken<Map<String, String>>(){}.getType();
 
     private static Options buildOptions() {
         return new Options()
@@ -99,6 +100,12 @@ public final class Main {
                     .hasArg()
                     .build())
             .addOption(Option.builder()
+                    .argName("Timeout")
+                    .longOpt(ARG_TIMEOUT)
+                    .desc("Maximum runtime for each function invocation")
+                    .hasArg()
+                    .build())
+            .addOption(Option.builder()
                     .argName("Environment Variables")
                     .longOpt(ARG_ENVIRONMENT)
                     .desc("Environment variables to run the function with. Must be a JSON object " +
@@ -113,20 +120,20 @@ public final class Main {
         return ByteBuffer.wrap(bytes);
     }
 
-    private static Integer parseMemory(final String memory) {
-        if (memory == null) {
+    private static Integer parseInteger(final String integer) {
+        if (integer == null) {
             return null;
         }
 
-        return Integer.valueOf(memory);
+        return Integer.valueOf(integer);
     }
 
-    private static Map<String, String> parseEnvironment(final String environment) {
-        if (environment == null) {
+    private static Map<String, String> parseMap(final String jsonMap) {
+        if (jsonMap == null) {
             return null;
         }
 
-        return GSON.fromJson(environment, ENVIRONMENT_TYPE);
+        return GSON.fromJson(jsonMap, STRING_MAP_TYPE);
     }
 
     private static boolean createFunction(final AWSLambda lambdaClient,
@@ -135,6 +142,7 @@ public final class Main {
                                           final String functionRole,
                                           final String functionRuntime,
                                           final Integer memory,
+                                          final Integer timeout,
                                           final Map<String, String> functionEnvironment,
                                           final File functionZip) {
         final ByteBuffer functionZipBytes;
@@ -156,6 +164,7 @@ public final class Main {
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
                     .withMemorySize(memory)
+                    .withTimeout(timeout)
                     .withEnvironment(environment)
                     .withCode(new FunctionCode()
                             .withZipFile(functionZipBytes)));
@@ -176,6 +185,7 @@ public final class Main {
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
                     .withMemorySize(memory)
+                    .withTimeout(timeout)
                     .withEnvironment(environment));
             System.out.println("Done");
         } catch (final AmazonClientException e) {
@@ -206,12 +216,14 @@ public final class Main {
         final File functionZip = new File(commandLine.getOptionValue(ARG_FUNCTION_ZIP));
         final String regionString = commandLine.getOptionValue(ARG_REGION);
         final String memoryString = commandLine.getOptionValue(ARG_MEMORY);
+        final String timeoutString = commandLine.getOptionValue(ARG_TIMEOUT);
         final String environmentString = commandLine.getOptionValue(ARG_ENVIRONMENT);
 
         final Regions region =
                 regionString == null ? Regions.DEFAULT_REGION : Regions.fromName(regionString);
-        final Integer memory = parseMemory(memoryString);
-        final Map<String, String> environment = parseEnvironment(environmentString);
+        final Integer memory = parseInteger(memoryString);
+        final Integer timeout = parseInteger(timeoutString);
+        final Map<String, String> environment = parseMap(environmentString);
 
         System.out.println("Running Lambda Deploy");
 
@@ -220,7 +232,7 @@ public final class Main {
                 .build();
 
         if (!createFunction(lambdaClient, functionName, functionHandler, functionRole,
-                functionRuntime, memory, environment, functionZip)) {
+                functionRuntime, memory, timeout, environment, functionZip)) {
             System.out.println("Unable to create function");
             System.exit(2);
             return;

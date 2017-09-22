@@ -71,23 +71,41 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
 )
 
 def _generate_lambda_function_script(ctx):
+    config = {
+        "function_name": ctx.attr.function_name,
+        "function_handler": ctx.attr.function_handler,
+        "function_role": ctx.attr.function_role,
+        "function_runtime": ctx.attr.function_runtime,
+        "function_zip": ctx.file.bundle.short_path
+    }
+
+    region = ctx.attr.region
+    if region != "":
+        config["region"] = region
+
     memory = ctx.attr.memory
-    if memory != None and memory % 64 != 0:
-        fail("Memory must be a multiple of 64 per Lambda's documentation", str(memory))
+    if memory != 0:
+        if memory % 64 != 0:
+            fail("Memory must be a multiple of 64 per Lambda's documentation", str(memory))
+        else:
+            config["memory"] = memory
+
+    timeout = ctx.attr.timeout
+    if timeout != 0:
+        if timeout <= 0:
+            fail("Timeout must be positive", str(timeout))
+        else:
+            config["timeout"] = timeout
+
+    environment = ctx.attr.environment
+    if environment != {}:
+        config["environment"] = environment
+
     generate_templated_file(
         ctx = ctx,
         generate_templated_file_script = ctx.executable._generate_templated_file_script,
         template = ctx.file._deploy_lambda_function_template,
-        config = {
-            "function_name": ctx.attr.function_name,
-            "function_handler": ctx.attr.function_handler,
-            "function_role": ctx.attr.function_role,
-            "function_runtime": ctx.attr.function_runtime,
-            "function_zip": ctx.file.bundle.short_path,
-            "region": ctx.attr.region,
-            "memory": memory,
-            "environment": ctx.attr.environment,
-        },
+        config = config,
         out_file = ctx.outputs.generated_script,
     )
 
@@ -119,9 +137,8 @@ web_internal_generate_deploy_lambda_function_script = rule(
         ),
         "region": attr.string(),
         "memory": attr.int(),
-        "environment": attr.string_dict(
-            default = {},
-        ),
+        "timeout": attr.int(),
+        "environment": attr.string_dict(),
         "_deploy_lambda_function_template": attr.label(
             default = Label("//deploy/templates:deploy_lambda_function_template.py.jinja2"),
             allow_single_file = True,
