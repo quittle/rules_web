@@ -28,6 +28,9 @@ def main():
             {% if region %}
                 '--region', '''{{ region }}''',
             {% endif %}
+            {% if memory %}
+                '--memory', '''{{ memory }}''',
+            {% endif %}
             {% if environment %}
                 '--environment', '''{{ environment | tojson }}''',
             {% endif %}

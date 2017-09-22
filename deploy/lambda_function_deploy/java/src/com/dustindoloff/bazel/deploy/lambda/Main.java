@@ -43,6 +43,7 @@ public final class Main {
     private static final String ARG_FUNCTION_RUNTIME = "function-runtime";
     private static final String ARG_FUNCTION_ZIP = "function-zip";
     private static final String ARG_REGION = "region";
+    private static final String ARG_MEMORY = "memory";
     private static final String ARG_ENVIRONMENT = "environment";
 
     private static final Gson GSON = new Gson();
@@ -88,7 +89,13 @@ public final class Main {
             .addOption(Option.builder()
                     .argName("Region")
                     .longOpt(ARG_REGION)
-                    .desc("AWS region ithe function should live in")
+                    .desc("AWS region the function should live in")
+                    .hasArg()
+                    .build())
+            .addOption(Option.builder()
+                    .argName("Memory")
+                    .longOpt(ARG_MEMORY)
+                    .desc("Amount of memory to provide the function when invoking")
                     .hasArg()
                     .build())
             .addOption(Option.builder()
@@ -106,7 +113,19 @@ public final class Main {
         return ByteBuffer.wrap(bytes);
     }
 
+    private static Integer parseMemory(final String memory) {
+        if (memory == null) {
+            return null;
+        }
+
+        return Integer.valueOf(memory);
+    }
+
     private static Map<String, String> parseEnvironment(final String environment) {
+        if (environment == null) {
+            return null;
+        }
+
         return GSON.fromJson(environment, ENVIRONMENT_TYPE);
     }
 
@@ -115,6 +134,7 @@ public final class Main {
                                           final String functionHandler,
                                           final String functionRole,
                                           final String functionRuntime,
+                                          final Integer memory,
                                           final Map<String, String> functionEnvironment,
                                           final File functionZip) {
         final ByteBuffer functionZipBytes;
@@ -125,7 +145,9 @@ public final class Main {
             return false;
         }
 
-        final Environment environment = new Environment().withVariables(functionEnvironment);
+        final Environment environment = functionEnvironment != null ?
+                new Environment().withVariables(functionEnvironment) :
+                null;
 
         try {
             lambdaClient.createFunction(new CreateFunctionRequest()
@@ -133,6 +155,7 @@ public final class Main {
                     .withHandler(functionHandler)
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
+                    .withMemorySize(memory)
                     .withEnvironment(environment)
                     .withCode(new FunctionCode()
                             .withZipFile(functionZipBytes)));
@@ -152,6 +175,7 @@ public final class Main {
                     .withHandler(functionHandler)
                     .withRole(functionRole)
                     .withRuntime(functionRuntime)
+                    .withMemorySize(memory)
                     .withEnvironment(environment));
             System.out.println("Done");
         } catch (final AmazonClientException e) {
@@ -181,10 +205,12 @@ public final class Main {
         final String functionRuntime = commandLine.getOptionValue(ARG_FUNCTION_RUNTIME);
         final File functionZip = new File(commandLine.getOptionValue(ARG_FUNCTION_ZIP));
         final String regionString = commandLine.getOptionValue(ARG_REGION);
+        final String memoryString = commandLine.getOptionValue(ARG_MEMORY);
         final String environmentString = commandLine.getOptionValue(ARG_ENVIRONMENT);
 
         final Regions region =
                 regionString == null ? Regions.DEFAULT_REGION : Regions.fromName(regionString);
+        final Integer memory = parseMemory(memoryString);
         final Map<String, String> environment = parseEnvironment(environmentString);
 
         System.out.println("Running Lambda Deploy");
@@ -194,7 +220,7 @@ public final class Main {
                 .build();
 
         if (!createFunction(lambdaClient, functionName, functionHandler, functionRole,
-                functionRuntime, environment, functionZip)) {
+                functionRuntime, memory, environment, functionZip)) {
             System.out.println("Unable to create function");
             System.exit(2);
             return;

@@ -71,6 +71,9 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
 )
 
 def _generate_lambda_function_script(ctx):
+    memory = ctx.attr.memory
+    if memory != None and memory % 64 != 0:
+        fail("Memory must be a multiple of 64 per Lambda's documentation", str(memory))
     generate_templated_file(
         ctx = ctx,
         generate_templated_file_script = ctx.executable._generate_templated_file_script,
@@ -82,6 +85,7 @@ def _generate_lambda_function_script(ctx):
             "function_runtime": ctx.attr.function_runtime,
             "function_zip": ctx.file.bundle.short_path,
             "region": ctx.attr.region,
+            "memory": memory,
             "environment": ctx.attr.environment,
         },
         out_file = ctx.outputs.generated_script,
@@ -114,6 +118,7 @@ web_internal_generate_deploy_lambda_function_script = rule(
             ],
         ),
         "region": attr.string(),
+        "memory": attr.int(),
         "environment": attr.string_dict(
             default = {},
         ),
