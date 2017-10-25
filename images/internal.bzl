@@ -53,7 +53,7 @@ def web_internal_crop_image(ctx):
     source_map = { ctx.file.image.short_path: output} if ctx.attr.map_source else {}
 
     return struct(
-        resources = set([output]),
+        resources = depset([output]),
         source_map = source_map,
     )
 
@@ -70,7 +70,7 @@ def web_internal_minify_png(ctx):
     source_map[ctx.file.png.short_path] = ctx.outputs.min_png
     return struct(
         source_map = source_map,
-        resources = set([ ctx.outputs.min_png ]),
+        resources = depset([ ctx.outputs.min_png ]),
     )
 
 def web_internal_generate_ico(ctx):
@@ -88,7 +88,7 @@ def web_internal_generate_ico(ctx):
     )
 
     return struct(
-        resources = set([ ctx.outputs.ico ]),
+        resources = depset([ ctx.outputs.ico ]),
     )
 
 def web_internal_favicon_image_generator(ctx):
@@ -132,7 +132,7 @@ def web_internal_favicon_image_generator(ctx):
         outputs.append(out_file)
 
     return struct(
-        resources = set(outputs),
+        resources = depset(outputs),
     )
 
 def web_internal_resize_image(ctx):
@@ -175,6 +175,6 @@ def web_internal_resize_image(ctx):
             source_map[key] = output
 
     return struct(
-        resources = set([output]),
+        resources = depset([output]),
         source_map = source_map,
     )

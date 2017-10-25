@@ -1,7 +1,5 @@
 env:
-    - BAZEL_VERSION='0.5.4'
-
-dist: trusty
+    - BAZEL_VERSION='0.6.1'
 
 sudo: true
 

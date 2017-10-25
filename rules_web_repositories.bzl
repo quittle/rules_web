@@ -204,8 +204,8 @@ def rules_web_repositories():
 
     native.git_repository(
         name = "io_bazel_rules_sass",
-        commit = "f5debf685ede0531f27377536fe05872b78aa63c", # 0.0.2 + patch
-        remote = "https://github.com/quittle/rules_sass.git",
+        commit = "c7e0810a6c813a3bc2c9dbbc1f5d696f3c9a8f53", # 0.0.3 + path patch
+        remote = "https://github.com/bazelbuild/rules_sass.git",
     )
 
     native.new_git_repository(
@@ -396,8 +396,14 @@ def rules_web_repositories():
         build_file_content = _PILLOW_BUILD_FILE,
     )
 
+    native.maven_jar(
+        name = "com_google_code_findbugs_jsr305",
+        artifact = "com.google.code.findbugs:jsr305:3.0.2",
+        sha1 = "25ea2e8b0c338a877313bd4672d3fe056ea78f0d",
+    )
+
     native.git_repository(
         name = "bazel_toolbox",
-        commit = "c12909cccdaef1d092652a49aedb928d4b2d90a3",
+        commit = "9d1e2b903eb8f8b31634cb7188dc336493c591ae",
         remote = "https://github.com/quittle/bazel_toolbox.git",
     )

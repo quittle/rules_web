@@ -43,12 +43,12 @@ def transitive_resources_(orig_struct, resource, opt_ignore_types=[]):
     return struct(
         source_map = merge_dicts(getattr(orig_struct, "source_map", {}),
                 getattr(resource, "source_map", {}) if "source_map" not in opt_ignore_types else {}),
-        resources = getattr(orig_struct, "resources", set()) +
-                (getattr(resource, "resources", set()) if "resources" not in opt_ignore_types else set()),
-        css_resources = getattr(orig_struct, "css_resources", set()) +
-                (getattr(resource, "css_resources", set()) if "css_resources" not in opt_ignore_types else set()),
-        deferred_js_resources = getattr(orig_struct, "deferred_js_resources", set()) +
-                (getattr(resource, "deferred_js_resources", set()) if "deferred_js_resources" not in opt_ignore_types else set()),
-        js_resources = getattr(orig_struct, "js_resources", set()) +
-                (getattr(resource, "js_resources", set()) if "js_resources" not in opt_ignore_types else set()),
+        resources = getattr(orig_struct, "resources", depset()) +
+                (getattr(resource, "resources", depset()) if "resources" not in opt_ignore_types else depset()),
+        css_resources = getattr(orig_struct, "css_resources", depset()) +
+                (getattr(resource, "css_resources", depset()) if "css_resources" not in opt_ignore_types else depset()),
+        deferred_js_resources = getattr(orig_struct, "deferred_js_resources", depset()) +
+                (getattr(resource, "deferred_js_resources", depset()) if "deferred_js_resources" not in opt_ignore_types else depset()),
+        js_resources = getattr(orig_struct, "js_resources", depset()) +
+                (getattr(resource, "js_resources", depset()) if "js_resources" not in opt_ignore_types else depset()),
     )

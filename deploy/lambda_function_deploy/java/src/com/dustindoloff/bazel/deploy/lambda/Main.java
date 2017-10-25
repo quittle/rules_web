@@ -25,6 +25,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -120,6 +122,7 @@ public final class Main {
         return ByteBuffer.wrap(bytes);
     }
 
+    @Nullable
     private static Integer parseInteger(final String integer) {
         if (integer == null) {
             return null;
@@ -128,6 +131,7 @@ public final class Main {
         return Integer.valueOf(integer);
     }
 
+    @Nullable
     private static Map<String, String> parseMap(final String jsonMap) {
         if (jsonMap == null) {
             return null;

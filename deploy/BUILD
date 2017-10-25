@@ -37,6 +37,8 @@ java_import(
         "@com_fasterxml_jackson_core_jackson_annotations//jar",
         "@com_fasterxml_jackson_core_jackson_core//jar",
         "@com_fasterxml_jackson_core_jackson_databind//jar",
+        "@com_google_code_findbugs_jsr305//jar",
+        "@com_google_code_gson_gson//jar",
         "@joda_time_joda_time//jar",
         "@org_apache_commons_logging//jar",
         "@org_apache_httpcomponents_httpclient//jar",

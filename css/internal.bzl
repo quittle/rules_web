@@ -21,7 +21,7 @@ def web_internal_minify_css_impl(ctx):
     )
 
     ret = struct(
-        css_resources = set([ ctx.outputs.min_css_file ]),
+        css_resources = depset([ ctx.outputs.min_css_file ]),
     )
 
     for resource in ctx.attr.srcs:

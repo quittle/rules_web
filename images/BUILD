@@ -42,6 +42,7 @@ java_binary(
         "pngtastic/java/src/com/dustindoloff/pngtastic/Main.java",
     ],
     deps = [
+        "@com_google_code_findbugs_jsr305//jar",
         "@org_apache_commons_cli//jar",
         "@pngtastic//jar",
     ],

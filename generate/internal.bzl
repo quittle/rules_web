@@ -32,9 +32,9 @@ def web_internal_generate_variables(ctx):
     )
 
     ret = struct(
-        css_resources = set([ctx.outputs.out_css.path ]) if ctx.outputs.out_css else set(),
-        js_resources = set([ctx.outputs.out_js.path ]) if ctx.outputs.out_js else set(),
-        resources = set([ctx.outputs.out_scss.path ]) if ctx.outputs.out_scss else set(),
+        css_resources = depset([ctx.outputs.out_css.path ]) if ctx.outputs.out_css else depset(),
+        js_resources = depset([ctx.outputs.out_js.path ]) if ctx.outputs.out_js else depset(),
+        resources = depset([ctx.outputs.out_scss.path ]) if ctx.outputs.out_scss else depset(),
     )
 
     ret = transitive_resources_(ret, ctx.file.config)

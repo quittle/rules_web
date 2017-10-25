@@ -56,14 +56,14 @@ def web_internal_minify_html_impl(ctx):
 
     # Sets are immutable so replace with a new set that does not contain the source file as it will
     # be replaced with the minified file
-    source_dict["resources"] = set([ resource
-            for resource in source_dict.get("resources", set([]))
+    source_dict["resources"] = depset([ resource
+            for resource in source_dict.get("resources", depset([]))
                 if resource != ctx.file.src ])
 
     ret = dict_to_struct(source_dict)
     ret = merge_structs(ret, struct(
         source_map = { source_file.short_path: out_file },
-        resources = set([ out_file ]),
+        resources = depset([ out_file ]),
     ))
 
     return ret
@@ -159,14 +159,14 @@ def web_internal_html_page_impl(ctx):
 
     ret = merge_structs(ret, struct(
         source_map = source_map,
-        resources = set(
+        resources = depset(
             resources +
             ctx.files.favicon_images +
             [ ctx.outputs.html_file ]
         ),
-        css_resources = set(css_files),
-        deferred_js_resources = set(deferred_js_files),
-        js_resources = set(js_files),
+        css_resources = depset(css_files),
+        deferred_js_resources = depset(deferred_js_files),
+        js_resources = depset(js_files),
     ))
 
     return ret
@@ -194,7 +194,7 @@ def web_internal_inject_html_impl(ctx):
     for resource in [ ctx.attr.outer_html, ctx.attr.inner_html ]:
         ret = transitive_resources_(ret, resource)
     ret = merge_structs(ret, struct(
-        resources = set([ ctx.outputs.html_file ]),
+        resources = depset([ ctx.outputs.html_file ]),
     ))
 
     ret_dict = struct_to_dict(ret)
@@ -203,7 +203,7 @@ def web_internal_inject_html_impl(ctx):
         resources_copy.remove(ctx.file.outer_html)
     if ctx.file.inner_html in resources_copy:
         resources_copy.remove(ctx.file.inner_html)
-    ret_dict["resources"] = set(resources_copy)
+    ret_dict["resources"] = depset(resources_copy)
     ret = dict_to_struct(ret_dict)
 
     return ret

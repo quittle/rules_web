@@ -74,7 +74,7 @@ def web_internal_font_generator(ctx):
     )
 
     ret = struct(
-        resources = set(
+        resources = depset(
             [ file for file in
                 [
                     ctx.file.eot,
@@ -84,7 +84,7 @@ def web_internal_font_generator(ctx):
                     ctx.file.svg,
                 ] if file != None ]
         ),
-        css_resources = set([
+        css_resources = depset([
             ctx.outputs.out_css,
         ]),
     )
@@ -150,7 +150,7 @@ def web_internal_minify_ttf(ctx):
     )
 
     ret = struct(
-        resources = set([ ctx.outputs.out_ttf ]),
+        resources = depset([ ctx.outputs.out_ttf ]),
         source_map = { ctx.file.ttf.short_path: ctx.outputs.out_ttf }
     )
 
@@ -171,7 +171,7 @@ def web_internal_ttf_to_eot(ctx):
     )
 
     ret = struct(
-        resources = set([ ctx.outputs.out_eot ]),
+        resources = depset([ ctx.outputs.out_eot ]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)
@@ -198,7 +198,7 @@ def web_internal_ttf_to_woff(ctx):
     )
 
     ret = struct(
-        resources = set([ ctx.outputs.out_woff ]),
+        resources = depset([ ctx.outputs.out_woff ]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)
@@ -223,7 +223,7 @@ def web_internal_ttf_to_woff2(ctx):
     )
 
     ret = struct(
-        resources = set([ ctx.outputs.out_woff2 ]),
+        resources = depset([ ctx.outputs.out_woff2 ]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)

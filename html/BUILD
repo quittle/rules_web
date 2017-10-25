@@ -27,6 +27,7 @@ java_binary(
     main_class = "com.dustindoloff.injecthtml.Main",
     deps = [
         "@br_com_starcode_parccser_parccser//jar",
+        "@com_google_code_findbugs_jsr305//jar",
         "@net_htmlparser_jericho_jericho_html//jar",
         "@org_apache_commons_cli//jar",
         "@org_apache_commons_io//jar",

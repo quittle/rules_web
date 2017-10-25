@@ -8,6 +8,8 @@ import com.googlecode.pngtastic.core.PngOptimizer;
 
 import java.io.IOException;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -34,6 +36,7 @@ public final class Main {
      * @param args The args passed into the main function.
      * @return The parsed arguments.
      */
+    @Nullable
     private static CommandLine parseArgs(final String[] args) {
         final Options options = new Options()
             .addOption(Option.builder()
@@ -96,6 +99,7 @@ public final class Main {
      * @return an integer version of {@code value} or null if {@code value} is null.
      * @throws RuntimeException if {@code value} is not parsable.
      */
+    @Nullable
     private static Integer toInteger(final String value) {
         if (value == null) {
             return null;

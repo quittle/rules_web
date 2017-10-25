@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import javax.annotation.Nullable;
+
 import net.htmlparser.jericho.Element;
 import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Segment;
@@ -34,7 +36,8 @@ public final class Main {
     private static final String ARG_INNER_HTML = "inner-html";
     private static final String ARG_QUERY_SELECTOR = "query-selector";
     private static final String ARG_INSERTION_MODE = "insertion-mode";
-    private static final String ARG_INSERTION_MODE_DEFAULT = InsertionMode.REPLACE_CONTENTS.getName();
+    private static final String ARG_INSERTION_MODE_DEFAULT =
+            InsertionMode.REPLACE_CONTENTS.getName();
     private static final String ARG_OUTPUT = "output";
 
     private static enum InsertionMode {
@@ -53,6 +56,7 @@ public final class Main {
             return name;
         }
 
+        @Nullable
         public static InsertionMode from(final String name) {
             for (InsertionMode mode : InsertionMode.values()) {
                 if (mode.name.equalsIgnoreCase(name)) {
@@ -62,7 +66,6 @@ public final class Main {
             return null;
         }
     }
-
 
     private static Options buildOptions() {
         return new Options()
@@ -108,7 +111,8 @@ public final class Main {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T getOption(final CommandLine commandLine, final String arg, final T defaultValue) {
+    private static <T> T getOption(final CommandLine commandLine, final String arg,
+                                   final T defaultValue) {
         try {
             return (T) commandLine.getParsedOptionValue(arg);
         } catch (final ParseException e) {
@@ -125,6 +129,7 @@ public final class Main {
         }
     }
 
+    @SuppressWarnings("UnnecessaryDefaultInEnumSwitch")
     public static void main(final String[] args) throws IOException {
         final Options options = buildOptions();
         final CommandLineParser parser = new DefaultParser();

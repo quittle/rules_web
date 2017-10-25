@@ -33,6 +33,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.time.temporal.ChronoUnit;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -46,6 +48,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Contains the main function and argument parsing capabilities
  */
+@SuppressWarnings("InconsistentOverloads")
 public final class Main {
     public static final int CACHE_DURATION_IMMUTABLE = -1;
 
@@ -93,6 +96,7 @@ public final class Main {
                     .build());
     }
 
+    @Nullable
     private static ZipFile getAsValidZip(final File zipFile) {
         try {
             return new ZipFile(zipFile, ZipFile.OPEN_READ);
@@ -135,6 +139,7 @@ public final class Main {
         }
     }
 
+    @Nullable
     private static String getContentType(final String fileName) {
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
         if (mimeType != null) {

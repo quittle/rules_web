@@ -32,7 +32,7 @@ def web_internal_resource_map_impl(ctx):
     )
 
     ret = struct(
-        js_resources = set([ ctx.outputs.resource_map ]),
+        js_resources = depset([ ctx.outputs.resource_map ]),
     )
     for dep in ctx.attr.deps:
         ret = transitive_resources_(ret, dep)
@@ -54,7 +54,7 @@ def web_internal_minify_js_impl(ctx):
     )
 
     return struct(
-        js_resources = set([ ctx.outputs.min_js_file ]),
+        js_resources = depset([ ctx.outputs.min_js_file ]),
     )
 
 def web_internal_closure_compile_impl(ctx):
@@ -80,7 +80,7 @@ def web_internal_closure_compile_impl(ctx):
     )
 
     return struct(
-        js_resources = set(
+        js_resources = depset(
             [ ctx.outputs.compiled_js ] +
             ctx.files.externs
         ),
