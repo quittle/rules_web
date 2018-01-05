@@ -42,31 +42,8 @@ def web_internal_zip_site(ctx):
         outputs = [ ctx.outputs.out_zip ]
     )
 
-
     return struct(
         source_map = source_map,
-    )
-
-def web_internal_minify_site_zip(ctx):
-    root_files = [ file.path for file in ctx.files.root_files ]
-
-    ctx.action(
-        mnemonic = "MinifySiteZip",
-        arguments = [
-                "--in-zip", ctx.file.site_zip.path,
-                "--out-zip", ctx.outputs.minified_zip.path,
-            ] +
-            optional_arg_("--root-files", root_files) +
-            optional_arg_("--keep-extensions", ctx.attr.keep_extensions) +
-            optional_arg_("--allow-multicase", ctx.attr.allow_multicase) +
-            optional_arg_("--use-content-hash", ctx.attr.use_content_hash),
-        inputs = [
-                ctx.executable._minify_site_zip_script,
-                ctx.file.site_zip,
-            ] +
-            ctx.files.root_files,
-        executable = ctx.executable._minify_site_zip_script,
-        outputs = [ ctx.outputs.minified_zip ],
     )
 
 def web_internal_rename_zip_paths(ctx):

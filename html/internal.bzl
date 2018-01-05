@@ -82,7 +82,7 @@ def web_internal_html_page_impl(ctx):
 
     favicons = [ value
         for size, favicon in zip(ctx.attr.favicon_sizes, ctx.files.favicon_images)
-            for value in (str(size), favicon.path)
+            for value in (str(size), "/" + favicon.path)
     ]
 
     source_map = {}
@@ -108,11 +108,11 @@ def web_internal_html_page_impl(ctx):
                     source_map[file.short_path] = file
                     resources.append(file)
 
-    resource_paths = [ resource.path for resource in resources ]
-    css_paths = [ css_file.path for css_file in css_files ]
-    deferred_js_paths = [ js_file.path for js_file in deferred_js_files ]
-    js_paths = [ js_file.path for js_file in js_files ]
-    inline_js_paths = [ js_file.path for js_file in inline_js_files ]
+    resource_paths = [ "/" + resource.path for resource in resources ]
+    css_paths = [ "/" + css_file.path for css_file in css_files ]
+    deferred_js_paths = [ "/" + js_file.path for js_file in deferred_js_files ]
+    js_paths = [ "/" + js_file.path for js_file in js_files ]
+    inline_js_paths = [ "/" + js_file.path for js_file in inline_js_files ]
 
     ctx.action(
         mnemonic = "GenerateHTMLPage",

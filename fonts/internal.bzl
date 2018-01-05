@@ -17,24 +17,24 @@ def web_internal_font_generator(ctx):
     # Resources for transitive dependencies
     resources = []
     if ctx.file.eot != None:
-        eot = ctx.file.eot.path
+        eot = "/" + ctx.file.eot.path
         single_source = "src: url('{eot}');".format(eot = eot)
         multi_source.append(("{eot}?#iefix".format(eot = eot), "embedded-opentype"))
         resources.append(eot)
     if ctx.file.ttf != None:
-        ttf = ctx.file.ttf.path
+        ttf = "/" + ctx.file.ttf.path
         multi_source.append((ttf, "truetype"))
         resources.append(ttf)
     if ctx.file.woff != None:
-        woff = ctx.file.woff.path
+        woff = "/" + ctx.file.woff.path
         multi_source.append((woff, "woff"))
         resources.append(woff)
     if ctx.file.woff2 != None:
-        woff2 = ctx.file.woff2.path
+        woff2 = "/" + ctx.file.woff2.path
         multi_source.append((woff2, "woff2"))
         resources.append(woff2)
     if ctx.file.svg != None:
-        svg = ctx.file.svg.path
+        svg = "/" + ctx.file.svg.path
         multi_source.append((
                 "{svg}#{name}-{weight}-{style}".format( # Must be unique per variant
                         svg = svg,

@@ -7,7 +7,6 @@ load("@bazel_toolbox//labels:labels.bzl",
 
 load(":internal.bzl",
     "web_internal_generate_zip_server_python_file",
-    "web_internal_minify_site_zip",
     "web_internal_rename_zip_paths",
     "web_internal_zip_site",
 )
@@ -24,25 +23,6 @@ zip_site = rule(
     implementation = web_internal_zip_site,
 )
 
-minify_site_zip = rule(
-    attrs = {
-        "site_zip": attr.label(
-            mandatory = True,
-            allow_files = True,
-            single_file = True,
-        ),
-        "root_files": attr.label_list(),
-        "keep_extensions": attr.bool(),
-        "allow_multicase": attr.bool(),
-        "use_content_hash": attr.bool(),
-        "minified_zip": attr.output(
-            mandatory = True,
-        ),
-        "_minify_site_zip_script": executable_label(Label("//site_zip:minify_site_zip")),
-    },
-    implementation = web_internal_minify_site_zip,
-)
-
 rename_zip_paths = rule(
     attrs = {
         "source_zip": attr.label(
@@ -55,10 +35,10 @@ rename_zip_paths = rule(
         ),
         "path_map_labels_out": attr.string_list(),
         "path_map": attr.string_dict(),
-        "out_zip": attr.output(
-            mandatory = True,
-        ),
         "_rename_zip_paths_script": executable_label(Label("//site_zip:rename_zip_paths")),
+    },
+    outputs = {
+        "out_zip": "%{name}.zip",
     },
     implementation = web_internal_rename_zip_paths,
 )

@@ -10,14 +10,6 @@ py_binary(
 )
 
 py_binary(
-    name = "minify_site_zip",
-    srcs = [
-        "scripts/minify_site_zip.py",
-    ],
-    visibility = [ "//visibility:public" ],
-)
-
-py_binary(
     name = "rename_zip_paths",
     srcs = [
         "scripts/rename_zip_paths.py",
