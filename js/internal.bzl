@@ -15,7 +15,7 @@ def web_internal_resource_map_impl(ctx):
                 source_map[file.short_path] = file
 
     path_map = {
-        in_relative_path: out_file.path
+        in_relative_path: "/" + out_file.path
             for in_relative_path, out_file in source_map.items()
     }
 

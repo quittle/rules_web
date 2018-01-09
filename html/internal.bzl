@@ -112,7 +112,7 @@ def web_internal_html_page_impl(ctx):
     css_paths = [ "/" + css_file.path for css_file in css_files ]
     deferred_js_paths = [ "/" + js_file.path for js_file in deferred_js_files ]
     js_paths = [ "/" + js_file.path for js_file in js_files ]
-    inline_js_paths = [ "/" + js_file.path for js_file in inline_js_files ]
+    inline_js_paths = [ js_file.path for js_file in inline_js_files ]
 
     ctx.action(
         mnemonic = "GenerateHTMLPage",
