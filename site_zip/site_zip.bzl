@@ -23,7 +23,7 @@ zip_site = rule(
     implementation = web_internal_zip_site,
 )
 
-rename_zip_paths = rule(
+_rename_zip_paths = rule(
     attrs = {
         "source_zip": attr.label(
             mandatory = True,
@@ -34,7 +34,6 @@ rename_zip_paths = rule(
             allow_files = True,
         ),
         "path_map_labels_out": attr.string_list(),
-        "path_map": attr.string_dict(),
         "_rename_zip_paths_script": executable_label(Label("//site_zip:rename_zip_paths")),
     },
     outputs = {
@@ -42,6 +41,14 @@ rename_zip_paths = rule(
     },
     implementation = web_internal_rename_zip_paths,
 )
+
+def rename_zip_paths(name=None, source_zip=None, path_map=None):
+    return _rename_zip_paths(
+        name = name,
+        source_zip = source_zip,
+        path_map_labels_in = path_map.keys(),
+        path_map_labels_out = path_map.values(),
+    )
 
 generate_zip_server_python_file = rule(
     attrs = {

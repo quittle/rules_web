@@ -17,7 +17,7 @@ def web_internal_zip_site(ctx):
         resources += getattr(resource, "resources", depset())
         resources += getattr(resource, "css_resources", depset())
         resources += getattr(resource, "js_resources", depset())
-        resources += getattr(resource, "deferred_resources", depset())
+        resources += getattr(resource, "deferred_js_resources", depset())
     resources += ctx.files.resources
 
     root_files = [ page.path for page in ctx.files.root_files ]
@@ -51,7 +51,7 @@ def web_internal_rename_zip_paths(ctx):
         fail("path_map_labels_in must be the same size as path_map_labels_out")
 
 
-    path_map = { key: value for key, value in ctx.attr.path_map.items() }
+    path_map = {}
     path_map.update({
             in_label.path: out_path
                     for in_label, out_path in
