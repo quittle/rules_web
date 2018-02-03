@@ -24,6 +24,9 @@ def main():
             {% if cache_durations %}
                 '--cache-durations', '''{{ cache_durations }}''',
             {% endif %}
+            {% if content_types %}
+                '--content-types', '''{{ content_types }}''',
+            {% endif %}
             {% if path_redirects %}
                 '--path-redirects', '''{{ path_redirects }}''',
             {% endif %}
