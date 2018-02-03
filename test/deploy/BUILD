@@ -2,7 +2,8 @@
 # Licensed under Apache License v2.0
 
 load("//deploy:deploy.bzl",
-    "deploy_lambda_function_script"
+    "deploy_lambda_function_script",
+    "deploy_site_zip_s3_script",
 )
 
 java_library(
@@ -86,5 +87,23 @@ deploy_lambda_function_script(
     environment = {
         "key": "value",
         "a": "b",
+    },
+)
+
+deploy_site_zip_s3_script(
+    name = "test_deploy_site_zip_s3_script",
+    bucket = "bucket",
+    zip_file = ":test_java_library",
+    cache_durations = {
+        12: [ "index.html" ],
+        1: [ "*" ],
+    },
+    content_types = {
+        "swzl": "application/swizl",
+    },
+    path_redirects = {
+        "a": "http://a.com",
+        "b": "https://a.com",
+        "c": "/d",
     },
 )

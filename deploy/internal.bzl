@@ -19,6 +19,7 @@ def _generate_deploy_site_zip_s3_script(ctx):
         arguments = [
             "--bucket", ctx.attr.bucket,
             "--cache-durations", ctx.attr.cache_durations,
+            "--content-types", repr(ctx.attr.content_types),
             "--path-redirects", repr(ctx.attr.path_redirects),
             "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
             "--generated-file", ctx.outputs.generated_script.path,
@@ -45,12 +46,8 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
         ),
         # Because this should never be called directly, we use string serialization to pass in the
         # cache values
-        "cache_durations": attr.string(
-            default = repr([
-                # 15 minutes
-                "60 * 15", [ "*" ],
-            ]),
-        ),
+        "cache_durations": attr.string(),
+        "content_types": attr.string_dict(),
         "path_redirects": attr.string_dict(
             default = {},
         ),

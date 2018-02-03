@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLConnection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,11 +56,14 @@ public final class Main {
     private static final String ARG_WEBSITE_ZIP = "website-zip";
     private static final String ARG_BUCKET = "bucket";
     private static final String ARG_CACHE_DURATIONS = "cache-durations";
+    private static final String ARG_CONTENT_TYPES = "content-types";
     private static final String ARG_PATH_REDIRECTS = "path-redirects";
     private static final String ARG_AWS_ACCESS_KEY = "aws-access-key";
     private static final String ARG_AWS_SECRET_KEY = "aws-secret-key";
 
     private static final long ONE_YEAR_SECONDS = ChronoUnit.YEARS.getDuration().getSeconds();
+    private static final Type CONTENT_TYPES_FORMAT =
+            new TypeToken<HashMap<String, String>>(){}.getType();
     private static final Type CACHE_DURATION_FORMAT =
             new TypeToken<LinkedHashMap<Integer, List<String>>>(){}.getType();
     private static final Type PATH_REDIRECTS_FORMAT =
@@ -86,6 +90,12 @@ public final class Main {
                     .argName("Cache Control Durations")
                     .longOpt(ARG_CACHE_DURATIONS)
                     .desc("Json object representing how long to cache each entry")
+                    .hasArg()
+                    .build())
+            .addOption(Option.builder()
+                    .argName("Additional Content-Types")
+                    .longOpt(ARG_CONTENT_TYPES)
+                    .desc("Json object representing a map of file extensions to content type")
                     .hasArg()
                     .build())
             .addOption(Option.builder()
@@ -140,12 +150,19 @@ public final class Main {
     }
 
     @Nullable
-    private static String getContentType(final String fileName) {
+    private static String getContentType(final String fileName,
+                                         final Map<String, String> additionalContentTypes) {
+        final String extension = FilenameUtils.getExtension(fileName);
+
+        final String providedContentType = additionalContentTypes.get(extension);
+        if (providedContentType != null) {
+            return providedContentType;
+        }
+
         String mimeType = URLConnection.guessContentTypeFromName(fileName);
         if (mimeType != null) {
             return mimeType;
         }
-        final String extension = FilenameUtils.getExtension(fileName);
         switch (extension) {
             case "avi":
                 return "video/x-msvideo";
@@ -272,7 +289,8 @@ public final class Main {
     private static boolean upload(final AmazonS3 s3Client,
                                   final String bucket,
                                   final ZipFile zipFile,
-                                  final LinkedHashMap<Integer, List<String>> cacheDurations) {
+                                  final LinkedHashMap<Integer, List<String>> cacheDurations,
+                                  final Map<String, String> additionalContentTypes) {
 
         final ObjectMetadata metadata = new ObjectMetadata();
         final PutObjectRequest request = getPutObjectRequest(metadata, bucket);
@@ -284,7 +302,7 @@ public final class Main {
             final String key = entry.getName();
             request.setKey(key);
             metadata.setCacheControl(getCacheControlValue(key, cacheDurations));
-            metadata.setContentType(getContentType(key));
+            metadata.setContentType(getContentType(key, additionalContentTypes));
             if (metadata.getContentType() == null) {
                 System.out.println("Unrecognized file type: " + key);
                 failed = true;
@@ -338,16 +356,22 @@ public final class Main {
             return;
         }
 
+        final Gson gson = new Gson();
+
         final File websiteZip = new File(commandLine.getOptionValue(ARG_WEBSITE_ZIP));
         final String s3Bucket = commandLine.getOptionValue(ARG_BUCKET);
 
         final String cacheDurationSerialized = commandLine.getOptionValue(ARG_CACHE_DURATIONS);
         final LinkedHashMap<Integer, List<String>> cacheDurations =
-                new Gson().fromJson(cacheDurationSerialized, CACHE_DURATION_FORMAT);
+                gson.fromJson(cacheDurationSerialized, CACHE_DURATION_FORMAT);
+
+        final String contentTypesSerialized = commandLine.getOptionValue(ARG_CONTENT_TYPES);
+        final Map<String, String> contentTypes =
+                gson.fromJson(contentTypesSerialized, CONTENT_TYPES_FORMAT);
 
         final String pathRedirectsSerialized = commandLine.getOptionValue(ARG_PATH_REDIRECTS);
         final Map<String, String> pathRedirects =
-                new Gson().fromJson(pathRedirectsSerialized, PATH_REDIRECTS_FORMAT);
+                gson.fromJson(pathRedirectsSerialized, PATH_REDIRECTS_FORMAT);
 
         final ZipFile zipFile = getAsValidZip(websiteZip);
         if (zipFile == null) {
@@ -381,7 +405,7 @@ public final class Main {
             return;
         }
 
-        if (!upload(s3Client, s3Bucket, zipFile, cacheDurations)) {
+        if (!upload(s3Client, s3Bucket, zipFile, cacheDurations, contentTypes)) {
             System.out.println("Unable to upload to S3.");
             System.exit(6);
             return;

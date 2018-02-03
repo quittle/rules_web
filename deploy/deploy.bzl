@@ -9,14 +9,18 @@ load(":internal.bzl",
 
 CACHE_DURATION_IMMUTABLE = -1
 
-def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations=[], path_redirects={}):
+def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations={60 * 15: ["*"]}, content_types={}, path_redirects={}):
     """
-        cache_durations should be a list that mirrors a dictionary. Cannot be represented by a
-        `dict` because they do not maintain order
-        [
+        cache_durations should be in the form
+        {
             123: [ "index.hml" ],
             999: [ "*" ],
-        ]
+        }
+
+        content_types should be in the form
+        {
+            "txt": "text/plain",
+        }
     """
 
     for value in path_redirects.values():
@@ -30,7 +34,8 @@ def deploy_site_zip_s3_script(name, bucket, zip_file, cache_durations=[], path_r
         name = script_name,
         bucket = bucket,
         zip = zip_file,
-        cache_durations = str(cache_durations),
+        cache_durations = str({ str(key): value for key, value in cache_durations.items() }),
+        content_types = content_types,
         path_redirects = path_redirects,
     )
 
