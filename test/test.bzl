@@ -103,7 +103,7 @@ _assert_valid_type = rule(
             ]
         ),
         "_assert_valid_type": executable_label(Label("//test:assert_valid_type")),
-        "_yui_binary": executable_label("@yui_compressor//:yui_compressor"),
+        "_yui_binary": executable_label(Label("//:yui_compressor")),
     },
     outputs = {
         "stamp_file": "assert/valid_type/%{name}.stamp",

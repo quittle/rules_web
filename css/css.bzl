@@ -20,7 +20,7 @@ minify_css = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": executable_label("@yui_compressor//:yui_compressor"),
+        "_yui_binary": executable_label(Label("//:yui_compressor")),
     },
     outputs = {
         "min_css_file": "%{name}.min.css",

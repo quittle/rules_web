@@ -23,10 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -255,7 +255,7 @@ public final class Main {
     }
 
     private static String getCacheControlValue(final int cacheDuration) {
-        List<String> cacheControl = new LinkedList<>();
+        List<String> cacheControl = new ArrayList<>();
         cacheControl.add("public");
         if (cacheDuration >= 0) {
             cacheControl.add(String.format("max-age=%d", cacheDuration));

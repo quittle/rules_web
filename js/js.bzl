@@ -39,7 +39,7 @@ minify_js = rule(
             non_empty = True,
             mandatory = True,
         ),
-        "_yui_binary": executable_label("@yui_compressor//:yui_compressor"),
+        "_yui_binary": executable_label(Label("//:yui_compressor")),
     },
     outputs = {
         "min_js_file": "minify_js/%{name}.min.js",

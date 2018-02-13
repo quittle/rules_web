@@ -13,6 +13,8 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+// Assert.fail is used to make debugging failures easier than simply letting exceptions be raised.
+@SuppressWarnings("CatchFail")
 public class ValidationTest {
     private static boolean hasSimpleConstructor(final Class<?> clazz) {
         try {
@@ -28,7 +30,7 @@ public class ValidationTest {
         final String handler = System.getProperty("handler");
         Assert.assertNotNull("Handler not passed in", handler);
 
-        final String[] handlerParts = handler.split("::");
+        final String[] handlerParts = handler.split("::", -1);
         Assert.assertTrue("Invalid handler name", 3 > handlerParts.length);
         final String handlerAbsoluteClass = handlerParts[0];
         final String handlerMethod;

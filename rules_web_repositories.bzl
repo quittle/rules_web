@@ -1,5 +1,10 @@
-# Copyright (c) 2016-2017 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Doloff
 # Licensed under Apache License v2.0
+
+load("@bazel_repository_toolbox//:github_repository.bzl",
+    "new_github_repository",
+    "github_repository",
+)
 
 _THIRD_PARTY_JAVACOPTS = [ "-XepDisableAllChecks", "-XepAllErrorsAsWarnings", "-nowarn" ]
 _THIRD_PARTY_COPTS = [ "-w" ]
@@ -8,30 +13,6 @@ def _build_file(build_file):
     return (build_file
             .replace("_THIRD_PARTY_JAVACOPTS", str(_THIRD_PARTY_JAVACOPTS))
             .replace("_THIRD_PARTY_COPTS", str(_THIRD_PARTY_COPTS)))
-
-_YUI_BUILD_FILE = _build_file("""
-
-java_binary(
-    name = "yui_compressor",
-    main_class = "com.yahoo.platform.yui.compressor.Bootstrap",
-    srcs = glob([ "src/**/*.java" ]) + [ "@rhino//:rhino_sources_for_yui_compiler" ],
-    deps = [ "@jargs//:jargs" ],
-    javacopts = _THIRD_PARTY_JAVACOPTS,
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
-_JARGS_BUILD_FILE = _build_file("""
-
-java_library(
-    name = "jargs",
-    srcs = glob([ "src/jargs/gnu/**/*.java" ]),
-    javacopts = _THIRD_PARTY_JAVACOPTS,
-    visibility = [ "//visibility:public" ],
-)
-
-""")
 
 _JERICHO_SELECTOR_BUILD_FILE = _build_file("""
 
@@ -42,66 +23,6 @@ java_library(
     deps = [
         "@br_com_starcode_parccser_parccser//jar",
         "@net_htmlparser_jericho_jericho_html//jar",
-    ],
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
-_RHINO_BUILD_FILE = _build_file("""
-
-filegroup(
-    name = "rhino_sources_for_yui_compiler",
-    srcs = glob(
-        include = [ "src/**/*.java" ],
-        exclude = [
-            "src/org/mozilla/javascript/Decompiler.java",
-            "src/org/mozilla/javascript/Parser.java",
-            "src/org/mozilla/javascript/Token.java",
-            "src/org/mozilla/javascript/TokenStream.java",
-        ],
-    ),
-    visibility = [ "//visibility:public" ],
-)
-
-java_library(
-    name = "rhino",
-    srcs = glob([ "src/**/*.java" ]),
-    javacopts = _THIRD_PARTY_JAVACOPTS,
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
-_JINJA_BUILD_FILE = _build_file("""
-
-py_library(
-    name = "jinja",
-    srcs = glob([ "jinja2/*.py" ]),
-    deps = [
-        "@markup_safe//:markup_safe",
-    ],
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
-_MARKUP_SAFE_BUILD_FILE = _build_file("""
-
-py_library(
-    name = "markup_safe",
-    srcs = glob([ "markupsafe/*.py" ]),
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
-_PY_BASIC_HTTP_SERVER_FILE = _build_file("""
-
-py_library(
-    name = "basic_http_server",
-    srcs = [
-        "BasicHttpServer-1.0.0/BasicHttpServer.py",
     ],
     visibility = [ "//visibility:public" ],
 )
@@ -131,6 +52,7 @@ cc_binary(
         include = [
             "src/*.cc",
             "src/*.h",
+            "include/**/*.h",
         ],
         exclude = [
             "src/convert_woff2ttf_fuzzer*.cc",
@@ -143,7 +65,10 @@ cc_binary(
     deps = [
         "@org_brotli//:brotlienc",
     ],
-    includes = [ "@org_brotli//:enc" ],
+    includes = [
+        "include",
+        "@org_brotli//:enc",
+    ],
     visibility = [ "//visibility:public" ],
 )
 
@@ -181,45 +106,18 @@ py_library(
 """)
 
 def rules_web_repositories():
-    native.new_git_repository(
-        name = "yui_compressor",
-        commit = "958491db9bff77fe97d3ea0b8af38953aa1f6216", # master
-        remote = "https://github.com/yui/yuicompressor.git",
-        build_file_content = _YUI_BUILD_FILE,
+    native.maven_jar(
+        name = "com_yahoo_platform_yui_yuicompressor",
+        artifact = "com.yahoo.platform.yui:yuicompressor:2.4.8",
+        sha1 = "900a7296bb52d740418d53274c1ecac5c83c760e",
     )
 
-    native.new_git_repository(
-        name = "jargs",
-        commit = "87e0009313e4e508102bb20bd9d736bc71ace30d", # master
-        remote = "https://github.com/purcell/jargs.git",
-        build_file_content = _JARGS_BUILD_FILE,
-    )
-
-    native.new_git_repository(
-        name = "rhino",
-        commit = "d89b519209853d446f2d9014e941a5e7b3867df2", # Release 1.7R2
-        remote = "https://github.com/mozilla/rhino.git",
-        build_file_content = _RHINO_BUILD_FILE,
-    )
-
-    native.git_repository(
+    github_repository(
         name = "io_bazel_rules_sass",
+        user = "bazelbuild",
+        project = "rules_sass",
         commit = "c7e0810a6c813a3bc2c9dbbc1f5d696f3c9a8f53", # 0.0.3 + path patch
-        remote = "https://github.com/bazelbuild/rules_sass.git",
-    )
-
-    native.new_git_repository(
-        name = "jinja",
-        commit = "d78a1b079cd985eea7d636f79124ab4fc44cb538", # 2.9.6
-        remote = "https://github.com/pallets/jinja.git",
-        build_file_content = _JINJA_BUILD_FILE,
-    )
-
-    native.new_git_repository(
-        name = "markup_safe",
-        commit = "d2a40c41dd1930345628ea9412d97e159f828157", # 1.0
-        remote = "https://github.com/pallets/markupsafe.git",
-        build_file_content = _MARKUP_SAFE_BUILD_FILE,
+        sha256 = "158b5975b19d7cf12d83ffbe5e7f208f0a9bfe92c1310ad0d948e4895abb5c11",
     )
 
     native.http_jar(
@@ -230,9 +128,15 @@ def rules_web_repositories():
 
     native.new_git_repository(
         name = "utluiz_jericho_selector",
-        commit = "3214ba810595d7d0be94a104496bb7ae7f409165",
+        commit = "8d2b47df389fe5ff62d6676c6477c60559665ced",
         remote = "https://github.com/utluiz/jericho-selector.git",
         build_file_content = _JERICHO_SELECTOR_BUILD_FILE,
+    )
+
+    native.maven_jar(
+        name = "org_mozilla_rhino",
+        artifact = "org.mozilla:rhino:1.7.8",
+        sha1 = "f4810305c9d2053db38f5d768b859cd8aeb80648",
     )
 
     native.maven_jar(
@@ -266,21 +170,9 @@ def rules_web_repositories():
     )
 
     native.maven_jar(
-        name = "org_apache_commons_cli",
-        artifact = "commons-cli:commons-cli:1.4",
-        sha1 = "c51c00206bb913cd8612b24abd9fa98ae89719b1",
-    )
-
-    native.maven_jar(
-        name = "org_apache_commons_io",
-        artifact = "commons-io:commons-io:2.5",
-        sha1 = "2852e6e05fbb95076fc091f6d1780f1f8fe35e0f",
-    )
-
-    native.maven_jar(
         name = "org_apache_commons_lang3",
-        artifact = "org.apache.commons:commons-lang3:3.6",
-        sha1 = "9d28a6b23650e8a7e9063c04588ace6cf7012c17",
+        artifact = "org.apache.commons:commons-lang3:3.7",
+        sha1 = "557edd918fd41f9260963583ebf5a61a43a6b423",
     )
 
     native.maven_jar(
@@ -291,89 +183,99 @@ def rules_web_repositories():
 
     native.maven_jar(
         name = "org_apache_httpcomponents_httpclient",
-        artifact = "org.apache.httpcomponents:httpclient:4.5.3",
-        sha1 = "d1577ae15f01ef5438c5afc62162457c00a34713",
+        artifact = "org.apache.httpcomponents:httpclient:4.5.5",
+        sha1 = "1603dfd56ebcd583ccdf337b6c3984ac55d89e58",
     )
 
     native.maven_jar(
         name = "org_apache_httpcomponents_httpcore",
-        artifact = "org.apache.httpcomponents:httpcore:4.4.6",
-        sha1 = "e3fd8ced1f52c7574af952e2e6da0df8df08eb82",
+        artifact = "org.apache.httpcomponents:httpcore:4.4.9",
+        sha1 = "a86ce739e5a7175b4b234c290a00a5fdb80957a0",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_core",
-        artifact = "com.amazonaws:aws-java-sdk-core:1.11.184",
-        sha1 = "1c2b17dd004e9b721b6639b8a1797e64939cc700",
+        artifact = "com.amazonaws:aws-java-sdk-core:1.11.275",
+        sha1 = "74ef283b06892b2398f6e9013a772868b06d84b9",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_kms",
-        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.184",
-        sha1 = "f00b787f614aa061899adcb44b40c68f6a9fd4d3",
+        artifact = "com.amazonaws:aws-java-sdk-kms:1.11.275",
+        sha1 = "42a5484659a58dfa339f516310bc64c0babfe57e",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_lambda",
-        artifact = "com.amazonaws:aws-java-sdk-lambda:1.11.123",
-        sha1 = "04d7adf30778264f2c32b00532b31bd86556d2f5",
+        artifact = "com.amazonaws:aws-java-sdk-lambda:1.11.275",
+        sha1 = "a365dd512aa2a62cd622d817de8ace574e56b061",
     )
 
     native.maven_jar(
         name = "com_amazonaws_aws_java_sdk_s3",
-        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.184",
-        sha1 = "21c34af4d83fe8156b0c3ae33324de532ad2b216",
+        artifact = "com.amazonaws:aws-java-sdk-s3:1.11.275",
+        sha1 = "4309dd431b168eeeb97adf7062c82d9713f14f01",
     )
 
-    native.git_repository(
+    github_repository(
         name = "io_bazel_rules_go",
-        remote = "https://github.com/bazelbuild/rules_go.git",
-        tag = "0.4.4",
+        user = "bazelbuild",
+        project = "rules_go",
+        tag = "0.9.0",
+        sha256 = "dea9e0405aae86e5339b1ccdd656387b4982352da7cec3ab688f1965440d3326",
     )
 
-    native.git_repository(
+    github_repository(
         name = "org_brotli",
-        commit = "46c1a881b41bb638c76247558aa04b1591af3aa7", # 0.6.0
-        remote = "https://github.com/google/brotli.git",
+        user = "google",
+        project = "brotli",
+        tag = "v1.0.2",
+        sha256 = "c2cf2a16646b44771a4109bb21218c8e2d952babb827796eb8a800c1f94b7422",
     )
 
-    native.new_git_repository(
+    new_github_repository(
         name = "font_tools",
-        commit = "b7cfdaf367a7c8f05bde68bd665842b6c84031dc", # 3.15.1
-        remote = "https://github.com/googlei18n/fonttools.git",
+        user = "fonttools",
+        project = "fonttools",
+        tag = "3.22.0",
         build_file_content = _FONT_TOOLS_BUILD_FILE,
+        sha256 = "e403b7ab34c4d7ee4130289850e2bf63299868e40086e46c9357e7005e37d8a4",
     )
 
-    native.new_git_repository(
+    new_github_repository(
         name = "woff2",
-        commit = "aa283a500aeb655834d77f3cf9cf1b093b0b4389", # master
-        remote = "https://github.com/google/woff2.git",
+        user = "google",
+        project = "woff2",
+        tag = "v1.0.2",
         build_file_content = _WOFF_2_BUILD_FILE,
+        sha256 = "add272bb09e6384a4833ffca4896350fdb16e0ca22df68c0384773c67a175594",
     )
 
-    native.new_git_repository(
+    new_github_repository(
         name = "ttf2eot",
+        user = "metaflop",
+        project = "ttf2eot",
         commit = "0133021ec33552b0b6ae7b3c8f052d067f4b4193", # master
-        remote = "https://github.com/metaflop/ttf2eot.git",
         build_file_content = _TTF_2_EOT_BUILD_FILE,
+        sha256 = "b27613e9415304adeb3de9abd7c0ce5e01b3fc5289055275c6f8c9fe97e7cead",
     )
 
     native.maven_jar(
         name = "pngtastic",
-        artifact = "com.github.depsypher:pngtastic:1.4",
-        sha1 = "3b101e1170c7bd09ef257681ea56808dca4b3823",
+        artifact = "com.github.depsypher:pngtastic:1.5",
+        sha1 = "837f0b6cf384f337a6dd710b72dda9b112589044",
     )
 
     native.maven_jar(
         name = "com_google_javascript_closure_compiler",
-        artifact = "com.google.javascript:closure-compiler:v20170806",
-        sha1 = "708706764914ee53821d70f24db33c3b40c19812",
+        artifact = "com.google.javascript:closure-compiler:v20180204",
+        sha1 = "755c8d0aa25b6a62462ce79189854fcf80db162c",
     )
 
     native.maven_jar(
         name = "br_com_starcode_parccser_parccser",
-        artifact = "br.com.starcode.parccser:parccser:1.1.1-RELEASE",
-        sha1 = "98f9db564ba8887e9f36ec0ac7e2f9f3693606f0",
+        artifact = "br.com.starcode.parccser:parccser:1.1.2-RELEASE",
+        sha1 = "7c018e07fcfbeccd5b363a33ecfbfa2ce4de45d4",
     )
 
     native.maven_jar(
@@ -390,9 +292,9 @@ def rules_web_repositories():
 
     native.new_http_archive(
         name = "pillow",
-        url = "https://pypi.python.org/packages/43/5a/904f2cc20ef9f9ba05f9ff1fb3dfadb1e6923e3bf6f8c8363d5dc3a179ab/Pillow-4.2.1-cp27-cp27mu-manylinux1_x86_64.whl",
+        url = "https://pypi.python.org/packages/89/bd/1d9a10f3e8157b7df275740b0782a892a0db387f8286620110c41e5146c7/Pillow-5.0.0-cp27-cp27mu-manylinux1_x86_64.whl",
         type = "zip",
-        sha256 = "24e8bef1269598ef8f1f418575b12a15bb1a019ea177ad9445b197b8f209a7c8",
+        sha256 = "25193f934d37d836a6b1f4c062ce574a96cbca7c6d9dc8ddfbbac7f9c54deaa4",
         build_file_content = _PILLOW_BUILD_FILE,
     )
 
@@ -402,8 +304,10 @@ def rules_web_repositories():
         sha1 = "25ea2e8b0c338a877313bd4672d3fe056ea78f0d",
     )
 
-    native.git_repository(
+    github_repository(
         name = "bazel_toolbox",
-        commit = "89074361a469da3a582585fdc48ca5c4f65c935a",
-        remote = "https://github.com/quittle/bazel_toolbox.git",
+        user = "quittle",
+        project = "bazel_toolbox",
+        commit = "099c51b826539cdfaf13a2680a4da4ad2d2b99c2",
+        sha256 = "6d44df1775ae49f144eda5a9f029ffb60e7b46163a66cf6a7bedaaf8d8977054",
     )
