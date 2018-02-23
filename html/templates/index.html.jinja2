@@ -1,10 +1,14 @@
 {#
- # Copyright (c) 2016-2017 Dustin Doloff
+ # Copyright (c) 2016-2018 Dustin Doloff
  # Licensed under Apache License v2.0
  #}
 
 {{ doctype or '<!DOCTYPE HTML>'}}
-<html>
+{% if lang %}
+    <html lang="{{ lang }}">
+{% else %}
+    <html>
+{% endif %}
     <head>
         {% for content in inline_js_files_contents %}
             <script type="text/javascript">{{ content }}</script>
