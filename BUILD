@@ -8,5 +8,5 @@ java_binary(
         "@com_yahoo_platform_yui_yuicompressor//jar",
         "@org_mozilla_rhino//jar",
     ],
-    visibility = [ "__subpackages__" ],
+    visibility = [ "//visibility:public" ],
 )
