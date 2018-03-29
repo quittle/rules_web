@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Doloff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//labels:labels.bzl",
@@ -16,6 +16,7 @@ load(":internal.bzl",
     "web_internal_html_page_impl",
     "web_internal_inject_html_impl",
     "web_internal_minify_html_impl",
+    "web_internal_validate_html_impl",
 )
 
 html_page = rule(
@@ -111,4 +112,22 @@ minify_html = rule(
         "min_html_file": "%{name}.min.html",
     },
     implementation = web_internal_minify_html_impl,
+)
+
+validate_html = rule(
+    attrs = {
+        "src": attr.label(
+            allow_files = HTML_FILE_TYPE,
+            single_file = True,
+            mandatory = True,
+        ),
+        "fail_on_warning": attr.bool(
+            default = True,
+        ),
+        "_wrapped_w3c_validator": executable_label(Label("//html:wrapped_nu_validator")),
+    },
+    implementation = web_internal_validate_html_impl,
+    outputs = {
+        "stamp_file": "%{name}.stamp",
+    },
 )

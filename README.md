@@ -72,6 +72,9 @@
   * `inner_html` The inner HTML fragment to inject in.
   * `query_selector` The CSS selector query to find the element in `outer_html` in which to inject.
   * `insertion_mode` The method by which `inner_html` will be injected into `outer_html`.
+* `validate_html` Uses the W3C validator to check an HTML file
+  * `src` The HTML file to validate
+  * `fail_on_warning` Optional flag (defaults to True) to fail the target on warnings as well as errors.
 
 `//images/images.bzl`
 * `favicon_image_generator` Generates favicons of various sizes

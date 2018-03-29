@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
 java_binary(
@@ -17,6 +17,18 @@ py_binary(
     ],
     deps = [
         "@jinja//:jinja",
+    ],
+    visibility = [ "//visibility:public" ],
+)
+
+java_binary(
+    name = "wrapped_nu_validator",
+    main_class = "ValidatorWrapper",
+    srcs = [
+        "java/ValidatorWrapper.java",
+    ],
+    deps = [
+        "@nu_validator//:validator",
     ],
     visibility = [ "//visibility:public" ],
 )

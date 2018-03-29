@@ -11,7 +11,7 @@
 {% endif %}
     <head>
         {% for content in inline_js_files_contents %}
-            <script type="text/javascript">{{ content }}</script>
+            <script>{{ content }}</script>
         {% endfor %}
         <meta charset="{{ charset or 'UTF-8' }}" />
         {% if title %}
@@ -45,11 +45,11 @@
         {% endfor %}
 
         {% for file in js_files  %}
-            <script src="{{ file }}" type="text/javascript"></script>
+            <script src="{{ file }}"></script>
         {% endfor %}
 
         {% for file in deferred_js_files  %}
-            <script src="{{ file }}" defer type="text/javascript"></script>
+            <script src="{{ file }}" defer></script>
         {% endfor %}
     </head>
     {{ include_body() }}

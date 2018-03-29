@@ -3,8 +3,8 @@
     "title": "Title Text",
     "meta": [
         {
-            "key": "fruit",
-            "value": "oranges"
+            "name": "fruit",
+            "content": "oranges"
         }
     ],
     "css_files": [

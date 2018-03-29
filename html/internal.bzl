@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Doloff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//collections:collections.bzl",
@@ -207,3 +207,17 @@ def web_internal_inject_html_impl(ctx):
     ret = dict_to_struct(ret_dict)
 
     return ret
+
+def web_internal_validate_html_impl(ctx):
+    args = [ ctx.outputs.stamp_file.path ]
+    if ctx.attr.fail_on_warning:
+        args.append("--Werror")
+    args.append(ctx.file.src.path)
+
+    ctx.action(
+        mnemonic = "ValidateHtml",
+        arguments = args,
+        inputs = [ ctx.file.src ],
+        executable = ctx.executable._wrapped_w3c_validator,
+        outputs = [ ctx.outputs.stamp_file ],
+    )

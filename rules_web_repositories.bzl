@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
 load("@bazel_repository_toolbox//:github_repository.bzl",
@@ -100,6 +100,18 @@ py_library(
         "PIL/.libs/*",
         "PIL/*.so"
     ]),
+    visibility = [ "//visibility:public" ],
+)
+
+""")
+
+_NU_VALIDATOR_BUILD_FILE = _build_file("""
+
+java_import(
+    name = "validator",
+    jars = [
+        "//:vnu.jar",
+    ],
     visibility = [ "//visibility:public" ],
 )
 
@@ -302,6 +314,14 @@ def rules_web_repositories():
         name = "com_google_code_findbugs_jsr305",
         artifact = "com.google.code.findbugs:jsr305:3.0.2",
         sha1 = "25ea2e8b0c338a877313bd4672d3fe056ea78f0d",
+    )
+
+    native.new_http_archive(
+        name = "nu_validator",
+        url = "https://github.com/validator/validator/releases/download/18.3.0/vnu.jar_18.3.0.zip",
+        sha256 = "9f8bcdc94b5496b9fcb8c01e20fd22684a7dcbbae48804aeb027f17315fb3f8d",
+        strip_prefix = "dist",
+        build_file_content = _NU_VALIDATOR_BUILD_FILE,
     )
 
     github_repository(

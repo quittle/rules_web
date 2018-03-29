@@ -1,8 +1,4 @@
-# Copyright (c) 2016 Dustin Doloff
+# Copyright (c) 2016, 2018 Dustin Toff
 # Licensed under Apache License v2.0
 
-/bazel-bin
-/bazel-genfiles
-/bazel-out
-/bazel-testlogs
-/bazel-rules_web
+/bazel-*

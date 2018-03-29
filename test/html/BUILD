@@ -14,6 +14,7 @@ load("//html:html.bzl",
     "html_page",
     "inject_html",
     "minify_html",
+    "validate_html",
 )
 
 load("//test:test.bzl",
@@ -58,6 +59,10 @@ assert_label_providers(
         },
     },
 )
+validate_html(
+    name = "validate_test_html_page",
+    src = ":test_html_page",
+)
 minify_html(
     name = "minify_test_html_page",
     src = ":test_html_page",
@@ -92,6 +97,10 @@ minify_html(
     src = "test_html_page_expected_unminified.html",
 )
 assert_files_equal(":minify_expected_test_html_page", ":minify_test_html_page")
+validate_html(
+    name = "validate_minify_test_html_page",
+    src = ":minify_test_html_page",
+)
 
 minify_html(
     name = "test_minify_html",
@@ -241,4 +250,10 @@ inner_inherited_providers["source_map"] = reverse(inner_inherited_providers["sou
 assert_label_providers(
     ":inject_html_inner_inherited_providers_test",
     inner_inherited_providers,
+)
+
+validate_html(
+    name = "validate_html_disable_fail_on_warning",
+    src = "warnings.html",
+    fail_on_warning = False,
 )
