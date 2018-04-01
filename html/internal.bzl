@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//collections:collections.bzl",
@@ -210,14 +210,20 @@ def web_internal_inject_html_impl(ctx):
 
 def web_internal_validate_html_impl(ctx):
     args = [ ctx.outputs.stamp_file.path ]
+    inputs = [ ctx.file.src ]
     if ctx.attr.fail_on_warning:
         args.append("--Werror")
+    if ctx.attr.filter_pattern:
+        args.extend(["--filterpattern", ctx.attr.filter_pattern])
+    if ctx.attr.filter_file:
+        args.extend(["--filterfile", ctx.file.filter_file.path])
+        inputs.append(ctx.file.filter_file)
     args.append(ctx.file.src.path)
 
     ctx.action(
         mnemonic = "ValidateHtml",
         arguments = args,
-        inputs = [ ctx.file.src ],
+        inputs = inputs,
         executable = ctx.executable._wrapped_w3c_validator,
         outputs = [ ctx.outputs.stamp_file ],
     )

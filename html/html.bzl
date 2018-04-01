@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2018 Dustin Doloff
+# Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//labels:labels.bzl",
@@ -124,6 +124,11 @@ validate_html = rule(
         "fail_on_warning": attr.bool(
             default = True,
         ),
+        "filter_file": attr.label(
+            allow_files = True,
+            single_file = True,
+        ),
+        "filter_pattern": attr.string(),
         "_wrapped_w3c_validator": executable_label(Label("//html:wrapped_nu_validator")),
     },
     implementation = web_internal_validate_html_impl,

@@ -1,0 +1,5 @@
+# Comment example
+This line matches nothing
+
+# Matches the expected warning
+The \u201ctype\u201d attribute is unnecessary for JavaScript resources\.

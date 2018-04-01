@@ -1,4 +1,4 @@
-# Copyright (c) 2016-2017 Dustin Doloff
+# Copyright (c) 2016-2016 Dustin Toff
 # Licensed under Apache License v2.0
 
 load("@bazel_toolbox//assert:assert.bzl",
@@ -256,4 +256,16 @@ validate_html(
     name = "validate_html_disable_fail_on_warning",
     src = "warnings.html",
     fail_on_warning = False,
+)
+
+validate_html(
+    name = "validate_html_filter_pattern",
+    src = "warnings.html",
+    filter_pattern = "The \\u201ctype\\u201d attribute is unnecessary for JavaScript resources\.",
+)
+
+validate_html(
+    name = "validate_html_filter_file",
+    src = "warnings.html",
+    filter_file = "validator.filter",
 )
