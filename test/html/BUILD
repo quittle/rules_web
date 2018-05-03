@@ -38,6 +38,7 @@ assert_valid_type(":test_html_page", "html")
 assert_label_providers(
     ":test_html_page",
     {
+        "actions": [ None ],
         "css_resources": [
             "test/html/test.css",
         ],
@@ -69,6 +70,7 @@ minify_html(
 )
 # This is re-used by inject_html tests
 minify_test_html_page_providers =  {
+    "actions": [ None ],
     "css_resources": [
         "test/html/test.css",
     ],
@@ -112,6 +114,7 @@ assert_descending_sizes([ "test.html", ":test_minify_html" ])
 assert_label_providers(
     ":test_minify_html",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/html/test_minify_html.min.html",
         ],
@@ -133,6 +136,7 @@ assert_valid_type(":append_inject_html_test", "html")
 assert_label_providers(
     ":append_inject_html_test",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -155,6 +159,7 @@ assert_valid_type(":prepend_inject_html_test", "html")
 assert_label_providers(
     ":prepend_inject_html_test",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -177,6 +182,7 @@ assert_valid_type(":replace_contents_inject_html_test", "html")
 assert_label_providers(
     ":replace_contents_inject_html_test",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -199,6 +205,7 @@ assert_valid_type(":replace_node_inject_html_test", "html")
 assert_label_providers(
     ":replace_node_inject_html_test",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],

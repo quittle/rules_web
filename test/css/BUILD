@@ -23,6 +23,7 @@ assert_descending_sizes([ "test.css", ":test_minify_css" ])
 assert_label_providers(
     ":test_minify_css",
     {
+        "actions": [ None ],
         "css_resources": [
             "{BIN_DIR}/test/css/test_minify_css.min.css",
         ],

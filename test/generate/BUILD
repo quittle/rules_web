@@ -24,6 +24,7 @@ assert_valid_type(":test_generate_variables_js", "js")
 assert_label_providers(
     ":test_generate_variables_js",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [
@@ -44,6 +45,7 @@ assert_valid_type(":test_generate_variables_scss", "scss")
 assert_label_providers(
     ":test_generate_variables_scss",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -64,6 +66,7 @@ assert_valid_type(":test_generate_variables_css", "css")
 assert_label_providers(
     ":test_generate_variables_css",
     {
+        "actions": [ None ],
         "css_resources": [
             "{GEN_DIR}/test/generate/test_generate_variables.css",
         ],

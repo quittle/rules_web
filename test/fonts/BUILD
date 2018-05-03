@@ -35,6 +35,7 @@ font_generator(
 assert_label_providers(
     ":test_font_generator",
     {
+        "actions": [ None ],
         "css_resources": [
             "{GEN_DIR}/test/fonts/test_font_generator__generated.css",
         ],
@@ -56,6 +57,7 @@ minify_css(
 assert_label_providers(
     ":validate_test_font_generator_css",
     {
+        "actions": [ None ],
         "css_resources": [
             "{BIN_DIR}/test/fonts/validate_test_font_generator_css.min.css",
         ],
@@ -79,6 +81,7 @@ assert_descending_sizes([ "test_roboto.ttf", ":test_minify_ttf_roboto" ])
 assert_label_providers(
     ":test_minify_ttf_roboto",
     {
+        "actions": [ None, None, None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -99,6 +102,7 @@ assert_descending_sizes([ "test_raleway.ttf", ":test_minify_ttf_raleway" ])
 assert_label_providers(
     ":test_minify_ttf_raleway",
     {
+        "actions": [ None, None, None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -118,6 +122,7 @@ ttf_to_eot(
 assert_label_providers(
     ":test_ttf_to_eot",
     {
+        "actions": [ None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -135,6 +140,7 @@ ttf_to_woff(
 assert_label_providers(
     ":test_ttf_to_woff",
     {
+        "actions": [ None, None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -153,6 +159,7 @@ assert_descending_sizes([ ":test_ttf_to_woff", ":test_ttf_to_woff2" ])
 assert_label_providers(
     ":test_ttf_to_woff2",
     {
+        "actions": [ None, None ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],

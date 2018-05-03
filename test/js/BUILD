@@ -24,6 +24,7 @@ assert_descending_sizes([ "test.js", ":test_minify_js" ])
 assert_label_providers(
     ":test_minify_js",
     {
+        "actions": [ None ],
         "js_resources": [
             "{BIN_DIR}/test/js/minify_js/test_minify_js.min.js",
         ],
@@ -39,6 +40,7 @@ assert_descending_sizes([ "test.js", ":test_closure_compile" ])
 assert_label_providers(
     ":test_closure_compile",
     {
+        "actions": [ None ],
         "js_resources": [
             "{BIN_DIR}/test/js/closure_compile/test_closure_compile.js",
         ],

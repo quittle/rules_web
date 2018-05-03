@@ -26,6 +26,7 @@ assert_valid_type(":test_crop_image_nothing", "bmp")
 assert_label_providers(
     ":test_crop_image_nothing",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/crop_image/test_crop_image_nothing",
         ],
@@ -47,6 +48,7 @@ assert_valid_type(":test_crop_image_pixels", "bmp")
 assert_label_providers(
     ":test_crop_image_pixels",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/crop_image/test_crop_image_pixels",
         ],
@@ -70,6 +72,7 @@ assert_valid_type(":test_crop_image_percent", "bmp")
 assert_label_providers(
     ":test_crop_image_percent",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/crop_image/test_crop_image_percent",
         ],
@@ -90,6 +93,7 @@ assert_valid_type(":test_crop_image_mix", "bmp")
 assert_label_providers(
     ":test_crop_image_mix",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/crop_image/test_crop_image_mix",
         ],
@@ -107,6 +111,7 @@ assert_descending_sizes([ "test.png", ":test_minify_png" ])
 assert_label_providers(
     ":test_minify_png",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/minified_png/test_minify_png.png",
         ],
@@ -129,6 +134,7 @@ assert_descending_sizes(":test_favicon_image_generator")
 assert_label_providers(
     ":test_favicon_image_generator",
     {
+        "actions": [ None, None, None, None, None, None, None, None ],
         "resources": [
             "{GEN_DIR}/test/images/1.png",
             "{GEN_DIR}/test/images/16.png",
@@ -152,6 +158,7 @@ assert_descending_sizes([ ":test_favicon_image_generator_upsize", "test.png" ])
 assert_label_providers(
     ":test_favicon_image_generator_upsize",
     {
+        "actions": [ None, None ],
         "resources": [
             "{GEN_DIR}/test/images/1000.png",
         ],
@@ -170,6 +177,7 @@ assert_files_equal("white-5x20.bmp", ":test_resize_image_exact")
 assert_label_providers(
     ":test_resize_image_exact",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_exact",
         ],
@@ -190,6 +198,7 @@ assert_files_equal("white-5x5.bmp", ":test_resize_image_given_width")
 assert_label_providers(
     ":test_resize_image_given_width",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_given_width",
         ],
@@ -207,6 +216,7 @@ assert_files_equal("white-10x10.bmp", ":test_resize_image_given_height")
 assert_label_providers(
     ":test_resize_image_given_height",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_given_height",
         ],
@@ -224,6 +234,7 @@ assert_files_equal("white-5x5.bmp", ":test_resize_image_scale")
 assert_label_providers(
     ":test_resize_image_scale",
     {
+        "actions": [ None ],
         "resources": [
             "{BIN_DIR}/test/images/resize_image/test_resize_image_scale",
         ],

@@ -328,6 +328,6 @@ def rules_web_repositories():
         name = "bazel_toolbox",
         user = "quittle",
         project = "bazel_toolbox",
-        commit = "099c51b826539cdfaf13a2680a4da4ad2d2b99c2",
-        sha256 = "6d44df1775ae49f144eda5a9f029ffb60e7b46163a66cf6a7bedaaf8d8977054",
+        commit = "dfe324d87b60b35825388998ac34b7adbecceb6c",
+        sha256 = "b2cf306f25c7a909b2b0142bd592e6e0e5847049036591bfe1e730d72deddc3d",
     )
