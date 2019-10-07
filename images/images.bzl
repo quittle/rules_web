@@ -1,11 +1,12 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_crop_image",
     "web_internal_favicon_image_generator",
     "web_internal_generate_ico",
@@ -16,8 +17,7 @@ load(":internal.bzl",
 crop_image = rule(
     attrs = {
         "image": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "width": attr.string(default = "100%"),
@@ -36,8 +36,7 @@ crop_image = rule(
 favicon_image_generator = rule(
     attrs = {
         "image": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "output_files": attr.output_list(
@@ -63,8 +62,7 @@ favicon_image_generator = rule(
 minify_png = rule(
     attrs = {
         "png": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "_pngtastic": executable_label(Label("//images:simplified_pngtastic")),
@@ -78,8 +76,7 @@ minify_png = rule(
 resize_image = rule(
     attrs = {
         "image": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "width": attr.int(default = -1),
@@ -98,8 +95,7 @@ resize_image = rule(
 _generate_ico = rule(
     attrs = {
         "source": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "sizes": attr.int_list(

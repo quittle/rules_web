@@ -2,9 +2,8 @@
 # Licensed under Apache License v2.0
 
 import argparse
-from HTMLParser import HTMLParser
+from html.parser import HTMLParser
 import json
-import os
 from PIL import Image
 import sys
 
@@ -19,7 +18,7 @@ def parse_args():
 # This is not a great parser. It does not support strict parsing
 def validate_html(file):
     parser = HTMLParser()
-    parser.feed(file.read())
+    parser.feed(file.read().decode("utf-8"))
     parser.close()
 
 def validate_json(file):
@@ -53,7 +52,7 @@ def main():
             elif file_type == 'png':
                 validate_png(fp)
             else:
-                print 'Invalid file type: ' + file_type
+                print('Invalid file type: ' + file_type)
                 sys.exit(1)
 
     with args.stamp as stamp_file:

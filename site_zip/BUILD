@@ -6,7 +6,7 @@ py_binary(
     srcs = [
         "scripts/zip_site.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
 
 py_binary(
@@ -14,5 +14,5 @@ py_binary(
     srcs = [
         "scripts/rename_zip_paths.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )

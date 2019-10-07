@@ -1,18 +1,19 @@
 # Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load("//:constants.bzl",
+load(
+    "//:constants.bzl",
     "CSS_FILE_TYPE",
     "HTML_FILE_TYPE",
-    "JS_FILE_TYPE",
     "JSON_FILE_TYPE",
+    "JS_FILE_TYPE",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_html_page_impl",
     "web_internal_inject_html_impl",
     "web_internal_minify_html_impl",
@@ -23,18 +24,15 @@ html_page = rule(
     attrs = {
         "template": attr.label(
             default = Label("//html/templates:index.html.jinja2"),
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
         ),
         "config": attr.label(
-            single_file = True,
+            allow_single_file = JSON_FILE_TYPE,
             mandatory = True,
-            allow_files = JSON_FILE_TYPE,
         ),
         "body": attr.label(
-            single_file = True,
+            allow_single_file = True,
             mandatory = True,
-            allow_files = True,
         ),
         "deferred_js_files": attr.label_list(
             default = [],
@@ -70,13 +68,11 @@ html_page = rule(
 inject_html = rule(
     attrs = {
         "outer_html": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "inner_html": attr.label(
-            single_file = True,
-            allow_files = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "query_selector": attr.string(
@@ -102,8 +98,7 @@ inject_html = rule(
 minify_html = rule(
     attrs = {
         "src": attr.label(
-            allow_files = HTML_FILE_TYPE,
-            single_file = True,
+            allow_single_file = HTML_FILE_TYPE,
             mandatory = True,
         ),
         "_html_compressor": executable_label(Label("//html:html_compressor")),
@@ -117,16 +112,14 @@ minify_html = rule(
 validate_html = rule(
     attrs = {
         "src": attr.label(
-            allow_files = HTML_FILE_TYPE,
-            single_file = True,
+            allow_single_file = HTML_FILE_TYPE,
             mandatory = True,
         ),
         "fail_on_warning": attr.bool(
             default = True,
         ),
         "filter_file": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "filter_pattern": attr.string(),
         "_wrapped_w3c_validator": executable_label(Label("//html:wrapped_nu_validator")),

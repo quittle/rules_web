@@ -1,7 +1,8 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//collections:collections.bzl",
+load(
+    "@bazel_toolbox//collections:collections.bzl",
     "merge_dicts",
 )
 
@@ -20,12 +21,12 @@ def optional_arg_(flag, val):
 
     if val_type == "bool":
         if val:
-            return [ flag ]
+            return [flag]
     elif val_type == "list":
         if len(val) > 0:
-            return [ flag ] + [ str(v) for v in val ]
+            return [flag] + [str(v) for v in val]
     elif val != None:
-        return [ flag, str(val) ]
+        return [flag, str(val)]
 
     return []
 
@@ -34,21 +35,23 @@ def optional_arg_(flag, val):
 # resource - dict like object - The dict to get properties from
 # opt_ignore_types - list of str - An optional list of types to leave out of the returned struct
 # A merged struct with all the resources in resource on top of orig_struct's resources
-def transitive_resources_(orig_struct, resource, opt_ignore_types=[]):
+def transitive_resources_(orig_struct, resource, opt_ignore_types = []):
     if type(orig_struct) != "struct":
         fail("orig_struct is not a struct")
     if type(opt_ignore_types) != "list":
         fail("opt_ignore_types is not a list")
 
     return struct(
-        source_map = merge_dicts(getattr(orig_struct, "source_map", {}),
-                getattr(resource, "source_map", {}) if "source_map" not in opt_ignore_types else {}),
-        resources = getattr(orig_struct, "resources", depset()) +
-                (getattr(resource, "resources", depset()) if "resources" not in opt_ignore_types else depset()),
-        css_resources = getattr(orig_struct, "css_resources", depset()) +
-                (getattr(resource, "css_resources", depset()) if "css_resources" not in opt_ignore_types else depset()),
-        deferred_js_resources = getattr(orig_struct, "deferred_js_resources", depset()) +
-                (getattr(resource, "deferred_js_resources", depset()) if "deferred_js_resources" not in opt_ignore_types else depset()),
-        js_resources = getattr(orig_struct, "js_resources", depset()) +
-                (getattr(resource, "js_resources", depset()) if "js_resources" not in opt_ignore_types else depset()),
+        source_map = merge_dicts(
+            getattr(orig_struct, "source_map", {}),
+            getattr(resource, "source_map", {}) if "source_map" not in opt_ignore_types else {},
+        ),
+        resources = depset(getattr(orig_struct, "resources", depset()).to_list() +
+                           (getattr(resource, "resources", depset()).to_list() if "resources" not in opt_ignore_types else list())),
+        css_resources = depset(getattr(orig_struct, "css_resources", depset()).to_list() +
+                               (getattr(resource, "css_resources", depset()).to_list() if "css_resources" not in opt_ignore_types else list())),
+        deferred_js_resources = depset(getattr(orig_struct, "deferred_js_resources", depset()).to_list() +
+                                       (getattr(resource, "deferred_js_resources", depset()).to_list() if "deferred_js_resources" not in opt_ignore_types else list())),
+        js_resources = depset(getattr(orig_struct, "js_resources", depset()).to_list() +
+                              (getattr(resource, "js_resources", depset()).to_list() if "js_resources" not in opt_ignore_types else list())),
     )

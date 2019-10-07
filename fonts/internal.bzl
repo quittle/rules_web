@@ -1,19 +1,22 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//actions:actions.bzl",
+load(
+    "@bazel_toolbox//actions:actions.bzl",
     "file_copy",
 )
-
-load("//:internal.bzl",
+load(
+    "//:internal.bzl",
     "transitive_resources_",
 )
 
 def web_internal_font_generator(ctx):
     # CSS src line for ie support
     single_source = ""
+
     # CSS  src line with multiple fonts for non-ie support. Contains tupples of (url, type)
     multi_source = []
+
     # Resources for transitive dependencies
     resources = []
     if ctx.file.eot != None:
@@ -36,17 +39,21 @@ def web_internal_font_generator(ctx):
     if ctx.file.svg != None:
         svg = "/" + ctx.file.svg.path
         multi_source.append((
-                "{svg}#{name}-{weight}-{style}".format( # Must be unique per variant
-                        svg = svg,
-                        name = ctx.attr.name,
-                        weight = ctx.attr.weight,
-                        style = ctx.attr.style),
-                "svg"))
+            "{svg}#{name}-{weight}-{style}".format(
+                # Must be unique per variant
+                svg = svg,
+                name = ctx.attr.name,
+                weight = ctx.attr.weight,
+                style = ctx.attr.style,
+            ),
+            "svg",
+        ))
         resources.append(svg)
 
     multi_source = [
-            "url('{path}') format('{type}')".format(path=path,type=type)
-                    for (path, type) in multi_source ]
+        "url('{path}') format('{type}')".format(path = path, type = type)
+        for (path, type) in multi_source
+    ]
     if len(multi_source) > 0:
         multi_source = "src: {formats};".format(formats = ",".join(multi_source))
 
@@ -61,28 +68,27 @@ def web_internal_font_generator(ctx):
                     font-style: {style};
                 }}
             """.format(
-                name = ctx.attr.font_name,
-                single_source = single_source,
-                multi_source = multi_source,
-                weight = ctx.attr.weight,
-                style = ctx.attr.style,
-            )
+        name = ctx.attr.font_name,
+        single_source = single_source,
+        multi_source = multi_source,
+        weight = ctx.attr.weight,
+        style = ctx.attr.style,
+    )
 
-    ctx.file_action(
+    ctx.actions.write(
         output = ctx.outputs.out_css,
-        content = content
+        content = content,
     )
 
     ret = struct(
         resources = depset(
-            [ file for file in
-                [
-                    ctx.file.eot,
-                    ctx.file.ttf,
-                    ctx.file.woff,
-                    ctx.file.woff2,
-                    ctx.file.svg,
-                ] if file != None ]
+            [file for file in [
+                ctx.file.eot,
+                ctx.file.ttf,
+                ctx.file.woff,
+                ctx.file.woff2,
+                ctx.file.svg,
+            ] if file != None],
         ),
         css_resources = depset([
             ctx.outputs.out_css,
@@ -104,54 +110,58 @@ def _generate_ttx(ctx, in_ttf, out_ttx, ttx_executable):
     if (type(ttx_executable) != "File"):
         fail("ttx_executable was not a File")
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateTTX",
         arguments = [
             "-q",
-            "-o", out_ttx.path,
+            "-o",
+            out_ttx.path,
             in_ttf.path,
         ],
-        inputs = [ in_ttf ],
+        inputs = [in_ttf],
         executable = ttx_executable,
-        outputs = [ out_ttx ],
+        outputs = [out_ttx],
     )
 
 def web_internal_minify_ttf(ctx):
     name = ctx.label.name
-    ttx = ctx.new_file("{name}__generated_ttx.ttx".format(name = name))
-    min_ttx = ctx.new_file("{name}__generated_min_ttx.ttx".format(name = name))
+    ttx = ctx.actions.declare_file("{name}__generated_ttx.ttx".format(name = name))
+    min_ttx = ctx.actions.declare_file("{name}__generated_min_ttx.ttx".format(name = name))
 
     _generate_ttx(ctx, ctx.file.ttf, ttx, ctx.executable._ttx)
 
     # BUG: There is a currently a bug where running ttx via `ctx.action` but not directly or even
     # via `bazel run @font_tools//:ttx` causes ttx to act strangely. For instance, a minimal action
     # that runs `ttx --version` will show 3.0 instead of 3.1.2. This is mostly fine, however.
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "MinifyTTX",
         arguments = [
-            "--in-ttx", ttx.path,
-            "--out-ttx", min_ttx.path,
+            "--in-ttx",
+            ttx.path,
+            "--out-ttx",
+            min_ttx.path,
         ],
-        inputs = [ ttx ],
+        inputs = [ttx],
         executable = ctx.executable._minify_ttx,
-        outputs = [ min_ttx ],
+        outputs = [min_ttx],
     )
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateMinimalTTX",
         arguments = [
             "-q",
-            "-o", ctx.outputs.out_ttf.path,
+            "-o",
+            ctx.outputs.out_ttf.path,
             min_ttx.path,
         ],
-        inputs = [ min_ttx ],
+        inputs = [min_ttx],
         executable = ctx.executable._ttx,
-        outputs = [ ctx.outputs.out_ttf ],
+        outputs = [ctx.outputs.out_ttf],
     )
 
     ret = struct(
-        resources = depset([ ctx.outputs.out_ttf ]),
-        source_map = { ctx.file.ttf.short_path: ctx.outputs.out_ttf }
+        resources = depset([ctx.outputs.out_ttf]),
+        source_map = {ctx.file.ttf.short_path: ctx.outputs.out_ttf},
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)
@@ -159,19 +169,19 @@ def web_internal_minify_ttf(ctx):
     return ret
 
 def web_internal_ttf_to_eot(ctx):
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateEOT",
         arguments = [
             ctx.file.ttf.path,
             ctx.outputs.out_eot.path,
         ],
-        inputs = [ ctx.file.ttf ],
+        inputs = [ctx.file.ttf],
         executable = ctx.executable._ttf2eot,
-        outputs = [ ctx.outputs.out_eot ],
+        outputs = [ctx.outputs.out_eot],
     )
 
     ret = struct(
-        resources = depset([ ctx.outputs.out_eot ]),
+        resources = depset([ctx.outputs.out_eot]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)
@@ -180,25 +190,27 @@ def web_internal_ttf_to_eot(ctx):
 
 def web_internal_ttf_to_woff(ctx):
     name = ctx.label.name
-    ttx = ctx.new_file("{name}__generated_ttx.ttx".format(name = name))
+    ttx = ctx.actions.declare_file("{name}__generated_ttx.ttx".format(name = name))
 
     _generate_ttx(ctx, ctx.file.ttf, ttx, ctx.executable._ttx)
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateWOFF",
         arguments = [
             "-q",
-            "--flavor", "woff",
-            "-o", ctx.outputs.out_woff.path,
+            "--flavor",
+            "woff",
+            "-o",
+            ctx.outputs.out_woff.path,
             ttx.path,
         ],
-        inputs = [ ttx ],
+        inputs = [ttx],
         executable = ctx.executable._ttx,
-        outputs = [ ctx.outputs.out_woff ],
+        outputs = [ctx.outputs.out_woff],
     )
 
     ret = struct(
-        resources = depset([ ctx.outputs.out_woff ]),
+        resources = depset([ctx.outputs.out_woff]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)
@@ -208,22 +220,22 @@ def web_internal_ttf_to_woff(ctx):
 def web_internal_ttf_to_woff2(ctx):
     # The tool unfortunately does not take the output path as an argument and simply creates a new
     # file next to the old one with a new extension
-    copied_source = ctx.new_file(ctx.outputs.out_woff2.basename.replace(".woff2", ".ttf"))
+    copied_source = ctx.actions.declare_file(ctx.outputs.out_woff2.basename.replace(".woff2", ".ttf"))
 
     file_copy(ctx, ctx.executable._file_copy, ctx.file.ttf, copied_source)
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateWOFF2",
         arguments = [
             copied_source.path,
         ],
-        inputs = [ copied_source ],
+        inputs = [copied_source],
         executable = ctx.executable._ttf2woff2,
-        outputs = [ ctx.outputs.out_woff2 ],
+        outputs = [ctx.outputs.out_woff2],
     )
 
     ret = struct(
-        resources = depset([ ctx.outputs.out_woff2 ]),
+        resources = depset([ctx.outputs.out_woff2]),
     )
 
     ret = transitive_resources_(ret, ctx.attr.ttf)

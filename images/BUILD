@@ -7,7 +7,7 @@ py_binary(
         "scripts/create_ico.py",
     ],
     main = "scripts/create_ico.py",
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
 
 py_binary(
@@ -15,8 +15,8 @@ py_binary(
     srcs = [
         "scripts/crop_image.py",
     ],
-    deps = [ "@pillow//:pillow" ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
+    deps = ["@pip//pillow"],
 )
 
 py_binary(
@@ -24,27 +24,27 @@ py_binary(
     srcs = [
         "scripts/resize_image.py",
     ],
-    deps = [ "@pillow//:pillow" ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
+    deps = ["@pip//pillow"],
 )
 
 java_binary(
     name = "pngtastic",
     main_class = "com.googlecode.pngtastic.PngtasticOptimizer",
-    runtime_deps = [ "@pngtastic//jar" ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
+    runtime_deps = ["@pngtastic//jar"],
 )
 
 java_binary(
     name = "simplified_pngtastic",
-    main_class = "com.dustindoloff.pngtastic.Main",
     srcs = [
         "pngtastic/java/src/com/dustindoloff/pngtastic/Main.java",
     ],
+    main_class = "com.dustindoloff.pngtastic.Main",
+    visibility = ["//visibility:public"],
     deps = [
         "@com_google_code_findbugs_jsr305//jar",
         "@org_apache_commons_cli//jar",
         "@pngtastic//jar",
     ],
-    visibility = [ "//visibility:public" ],
 )

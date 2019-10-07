@@ -8,7 +8,7 @@ import zipfile
 def parse_args():
     parser = argparse.ArgumentParser(
             description='Detects and zips all the required files for a site together')
-    parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
+    parser.add_argument('--output', type=argparse.FileType('wb+'), required=True)
     parser.add_argument('--root-files', type=str, nargs='+', default=[])
     parser.add_argument('--resources', type=str, nargs='+', default=[])
     parser.add_argument('--source-map', type=json.loads, default={})
@@ -39,6 +39,8 @@ def main():
     with zipfile.ZipFile(args.output, mode='w') as out_zip:
         for page in args.root_files:
             process_file(page, out_zip, args.source_map, set(args.resources))
+
+        out_zip.close()
 
 
 if __name__ == '__main__':

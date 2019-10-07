@@ -12,7 +12,7 @@ PPEM_KEY = 'ppem'
 def parse_args():
     parser = argparse.ArgumentParser(description='Minifies a TTX file')
     parser.add_argument('--in-ttx', type=argparse.FileType('r'), required=True)
-    parser.add_argument('--out-ttx', type=argparse.FileType('w+'), required=True)
+    parser.add_argument('--out-ttx', type=argparse.FileType('wb+'), required=True)
     return parser.parse_args()
 
 def next_name():
@@ -59,12 +59,12 @@ def main():
         if 'name' in attributes:
             name = attributes['name']
             if name not in name_map :
-                name_map[name] = name_generator.next()
+                name_map[name] = next(name_generator)
 
         if 'glyph' in attributes:
             glyph = attributes['glyph']
             if glyph not in name_map :
-                name_map[glyph] = name_generator.next()
+                name_map[glyph] = next(name_generator)
 
     for element in root.iter():
         attributes = element.attrib
@@ -105,7 +105,7 @@ def main():
             # Build into new dict to avoid overriding match values (such as the short name "m"
             # replacing the real name for the glyph "m")
             new_values = {}
-            for key, value in values.iteritems():
+            for key, value in values.items():
                 if key != PPEM_KEY and key in name_map:
                     key = name_map[key]
 
@@ -120,7 +120,7 @@ def main():
 
             element.text += ';\n'.join(
                         [ key + ': ' + value
-                            for key, value in new_values.iteritems() ]
+                            for key, value in new_values.items() ]
                     ) + ';'
 
         # Clear dates

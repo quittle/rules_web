@@ -1,5 +1,7 @@
+dist: bionic
+
 env:
-    - BAZEL_VERSION='0.13.0'
+    - BAZEL_VERSION='0.29.1'
 
 sudo: true
 

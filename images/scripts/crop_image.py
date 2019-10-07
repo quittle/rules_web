@@ -7,12 +7,12 @@ import sys
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Resizes an image')
-    parser.add_argument('--source', type=argparse.FileType('r'), required=True)
+    parser.add_argument('--source', type=argparse.FileType('rb'), required=True)
     parser.add_argument('--width', type=str, required=True)
     parser.add_argument('--height', type=str, required=True)
     parser.add_argument('--x-offset', type=str, required=True)
     parser.add_argument('--y-offset', type=str, required=True)
-    parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
+    parser.add_argument('--output', type=argparse.FileType('wb+'), required=True)
     return parser.parse_args()
 
 def parse_number(number):
@@ -23,18 +23,18 @@ def parse_number(number):
 
 def check_bounds(number):
     if number < 0:
-        print 'Argument may not be negative: %d' % number
+        print('Argument may not be negative: %d' % number)
         sys.exit(1)
 
     num_type = type(number)
     if num_type == float:
         if number > 1:
-            print 'Percent may not be greater than 100%'
+            print('Percent may not be greater than 100%')
             sys.exit(1)
     elif num_type == int:
         pass
     else:
-        print 'Invalid number type: %s' % num_type
+        print('Invalid number type: %s' % num_type)
         sys.exit(1)
 
 def is_pct(number):
@@ -68,10 +68,10 @@ def main():
         y_offset = convert_dimension(image_height, y_offset)
 
         if x_offset + width > image_width:
-            print 'Cropped image outside bounds of source width'
+            print('Cropped image outside bounds of source width')
             sys.exit(2)
         elif y_offset + height > image_height:
-            print 'Cropped image outside bounds of source height'
+            print('Cropped image outside bounds of source height')
             sys.exit(2)
 
         resized_image = image.crop((x_offset, y_offset, x_offset + width, y_offset + height))

@@ -1,11 +1,12 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_font_generator",
     "web_internal_minify_ttf",
     "web_internal_ttf_to_eot",
@@ -19,24 +20,19 @@ font_generator = rule(
             mandatory = True,
         ),
         "eot": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "woff": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "woff2": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "svg": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "weight": attr.string(
             default = "normal",
@@ -67,15 +63,14 @@ font_generator = rule(
     implementation = web_internal_font_generator,
     output_to_genfiles = True,
     outputs = {
-        "out_css": "%{name}__generated.css"
+        "out_css": "%{name}__generated.css",
     },
 )
 
 minify_ttf = rule(
     attrs = {
         "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "_ttx": executable_label("@font_tools//:ttx"),
@@ -91,8 +86,7 @@ minify_ttf = rule(
 ttf_to_eot = rule(
     attrs = {
         "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "_ttf2eot": executable_label("@ttf2eot//:ttf2eot"),
@@ -107,8 +101,7 @@ ttf_to_eot = rule(
 ttf_to_woff = rule(
     attrs = {
         "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "_ttx": executable_label("@font_tools//:ttx"),
@@ -123,8 +116,7 @@ ttf_to_woff = rule(
 ttf_to_woff2 = rule(
     attrs = {
         "ttf": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             mandatory = True,
         ),
         "_ttf2woff2": executable_label("@woff2//:ttf2woff2"),

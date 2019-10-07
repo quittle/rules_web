@@ -6,7 +6,7 @@ py_binary(
     srcs = [
         "scripts/assert_descending_sizes.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )
 
 py_binary(
@@ -14,6 +14,6 @@ py_binary(
     srcs = [
         "scripts/assert_valid_type.py",
     ],
-    deps = [ "@pillow//:pillow" ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
+    deps = ["@pip//pillow"],
 )

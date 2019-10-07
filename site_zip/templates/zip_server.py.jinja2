@@ -5,14 +5,15 @@
 
 import argparse
 import signal
-import SimpleHTTPServer
-import SocketServer
+import http.server
+import socketserver
 import sys
 import threading
 import zipfile
 
 def perror(msg):
     sys.stderr.write(msg + '\n')
+    sys.stderr.flush()
 
 def shutdown_server(server):
     server.shutdown()
@@ -21,10 +22,10 @@ def shutdown_server(server):
 def handler(signum, frame, server):
     threading.Thread(target=shutdown_server, args=[server]).start()
 
-class ReuseAddrTCPServer(SocketServer.TCPServer):
+class ReuseAddrTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
 
-class ZipRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class ZipRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_HEAD(s):
         s.send_response(200)
         s.end_headers()
@@ -37,6 +38,7 @@ class ZipRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             self.wfile.write(info.read())
         except KeyError:
             self.send_response(404)
+            self.end_headers()
         return
 
 def parse_args():

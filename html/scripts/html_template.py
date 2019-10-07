@@ -32,7 +32,7 @@ def dict_extend(dictionary, key, extension):
         dictionary[key] = dictionary.get(key, {})
         dictionary[key].update(extension)
     else:
-        print 'Unrecognized extension type: ' + str(extension_type)
+        print('Unrecognized extension type: ' + str(extension_type))
         sys.exit(2)
 
 def include_body():
@@ -42,7 +42,7 @@ def main():
     args = parse_args()
 
     if len(args.favicons) % 2 != 0:
-        print 'Favicons must contain an even number of items'
+        print('Favicons must contain an even number of items')
         sys.exit(1)
 
     favicons = dict(zip((int(size) for size in args.favicons[0::2]), args.favicons[1::2]))

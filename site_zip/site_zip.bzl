@@ -1,11 +1,12 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_generate_zip_server_python_file",
     "web_internal_rename_zip_paths",
     "web_internal_zip_site",
@@ -27,8 +28,7 @@ _rename_zip_paths = rule(
     attrs = {
         "source_zip": attr.label(
             mandatory = True,
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "path_map_labels_in": attr.label_list(
             allow_files = True,
@@ -42,7 +42,7 @@ _rename_zip_paths = rule(
     implementation = web_internal_rename_zip_paths,
 )
 
-def rename_zip_paths(name=None, source_zip=None, path_map=None):
+def rename_zip_paths(name = None, source_zip = None, path_map = None):
     return _rename_zip_paths(
         name = name,
         source_zip = source_zip,
@@ -53,8 +53,7 @@ def rename_zip_paths(name=None, source_zip=None, path_map=None):
 generate_zip_server_python_file = rule(
     attrs = {
         "zip": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "host": attr.string(
             mandatory = True,
@@ -65,8 +64,7 @@ generate_zip_server_python_file = rule(
         "out_file": attr.output(),
         "_template": attr.label(
             default = Label("//site_zip/templates:zip_server.py.jinja2"),
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         "_generate_jinja_file": executable_label("@bazel_toolbox//actions:generate_templated_file"),
     },
@@ -74,9 +72,9 @@ generate_zip_server_python_file = rule(
     implementation = web_internal_generate_zip_server_python_file,
 )
 
-def zip_server(name, zip, host = 'localhost', port = 80):
-    generated_file_target = "{name}__args".format(name=name)
-    generated_file_name = "zip_server_{name}.py".format(name=name)
+def zip_server(name, zip, host = "localhost", port = 80):
+    generated_file_target = "{name}__args".format(name = name)
+    generated_file_name = "zip_server_{name}.py".format(name = name)
 
     generate_zip_server_python_file(
         name = generated_file_target,
@@ -88,16 +86,16 @@ def zip_server(name, zip, host = 'localhost', port = 80):
 
     # This group is so the generated zip can be referenced as data by the binary as it can't be
     # consumed directly.
-    fg_name = "{name}__zip_filegroup".format(name=name)
+    fg_name = "{name}__zip_filegroup".format(name = name)
     native.filegroup(
         name = fg_name,
-        srcs = [ zip ]
+        srcs = [zip],
     )
 
     native.py_binary(
         name = name,
         srcs = [
-            ":{generated_file_target}".format(generated_file_target=generated_file_target),
+            ":{generated_file_target}".format(generated_file_target = generated_file_target),
         ],
         data = [
             fg_name,

@@ -1,36 +1,44 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//actions:actions.bzl",
+load(
+    "@bazel_toolbox//actions:actions.bzl",
     "generate_templated_file",
 )
-
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load("//:internal.bzl",
+load(
+    "//:internal.bzl",
     "optional_arg_",
 )
 
 def _generate_deploy_site_zip_s3_script(ctx):
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GeneratingS3DeployScript",
         arguments = [
-            "--bucket", ctx.attr.bucket,
-            "--cache-durations", ctx.attr.cache_durations,
-            "--content-types", repr(ctx.attr.content_types),
-            "--path-redirects", repr(ctx.attr.path_redirects),
-            "--deployment-jinja-template", ctx.file._deploy_site_zip_to_s3_template.path,
-            "--generated-file", ctx.outputs.generated_script.path,
-            "--website-zip", ctx.file.zip.path,
+            "--bucket",
+            ctx.attr.bucket,
+            "--cache-durations",
+            ctx.attr.cache_durations,
+            "--content-types",
+            repr(ctx.attr.content_types),
+            "--path-redirects",
+            repr(ctx.attr.path_redirects),
+            "--deployment-jinja-template",
+            ctx.file._deploy_site_zip_to_s3_template.path,
+            "--generated-file",
+            ctx.outputs.generated_script.path,
+            "--website-zip",
+            ctx.file.zip.path,
         ],
         inputs = [
             ctx.file.zip,
             ctx.file._deploy_site_zip_to_s3_template,
-            ctx.executable._s3_website_deploy_script_builder,
         ],
-        outputs = [ ctx.outputs.generated_script ],
+        tools = [ctx.executable._s3_website_deploy_script_builder],
+        outputs = [ctx.outputs.generated_script],
         executable = ctx.executable._s3_website_deploy_script_builder,
     )
 
@@ -41,8 +49,7 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
         ),
         "zip": attr.label(
             mandatory = True,
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
         # Because this should never be called directly, we use string serialization to pass in the
         # cache values
@@ -55,11 +62,9 @@ web_internal_generate_deploy_site_zip_s3_script = rule(
             default = Label("//deploy/templates:deploy_site_zip_to_s3.py.jinja2"),
             executable = True,
             cfg = "host",
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
         ),
-        "_s3_website_deploy_script_builder":
-                executable_label(Label("//deploy:s3_website_deploy_script_builder")),
+        "_s3_website_deploy_script_builder": executable_label(Label("//deploy:s3_website_deploy_script_builder")),
     },
     implementation = _generate_deploy_site_zip_s3_script,
     outputs = {
@@ -73,7 +78,7 @@ def _generate_lambda_function_script(ctx):
         "function_handler": ctx.attr.function_handler,
         "function_role": ctx.attr.function_role,
         "function_runtime": ctx.attr.function_runtime,
-        "function_zip": ctx.file.bundle.short_path
+        "function_zip": ctx.file.bundle.short_path,
     }
 
     region = ctx.attr.region
@@ -128,8 +133,8 @@ web_internal_generate_deploy_lambda_function_script = rule(
             mandatory = True,
             allow_single_file = True,
             providers = [
-                [ "java" ],
-                [ "py" ],
+                ["java"],
+                ["py"],
             ],
         ),
         "region": attr.string(),
@@ -140,8 +145,7 @@ web_internal_generate_deploy_lambda_function_script = rule(
             default = Label("//deploy/templates:deploy_lambda_function_template.py.jinja2"),
             allow_single_file = True,
         ),
-        "_generate_templated_file_script":
-                executable_label(Label("@bazel_toolbox//actions:generate_templated_file")),
+        "_generate_templated_file_script": executable_label(Label("@bazel_toolbox//actions:generate_templated_file")),
     },
     implementation = _generate_lambda_function_script,
     outputs = {
@@ -150,21 +154,23 @@ web_internal_generate_deploy_lambda_function_script = rule(
 )
 
 def _generate_wrapper_script(ctx):
-    label_to_target = { value: key for key, value in ctx.attr.label_replacements.items() }
+    label_to_target = {value: key for key, value in ctx.attr.label_replacements.items()}
 
     arguments = []
     for arg in ctx.attr.arguments:
         arguments.push(label_to_target.get(arg, arg))
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GeneratingWrapperScript",
         arguments = [
-            "--executable", ctx.file.binary.path,
-            "--generated-file", ctx.outputs.generated_script.path,
-        ] + [ "--arguments" ] + arguments,
-        inputs = [ ctx.file.binary ],
+            "--executable",
+            ctx.file.binary.path,
+            "--generated-file",
+            ctx.outputs.generated_script.path,
+        ] + ["--arguments"] + arguments,
+        inputs = [ctx.file.binary],
         executable = ctx.executable._execute_script_wrapper_builder,
-        outputs = [ ctx.outputs.generated_script ],
+        outputs = [ctx.outputs.generated_script],
     )
 
 web_internal_generate_wrapper_script = rule(
@@ -181,8 +187,7 @@ web_internal_generate_wrapper_script = rule(
             allow_files = True,
         ),
         "generated_script": attr.output(),
-        "_execute_script_wrapper_builder":
-                executable_label(Label("//deploy:execute_script_wrapper_builder")),
+        "_execute_script_wrapper_builder": executable_label(Label("//deploy:execute_script_wrapper_builder")),
     },
     implementation = _generate_wrapper_script,
 )

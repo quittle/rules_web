@@ -14,7 +14,7 @@ def stringify_css(json):
                 ']')
     elif isinstance(json, dict):
         return ('{' +
-                ', '.join(key + ': ' + stringify_css(value) for key, value in json.iteritems()) +
+                ', '.join(key + ': ' + stringify_css(value) for key, value in json.items()) +
                 '}')
     elif isinstance(json, bool):
         return 'true' if json else 'false'
@@ -28,15 +28,17 @@ def stringify_scss(json):
                 ')')
     elif isinstance(json, dict):
         return ('(' +
-                ', '.join(stringify_scss(key) + ': ' + stringify_scss(value) for key, value in json.iteritems()) +
+                ', '.join(stringify_scss(key) + ': ' + stringify_scss(value) for key, value in json.items()) +
                 ')')
     elif isinstance(json, bool):
         return 'true' if json else 'false'
-    elif isinstance(json, unicode):
-        return '\'' + str(json) + '\''
+    elif isinstance(json, str):
+        return '\'' + json + '\''
     else:
         return str(json)
 
+
+# noinspection PyInterpreter
 class VariableWriter:
     def __init__(self, file, config):
         self._file = file
@@ -44,7 +46,7 @@ class VariableWriter:
 
     def write(self):
         if self.uses_iteration():
-            for key, value in self._config.iteritems():
+            for key, value in self._config.items():
                 self._file.write(self.write_iteration(key, value))
         else:
             self._file.write(self.write_whole(config))
@@ -82,14 +84,14 @@ def main():
     args = parse_args()
 
     if not args.js_out and not args.css_out and not args.scss_out:
-        print 'Must specify at least on out file'
+        print('Must specify at least on out file')
         sys.exit(1)
 
     config = None
     with args.config as config_file:
         config = json.load(config_file, encoding='ascii', object_pairs_hook=collections.OrderedDict)
 
-    assert all(isinstance(key, basestring) for key in config.iterkeys()), 'Expected all keys to be strings'
+    assert all(isinstance(key, str) for key in config.keys()), 'Expected all keys to be strings'
 
     if args.js_out:
         JSVariableWriter(args.js_out, config).write()

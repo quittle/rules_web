@@ -1,30 +1,30 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//collections:collections.bzl",
+load(
+    "@bazel_toolbox//collections:collections.bzl",
     "simple_dict",
     "struct_to_dict",
 )
-
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load("@io_bazel_rules_sass//sass:sass.bzl",
+load(
+    "@io_bazel_rules_sass//sass:sass.bzl",
     "sass_binary",
 )
 
 def _assert_descending_sizes_impl(ctx):
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "AssertingFilesOfDescendingSizes",
         arguments = [
-                "--stamp", ctx.outputs.stamp_file.path,
-            ] +
-            [ "--files" ] + [ file.path for file in ctx.files.files ],
-        inputs = [
-                ctx.executable._assert_descending_sizes,
-            ] +
-            ctx.files.files,
+                        "--stamp",
+                        ctx.outputs.stamp_file.path,
+                    ] +
+                    ["--files"] + [file.path for file in ctx.files.files],
+        inputs = ctx.files.files,
+        tools = [ctx.executable._assert_descending_sizes],
         executable = ctx.executable._assert_descending_sizes,
         outputs = [
             ctx.outputs.stamp_file,
@@ -33,34 +33,34 @@ def _assert_descending_sizes_impl(ctx):
 
 def _assert_valid_type_impl(ctx):
     if ctx.attr.type in ["bmp", "html", "json", "png"]:
-        ctx.action(
+        ctx.actions.run(
             mnemonic = "AssertingValidFile",
             arguments = [
-                    "--type", ctx.attr.type,
-                    "--stamp", ctx.outputs.stamp_file.path,
-                ] +
-                [ "--files" ] + [ file.path for file in ctx.files.files ],
-            inputs = [
-                    ctx.executable._assert_valid_type,
-                ] +
-                ctx.files.files,
+                            "--type",
+                            ctx.attr.type,
+                            "--stamp",
+                            ctx.outputs.stamp_file.path,
+                        ] +
+                        ["--files"] + [file.path for file in ctx.files.files],
+            inputs = ctx.files.files,
+            tools = [ctx.executable._assert_valid_type],
             executable = ctx.executable._assert_valid_type,
             outputs = [
                 ctx.outputs.stamp_file,
             ],
         )
     elif ctx.attr.type in ["js", "css"]:
-        ctx.action(
+        ctx.actions.run(
             mnemonic = "AssertingValidFile",
-            arguments = [ file.path for file in ctx.files.files ] +
-                [
-                    "--type", ctx.attr.type,
-                    "-o", ctx.outputs.stamp_file.path,
-                ],
-            inputs = [
-                    ctx.executable._yui_binary,
-                ] +
-                ctx.files.files,
+            arguments = [file.path for file in ctx.files.files] +
+                        [
+                            "--type",
+                            ctx.attr.type,
+                            "-o",
+                            ctx.outputs.stamp_file.path,
+                        ],
+            inputs = ctx.files.files,
+            tools = [ctx.executable._yui_binary],
             executable = ctx.executable._yui_binary,
             outputs = [
                 ctx.outputs.stamp_file,
@@ -68,7 +68,6 @@ def _assert_valid_type_impl(ctx):
         )
     else:
         fail("Unsupported type: " + ctx.attr.type)
-
 
 _assert_descending_sizes = rule(
     attrs = {
@@ -100,7 +99,7 @@ _assert_valid_type = rule(
                 "json",
                 "png",
                 "scss",
-            ]
+            ],
         ),
         "_assert_valid_type": executable_label(Label("//test:assert_valid_type")),
         "_yui_binary": executable_label(Label("//:yui_compressor")),
@@ -113,18 +112,11 @@ _assert_valid_type = rule(
 
 def _normalize_name(name):
     # These names can make the paths extra long so use abbreviations
-    return (name
-            .replace(" ", "-")
-            .replace(":", "_cln_")
-            .replace("\"", "_qte_")
-            .replace("{", "_ocbr_")
-            .replace("}", "_ccbr_")
-            .replace("[", "_osbr_")
-            .replace("]", "_csbr_"))
+    return name.replace(" ", "-").replace(":", "_cln_").replace("\"", "_qte_").replace("{", "_ocbr_").replace("}", "_ccbr_").replace("[", "_osbr_").replace("]", "_csbr_")
 
 def assert_descending_sizes(files):
     if type(files) != "list":
-        files = [ files ]
+        files = [files]
 
     name = "assert_descending_sizes_{files}".format(files = "-".join(files))
     name = _normalize_name(name)
@@ -140,7 +132,7 @@ def assert_valid_type(files, file_type):
 
     if file_type == "scss":
         if type(files) != "list":
-            files = [ files ]
+            files = [files]
 
         for file in files:
             sass_binary(

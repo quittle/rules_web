@@ -18,7 +18,7 @@ def main():
 
     assert len(files) >= 2, "At least 2 files must be passed in"
 
-    for i in xrange(1, len(files)):
+    for i in range(1, len(files)):
         larger_file = files[i - 1]
         smaller_file = files[i]
         assert os.stat(larger_file).st_size > os.stat(smaller_file).st_size, \

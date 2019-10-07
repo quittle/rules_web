@@ -1,15 +1,16 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load("//:constants.bzl",
+load(
+    "//:constants.bzl",
     "JS_FILE_TYPE",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_closure_compile_impl",
     "web_internal_minify_js_impl",
     "web_internal_resource_map_impl",
@@ -36,7 +37,7 @@ minify_js = rule(
     attrs = {
         "srcs": attr.label_list(
             allow_files = JS_FILE_TYPE,
-            non_empty = True,
+            allow_empty = False,
             mandatory = True,
         ),
         "_yui_binary": executable_label(Label("//:yui_compressor")),
@@ -51,7 +52,7 @@ closure_compile = rule(
     attrs = {
         "srcs": attr.label_list(
             allow_files = JS_FILE_TYPE,
-            non_empty = True,
+            allow_empty = False,
             mandatory = True,
         ),
         "externs": attr.label_list(

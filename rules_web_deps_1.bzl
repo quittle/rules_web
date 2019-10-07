@@ -1,18 +1,19 @@
 # Copyright (c) 2016-2018 Dustin Toff
 # Licensed under Apache License v2.0
 
-load("@bazel_repository_toolbox//:github_repository.bzl",
-    "new_github_repository",
+load(
+    "@bazel_repository_toolbox//:github_repository.bzl",
     "github_repository",
+    "new_github_repository",
 )
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_jar")
 
-_THIRD_PARTY_JAVACOPTS = [ "-XepDisableAllChecks", "-XepAllErrorsAsWarnings", "-nowarn" ]
-_THIRD_PARTY_COPTS = [ "-w" ]
+_THIRD_PARTY_JAVACOPTS = ["-XepDisableAllChecks", "-XepAllErrorsAsWarnings", "-nowarn"]
+_THIRD_PARTY_COPTS = ["-w"]
 
 def _build_file(build_file):
-    return (build_file
-            .replace("_THIRD_PARTY_JAVACOPTS", str(_THIRD_PARTY_JAVACOPTS))
-            .replace("_THIRD_PARTY_COPTS", str(_THIRD_PARTY_COPTS)))
+    return (build_file.replace("_THIRD_PARTY_JAVACOPTS", str(_THIRD_PARTY_JAVACOPTS)).replace("_THIRD_PARTY_COPTS", str(_THIRD_PARTY_COPTS)))
 
 _JERICHO_SELECTOR_BUILD_FILE = _build_file("""
 
@@ -89,22 +90,6 @@ cc_binary(
 
 """)
 
-_PILLOW_BUILD_FILE = _build_file("""
-
-py_library(
-    name = "pillow",
-    srcs = glob([
-        "PIL/*.py"
-    ]),
-    data = glob([
-        "PIL/.libs/*",
-        "PIL/*.so"
-    ]),
-    visibility = [ "//visibility:public" ],
-)
-
-""")
-
 _NU_VALIDATOR_BUILD_FILE = _build_file("""
 
 java_import(
@@ -117,7 +102,7 @@ java_import(
 
 """)
 
-def rules_web_repositories():
+def rules_web_dependencies():
     native.maven_jar(
         name = "com_yahoo_platform_yui_yuicompressor",
         artifact = "com.yahoo.platform.yui:yuicompressor:2.4.8",
@@ -128,17 +113,25 @@ def rules_web_repositories():
         name = "io_bazel_rules_sass",
         user = "bazelbuild",
         project = "rules_sass",
-        commit = "c7e0810a6c813a3bc2c9dbbc1f5d696f3c9a8f53", # 0.0.3 + path patch
-        sha256 = "158b5975b19d7cf12d83ffbe5e7f208f0a9bfe92c1310ad0d948e4895abb5c11",
+        commit = "1.23.0",
+        sha256 = "d9c4166f5eeaae2bc0985435bcc69a5f8ce0b6d4c2bfb8c04d97bf439e4d8c3b",
     )
 
-    native.http_jar(
+    github_repository(
+        name = "com_apt_itude_rules_pip",
+        user = "apt-itude",
+        project = "rules_pip",
+        commit = "ce667087818553cdc4b1a2258fc53df917c4f87c",
+        sha256 = "5cabd6bfb9cef095d0d076faf5e7acd5698f7172e803059c21c4e700a07b131b",
+    )
+
+    http_jar(
         name = "html_compressor",
         sha256 = "88894e330cdb0e418e805136d424f4c262236b1aa3683e51037cdb66310cb0f9",
         url = "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/htmlcompressor/htmlcompressor-1.5.3.jar",
     )
 
-    native.new_git_repository(
+    new_git_repository(
         name = "utluiz_jericho_selector",
         commit = "8d2b47df389fe5ff62d6676c6477c60559665ced",
         remote = "https://github.com/utluiz/jericho-selector.git",
@@ -241,8 +234,8 @@ def rules_web_repositories():
         name = "org_brotli",
         user = "google",
         project = "brotli",
-        tag = "v1.0.2",
-        sha256 = "c2cf2a16646b44771a4109bb21218c8e2d952babb827796eb8a800c1f94b7422",
+        tag = "v1.0.7",
+        sha256 = "4c61bfb0faca87219ea587326c467b95acb25555b53d1a421ffa3c8a9296ee2c",
     )
 
     new_github_repository(
@@ -267,7 +260,7 @@ def rules_web_repositories():
         name = "ttf2eot",
         user = "metaflop",
         project = "ttf2eot",
-        commit = "0133021ec33552b0b6ae7b3c8f052d067f4b4193", # master
+        commit = "0133021ec33552b0b6ae7b3c8f052d067f4b4193",  # master
         build_file_content = _TTF_2_EOT_BUILD_FILE,
         sha256 = "b27613e9415304adeb3de9abd7c0ce5e01b3fc5289055275c6f8c9fe97e7cead",
     )
@@ -302,21 +295,13 @@ def rules_web_repositories():
         sha1 = "2973d150c0dc1fefe998f834810d68f278ea58ec",
     )
 
-    native.new_http_archive(
-        name = "pillow",
-        url = "https://pypi.python.org/packages/89/bd/1d9a10f3e8157b7df275740b0782a892a0db387f8286620110c41e5146c7/Pillow-5.0.0-cp27-cp27mu-manylinux1_x86_64.whl",
-        type = "zip",
-        sha256 = "25193f934d37d836a6b1f4c062ce574a96cbca7c6d9dc8ddfbbac7f9c54deaa4",
-        build_file_content = _PILLOW_BUILD_FILE,
-    )
-
     native.maven_jar(
         name = "com_google_code_findbugs_jsr305",
         artifact = "com.google.code.findbugs:jsr305:3.0.2",
         sha1 = "25ea2e8b0c338a877313bd4672d3fe056ea78f0d",
     )
 
-    native.new_http_archive(
+    http_archive(
         name = "nu_validator",
         url = "https://github.com/validator/validator/releases/download/18.3.0/vnu.jar_18.3.0.zip",
         sha256 = "9f8bcdc94b5496b9fcb8c01e20fd22684a7dcbbae48804aeb027f17315fb3f8d",
@@ -328,6 +313,6 @@ def rules_web_repositories():
         name = "bazel_toolbox",
         user = "quittle",
         project = "bazel_toolbox",
-        commit = "dfe324d87b60b35825388998ac34b7adbecceb6c",
-        sha256 = "b2cf306f25c7a909b2b0142bd592e6e0e5847049036591bfe1e730d72deddc3d",
+        commit = "debed2fb5ed7ce3c96ea87c006b9f962e2357177",
+        sha256 = "e044e18f8fbe845e1cecffb60ef919b1e3b0b34d111acf2838b1a194b9073099",
     )

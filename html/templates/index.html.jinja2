@@ -19,7 +19,7 @@
             <meta name="application-name" content="{{ title }}" />
         {% endif %}
 
-        {% for size, favicon in favicons.iteritems() %}
+        {% for size, favicon in favicons.items() %}
             <link rel="apple-touch-icon-precomposed" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
             <link rel="icon" sizes="{{ size }}x{{ size }}" href="{{ favicon }}" />
         {% endfor %}
@@ -28,13 +28,13 @@
             <meta name="msapplication-TileImage" content="{{ favicons[144] }}" />
         {% endif %}
 
-        {% for size, favicon in favicons.iteritems() if size in [70, 150, 310] %}
+        {% for size, favicon in favicons.items() if size in [70, 150, 310] %}
             <meta name="msapplication-square{{ size }}x{{ size }}logo" content="{{ favicon }}" />
         {% endfor %}
 
         {% for items in meta %}
             <meta
-            {% for key, value in items.iteritems() %}
+            {% for key, value in items.items() %}
                 {{ key }}="{{ value }}"
             {% endfor %}
             />

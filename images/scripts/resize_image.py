@@ -7,11 +7,11 @@ import sys
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Resizes an image')
-    parser.add_argument('--source', type=argparse.FileType('r'), required=True)
+    parser.add_argument('--source', type=argparse.FileType('rb'), required=True)
     parser.add_argument('--width', type=int)
     parser.add_argument('--height', type=int)
     parser.add_argument('--scale', type=float)
-    parser.add_argument('--output', type=argparse.FileType('w+'), required=True)
+    parser.add_argument('--output', type=argparse.FileType('wb'), required=True)
     parser.add_argument('--allow-upsizing', action='store_true', default=False)
     parser.add_argument('--allow-stretching', action='store_true', default=False)
     return parser.parse_args()
@@ -24,11 +24,11 @@ def main():
         image_width, image_height = image.size
 
         if not args.allow_upsizing and (args.width > image_width or args.height > image_height):
-            print 'Image upsizing not allowed'
+            print('Image upsizing not allowed')
             sys.exit(1)
 
         if not args.allow_stretching and (args.width / args.height) != (image_width / image_height):
-            print 'Image stretching not allowed'
+            print('Image stretching not allowed ' + str(args.width) + ' ' + str(args.height) + ' ' + str(image_width) + ' ' + str(image_height))
             sys.exit(2)
 
         width = None

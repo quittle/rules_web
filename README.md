@@ -10,11 +10,16 @@
         remote = "https://github.com/quittle/rules_web.git",
     )
   ```
-3. Add the dependencies as well in the `WORKSPACE`
+3. Load the 3 sets of dependencies in order in your `WORKSPACE` file. It is multi-stage due to
+   the way Bazel handles repository rule loading.
 
   ```
-    load("@rules_web//:rules_web_repositories.bzl", "rules_web_repositories")
-    rules_web_repositories()
+    load("@rules_web//:rules_web_deps_1.bzl", "rules_web_dependencies")
+    rules_web_dependencies()
+    load("@rules_web//:rules_web_deps_2.bzl", "rules_web_dependencies")
+    rules_web_dependencies()
+    load("@rules_web//:rules_web_deps_3.bzl", "rules_web_dependencies")
+    rules_web_dependencies()
   ```
 4. Load rule files from non-`internal.bzl` Bazel files.
 
@@ -135,3 +140,9 @@
   * `source` The source image to resize
   * `sizes` A list of sizes to resize the `source` image to
   * `allow_upsizing` An optional boolean of whether the build should not fail if one of the generated sizes is larger than the source image. Defaults to `False`.
+
+## Troubleshooting
+If you get an error similar to
+> ImportError: cannot import name 'sysconfig' from 'distutils'
+
+you will need to `apt install python3-distutils`

@@ -1,11 +1,12 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//collections:collections.bzl",
+load(
+    "@bazel_toolbox//collections:collections.bzl",
     "merge_dicts",
 )
-
-load("//:internal.bzl",
+load(
+    "//:internal.bzl",
     "optional_arg_",
 )
 
@@ -19,44 +20,51 @@ def _minify_png(ctx, pngtastic, in_png, out_png):
     if (type(out_png) != "File"):
         fail("out_png was not a File")
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "MinifyPNG",
         arguments = [
-            "--input", in_png.path,
-            "--output", out_png.path,
+            "--input",
+            in_png.path,
+            "--output",
+            out_png.path,
         ],
-        inputs = [ in_png ],
+        inputs = [in_png],
         executable = pngtastic,
-        outputs = [ out_png ],
+        outputs = [out_png],
     )
 
 def web_internal_crop_image(ctx):
     output = ctx.outputs.cropped_image
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "CroppingImage",
         arguments = [
-            "--source", ctx.file.image.path,
-            "--width", ctx.attr.width,
-            "--height", ctx.attr.height,
-            "--x-offset", ctx.attr.x_offset,
-            "--y-offset", ctx.attr.y_offset,
-            "--output", output.path,
+            "--source",
+            ctx.file.image.path,
+            "--width",
+            ctx.attr.width,
+            "--height",
+            ctx.attr.height,
+            "--x-offset",
+            ctx.attr.x_offset,
+            "--y-offset",
+            ctx.attr.y_offset,
+            "--output",
+            output.path,
         ],
         inputs = [
             ctx.file.image,
         ],
         executable = ctx.executable._crop_image,
-        outputs = [ output ],
+        outputs = [output],
     )
 
-    source_map = { ctx.file.image.short_path: output} if ctx.attr.map_source else {}
+    source_map = {ctx.file.image.short_path: output} if ctx.attr.map_source else {}
 
     return struct(
         resources = depset([output]),
         source_map = source_map,
     )
-
 
 def web_internal_minify_png(ctx):
     _minify_png(
@@ -70,25 +78,27 @@ def web_internal_minify_png(ctx):
     source_map[ctx.file.png.short_path] = ctx.outputs.min_png
     return struct(
         source_map = source_map,
-        resources = depset([ ctx.outputs.min_png ]),
+        resources = depset([ctx.outputs.min_png]),
     )
 
 def web_internal_generate_ico(ctx):
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "GenerateICO",
         arguments = [
-                "--source", ctx.file.source.path,
-                "--output", ctx.outputs.ico.path,
-            ] +
-            [ "--sizes" ] + [ str(size) for size in ctx.attr.sizes ] +
-            optional_arg_("--allow-upsizing", ctx.attr.allow_upsizing),
-        inputs = [ ctx.file.source ],
+                        "--source",
+                        ctx.file.source.path,
+                        "--output",
+                        ctx.outputs.ico.path,
+                    ] +
+                    ["--sizes"] + [str(size) for size in ctx.attr.sizes] +
+                    optional_arg_("--allow-upsizing", ctx.attr.allow_upsizing),
+        inputs = [ctx.file.source],
         executable = ctx.executable._generate_ico,
-        outputs = [ ctx.outputs.ico ],
+        outputs = [ctx.outputs.ico],
     )
 
     return struct(
-        resources = depset([ ctx.outputs.ico ]),
+        resources = depset([ctx.outputs.ico]),
     )
 
 def web_internal_favicon_image_generator(ctx):
@@ -103,23 +113,29 @@ def web_internal_favicon_image_generator(ctx):
     outputs = []
 
     for size, out_file in zip(ctx.attr.output_sizes, ctx.outputs.output_files):
-        unoptimized_png = ctx.new_file(out_file.short_path + "-unoptimized.png")
+        unoptimized_png = ctx.actions.declare_file(out_file.short_path + "-unoptimized.png")
 
-        ctx.action(
+        ctx.actions.run(
             mnemonic = "GenerateFaviconSize",
             arguments = [
-                    "--source", ctx.file.image.path,
-                    "--width", str(size),
-                    "--height", str(size),
-                    "--output", unoptimized_png.path,
-                ] +
-                additional_args,
+                            "--source",
+                            ctx.file.image.path,
+                            "--width",
+                            str(size),
+                            "--height",
+                            str(size),
+                            "--output",
+                            unoptimized_png.path,
+                        ] +
+                        additional_args,
             inputs = [
-                ctx.executable._resize_image,
                 ctx.file.image,
             ],
+            tools = [
+                ctx.executable._resize_image,
+            ],
             executable = ctx.executable._resize_image,
-            outputs = [ unoptimized_png ],
+            outputs = [unoptimized_png],
         )
 
         _minify_png(
@@ -141,21 +157,23 @@ def web_internal_resize_image(ctx):
     if (ctx.attr.width != -1 or ctx.attr.height != -1) and ctx.attr.scale == "":
         additional_args = []
         if ctx.attr.width != -1:
-            additional_args +=  [ "--width", str(ctx.attr.width)]
+            additional_args += ["--width", str(ctx.attr.width)]
         if ctx.attr.height != -1:
-            additional_args += [ "--height", str(ctx.attr.height) ]
+            additional_args += ["--height", str(ctx.attr.height)]
     elif ctx.attr.width == -1 and ctx.attr.height == -1 and ctx.attr.scale != "":
-        additional_args = [ "--scale", ctx.attr.scale ]
+        additional_args = ["--scale", ctx.attr.scale]
     else:
         fail("Either width and height need to be set or just scale")
 
     output = ctx.outputs.resized_image
 
-    ctx.action(
+    ctx.actions.run(
         mnemonic = "ResizingImage",
         arguments = [
-            "--source", ctx.file.image.path,
-            "--output", output.path,
+            "--source",
+            ctx.file.image.path,
+            "--output",
+            output.path,
             "--allow-upsizing",
             "--allow-stretching",
         ] + additional_args,
@@ -163,12 +181,12 @@ def web_internal_resize_image(ctx):
             ctx.file.image,
         ],
         executable = ctx.executable._resize_image,
-        outputs = [ output ],
+        outputs = [output],
     )
 
     source_map = getattr(ctx.attr.image, "source_map", {})
 
-    source_map = merge_dicts(source_map, { ctx.file.image.short_path: output} if ctx.attr.map_source else {})
+    source_map = merge_dicts(source_map, {ctx.file.image.short_path: output} if ctx.attr.map_source else {})
 
     for key, value in source_map.items():
         if value == ctx.file.image:
