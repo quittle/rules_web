@@ -6,8 +6,8 @@ import zipfile
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Renames paths in a zip folder')
-    parser.add_argument('--in-zip', type=argparse.FileType('r'), required=True)
-    parser.add_argument('--out-zip', type=argparse.FileType('w+'), required=True)
+    parser.add_argument('--in-zip', type=argparse.FileType('rb'), required=True)
+    parser.add_argument('--out-zip', type=argparse.FileType('wb+'), required=True)
     parser.add_argument('--path-map', type=str, nargs='+', default=[])
     return parser.parse_args()
 
@@ -25,7 +25,7 @@ def main():
 
 
         with zipfile.ZipFile(args.out_zip, mode='w') as out_zip:
-            for source, dest in path_map.iteritems():
+            for source, dest in path_map.items():
                 out_zip.writestr(dest, in_zip.read(source))
 
 if __name__ == '__main__':

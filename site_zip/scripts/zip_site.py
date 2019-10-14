@@ -26,7 +26,7 @@ def process_file(file_path, out_zip, source_map, unused_resources, used_resource
         contents = file.read()
 
     for resource in unused_resources.copy():
-        if resource in unused_resources and resource in contents:
+        if resource in unused_resources and resource in str(contents):
             unused_resources.remove(resource)
             used_resources.add(resource)
             process_file(resource, out_zip, source_map, unused_resources, used_resources)

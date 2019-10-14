@@ -9,5 +9,5 @@ def rules_web_dependencies():
     pip_repository(
         name = "pip",
         python_interpreter = "python3",
-        requirements = "//:requirements.txt",
+        requirements = "@rules_web//:requirements.txt",
     )

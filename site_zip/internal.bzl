@@ -14,11 +14,11 @@ def web_internal_zip_site(ctx):
     resources = list()
     source_map = {}
     for resource in ctx.attr.root_files + ctx.attr.resources:
-        source_map += getattr(resource, "source_map", {})
-        resources += getattr(resource, "resources", depset())
-        resources += getattr(resource, "css_resources", depset())
-        resources += getattr(resource, "js_resources", depset())
-        resources += getattr(resource, "deferred_js_resources", depset())
+        source_map.update(getattr(resource, "source_map", {}))
+        resources += getattr(resource, "resources", depset()).to_list()
+        resources += getattr(resource, "css_resources", depset()).to_list()
+        resources += getattr(resource, "js_resources", depset()).to_list()
+        resources += getattr(resource, "deferred_js_resources", depset()).to_list()
     resources += ctx.files.resources
 
     root_files = [page.path for page in ctx.files.root_files]
