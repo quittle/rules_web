@@ -4,9 +4,9 @@
 java_binary(
     name = "yui_compressor",
     main_class = "com.yahoo.platform.yui.compressor.Bootstrap",
+    visibility = ["//visibility:public"],
     runtime_deps = [
         "@com_yahoo_platform_yui_yuicompressor//jar",
         "@org_mozilla_rhino//jar",
     ],
-    visibility = [ "//visibility:public" ],
 )

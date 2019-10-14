@@ -2,11 +2,6 @@
 # Licensed under Apache License v2.0
 
 load(
-    "@bazel_toolbox//collections:collections.bzl",
-    "simple_dict",
-    "struct_to_dict",
-)
-load(
     "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )

@@ -1,41 +1,42 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//assert:assert.bzl",
+load(
+    "@bazel_toolbox//assert:assert.bzl",
     "assert_label_providers",
 )
-
-load("//css:css.bzl",
+load(
+    "//css:css.bzl",
     "minify_css",
 )
-
-load("//fonts:fonts.bzl",
+load(
+    "//fonts:fonts.bzl",
     "font_generator",
     "minify_ttf",
     "ttf_to_eot",
     "ttf_to_woff",
     "ttf_to_woff2",
 )
-
-load("//test:test.bzl",
+load(
+    "//test:test.bzl",
     "assert_descending_sizes",
-    "assert_valid_type",
 )
 
 font_generator(
     name = "test_font_generator",
-    font_name = "font_name",
     eot = ":test_ttf_to_eot",
-    ttf = "test_roboto.ttf", # Use a local file instead of a generated one
+    font_name = "font_name",
+    style = "italic",
+    ttf = "test_roboto.ttf",  # Use a local file instead of a generated one
+    weight = "bolder",
     woff = ":test_ttf_to_woff",
     woff2 = ":test_ttf_to_woff2",
-    weight = "bolder",
-    style = "italic",
 )
+
 assert_label_providers(
     ":test_font_generator",
     {
-        "actions": [ None ],
+        "actions": [None],
         "css_resources": [
             "{GEN_DIR}/test/fonts/test_font_generator__generated.css",
         ],
@@ -50,14 +51,16 @@ assert_label_providers(
         "source_map": {},
     },
 )
+
 minify_css(
     name = "validate_test_font_generator_css",
-    srcs = [ ":test_font_generator" ],
+    srcs = [":test_font_generator"],
 )
+
 assert_label_providers(
     ":validate_test_font_generator_css",
     {
-        "actions": [ None ],
+        "actions": [None],
         "css_resources": [
             "{BIN_DIR}/test/fonts/validate_test_font_generator_css.min.css",
         ],
@@ -77,11 +80,20 @@ minify_ttf(
     name = "test_minify_ttf_roboto",
     ttf = "test_roboto.ttf",
 )
-assert_descending_sizes([ "test_roboto.ttf", ":test_minify_ttf_roboto" ])
+
+assert_descending_sizes([
+    "test_roboto.ttf",
+    ":test_minify_ttf_roboto",
+])
+
 assert_label_providers(
     ":test_minify_ttf_roboto",
     {
-        "actions": [ None, None, None ],
+        "actions": [
+            None,
+            None,
+            None,
+        ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -98,11 +110,20 @@ minify_ttf(
     name = "test_minify_ttf_raleway",
     ttf = "test_raleway.ttf",
 )
-assert_descending_sizes([ "test_raleway.ttf", ":test_minify_ttf_raleway" ])
+
+assert_descending_sizes([
+    "test_raleway.ttf",
+    ":test_minify_ttf_raleway",
+])
+
 assert_label_providers(
     ":test_minify_ttf_raleway",
     {
-        "actions": [ None, None, None ],
+        "actions": [
+            None,
+            None,
+            None,
+        ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -119,10 +140,11 @@ ttf_to_eot(
     name = "test_ttf_to_eot",
     ttf = "test_roboto.ttf",
 )
+
 assert_label_providers(
     ":test_ttf_to_eot",
     {
-        "actions": [ None ],
+        "actions": [None],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -137,10 +159,14 @@ ttf_to_woff(
     name = "test_ttf_to_woff",
     ttf = "test_roboto.ttf",
 )
+
 assert_label_providers(
     ":test_ttf_to_woff",
     {
-        "actions": [ None, None ],
+        "actions": [
+            None,
+            None,
+        ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],
@@ -155,11 +181,19 @@ ttf_to_woff2(
     name = "test_ttf_to_woff2",
     ttf = "test_roboto.ttf",
 )
-assert_descending_sizes([ ":test_ttf_to_woff", ":test_ttf_to_woff2" ])
+
+assert_descending_sizes([
+    ":test_ttf_to_woff",
+    ":test_ttf_to_woff2",
+])
+
 assert_label_providers(
     ":test_ttf_to_woff2",
     {
-        "actions": [ None, None ],
+        "actions": [
+            None,
+            None,
+        ],
         "css_resources": [],
         "deferred_js_resources": [],
         "js_resources": [],

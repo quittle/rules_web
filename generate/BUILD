@@ -6,5 +6,5 @@ py_binary(
     srcs = [
         "scripts/generate_variables.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )

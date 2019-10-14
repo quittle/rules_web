@@ -9,10 +9,6 @@ load(
     "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-load(
-    "//:internal.bzl",
-    "optional_arg_",
-)
 
 def _generate_deploy_site_zip_s3_script(ctx):
     ctx.actions.run(

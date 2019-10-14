@@ -4,8 +4,8 @@
 java_binary(
     name = "closure_compiler",
     main_class = "com.google.javascript.jscomp.CommandLineRunner",
-    runtime_deps = [ "@com_google_javascript_closure_compiler//jar" ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
+    runtime_deps = ["@com_google_javascript_closure_compiler//jar"],
 )
 
 py_binary(
@@ -13,5 +13,5 @@ py_binary(
     srcs = [
         "scripts/resource_map.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )

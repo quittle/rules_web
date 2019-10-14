@@ -6,5 +6,5 @@ py_binary(
     srcs = [
         "scripts/minify_ttx.py",
     ],
-    visibility = [ "//visibility:public" ],
+    visibility = ["//visibility:public"],
 )

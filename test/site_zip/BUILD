@@ -4,16 +4,11 @@
 load(
     "@bazel_toolbox//assert:assert.bzl",
     "assert_files_equal",
-    "assert_label_providers",
 )
 load(
     "//site_zip:site_zip.bzl",
     "zip_server",
     "zip_site",
-)
-load(
-    "//test:test.bzl",
-    "assert_valid_type",
 )
 
 zip_site(

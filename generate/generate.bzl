@@ -1,11 +1,12 @@
 # Copyright (c) 2016-2017 Dustin Doloff
 # Licensed under Apache License v2.0
 
-load("@bazel_toolbox//labels:labels.bzl",
+load(
+    "@bazel_toolbox//labels:labels.bzl",
     "executable_label",
 )
-
-load(":internal.bzl",
+load(
+    ":internal.bzl",
     "web_internal_generate_variables",
 )
 
