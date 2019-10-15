@@ -40,6 +40,7 @@ java_import(
         "@com_google_code_findbugs_jsr305//jar",
         "@com_google_code_gson_gson//jar",
         "@joda_time_joda_time//jar",
+        "@maven//:javax_xml_bind_jaxb_api",
         "@org_apache_commons_logging//jar",
         "@org_apache_httpcomponents_httpclient//jar",
         "@org_apache_httpcomponents_httpcore//jar",

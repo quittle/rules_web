@@ -113,7 +113,7 @@ def rules_web_dependencies():
         name = "io_bazel_rules_sass",
         user = "bazelbuild",
         project = "rules_sass",
-        commit = "1.23.0",
+        tag = "1.23.0",
         sha256 = "d9c4166f5eeaae2bc0985435bcc69a5f8ce0b6d4c2bfb8c04d97bf439e4d8c3b",
     )
 
@@ -123,6 +123,14 @@ def rules_web_dependencies():
         project = "rules_pip",
         commit = "ce667087818553cdc4b1a2258fc53df917c4f87c",
         sha256 = "5cabd6bfb9cef095d0d076faf5e7acd5698f7172e803059c21c4e700a07b131b",
+    )
+
+    github_repository(
+        name = "rules_jvm_external",
+        user = "bazelbuild",
+        project = "rules_jvm_external",
+        tag = "2.8",
+        sha256 = "4b9cd81a08d9ea89218428c1e7a59f06abfaa1042402efa407efb7d3e607df84",
     )
 
     http_jar(
