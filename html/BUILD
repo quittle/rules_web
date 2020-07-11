@@ -39,11 +39,11 @@ java_binary(
     main_class = "com.dustindoloff.injecthtml.Main",
     visibility = ["//visibility:public"],
     deps = [
-        "@br_com_starcode_parccser_parccser//jar",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@net_htmlparser_jericho_jericho_html//jar",
-        "@org_apache_commons_cli//jar",
-        "@org_apache_commons_io//jar",
+        "@maven//:br_com_starcode_parccser_parccser",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:net_htmlparser_jericho_jericho_html",
+        "@maven//:commons_cli_commons_cli",
+        "@maven//:commons_io_commons_io",
         "@utluiz_jericho_selector//:jericho_selector",
     ],
 )

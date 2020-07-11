@@ -10,8 +10,8 @@ load(
 def web_internal_resource_map_impl(ctx):
     source_map = {}
     for dep in ctx.attr.deps:
-        source_map += getattr(dep, "source_map", {})
-        for file in dep.files:
+        source_map = dict(source_map.items() + getattr(dep, "source_map", {}).items())
+        for file in dep.files.to_list():
             if file.is_source:
                 source_map[file.short_path] = file
 
@@ -30,7 +30,8 @@ def web_internal_resource_map_impl(ctx):
             "--output",
             ctx.outputs.resource_map.path,
         ],
-        inputs = [ctx.executable._resource_map_script] + ctx.files.deps,
+        inputs = ctx.files.deps,
+        tools = [ctx.executable._resource_map_script],
         executable = ctx.executable._resource_map_script,
         outputs = [ctx.outputs.resource_map],
     )

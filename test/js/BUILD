@@ -10,6 +10,7 @@ load(
     "//js:js.bzl",
     "closure_compile",
     "minify_js",
+    "resource_map",
 )
 load(
     "//test:test.bzl",
@@ -58,4 +59,14 @@ assert_label_providers(
             "{BIN_DIR}/test/js/closure_compile/test_closure_compile.js",
         ],
     },
+)
+
+resource_map(
+    name = "test_resource_map",
+    constant_name = "RESOURCE_PATHS",
+    deps = [
+        ":test_closure_compile",
+        ":test_minify_js",
+    ],
+    visibility = ["//visibility:public"]
 )

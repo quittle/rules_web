@@ -32,7 +32,7 @@ java_binary(
     name = "pngtastic",
     main_class = "com.googlecode.pngtastic.PngtasticOptimizer",
     visibility = ["//visibility:public"],
-    runtime_deps = ["@pngtastic//jar"],
+    runtime_deps = ["@maven//:com_github_depsypher_pngtastic"],
 )
 
 java_binary(
@@ -43,8 +43,8 @@ java_binary(
     main_class = "com.dustindoloff.pngtastic.Main",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_google_code_findbugs_jsr305//jar",
-        "@org_apache_commons_cli//jar",
-        "@pngtastic//jar",
+        "@maven//:com_google_code_findbugs_jsr305",
+        "@maven//:commons_cli_commons_cli",
+        "@maven//:com_github_depsypher_pngtastic",
     ],
 )

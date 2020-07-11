@@ -7,8 +7,9 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "bazel_repository_toolbox",
-    commit = "f512b37be02d5575d85234c9040b0f4c795a76ef",
+    commit = "b7d32c04cb993267606a188cc4c55be3b6b5c564",
     remote = "https://github.com/quittle/bazel_repository_toolbox",
+    shallow_since = "1593401847 +0100",
 )
 
 # A three part load of the dependencies is required to load them all and ensure all necessary

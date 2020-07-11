@@ -33,17 +33,9 @@ java_import(
     name = "aws_sdk_core",
     jars = [],
     exports = [
-        "@com_amazonaws_aws_java_sdk_core//jar",
-        "@com_fasterxml_jackson_core_jackson_annotations//jar",
-        "@com_fasterxml_jackson_core_jackson_core//jar",
-        "@com_fasterxml_jackson_core_jackson_databind//jar",
-        "@com_google_code_findbugs_jsr305//jar",
-        "@com_google_code_gson_gson//jar",
-        "@joda_time_joda_time//jar",
-        "@maven//:javax_xml_bind_jaxb_api",
-        "@org_apache_commons_logging//jar",
-        "@org_apache_httpcomponents_httpclient//jar",
-        "@org_apache_httpcomponents_httpcore//jar",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_fasterxml_jackson_core_jackson_annotations",
+        "@maven//:com_google_code_findbugs_jsr305",
     ],
 )
 
@@ -54,12 +46,12 @@ java_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":aws_sdk_core",
-        "@com_amazonaws_aws_java_sdk_kms//jar",
-        "@com_amazonaws_aws_java_sdk_s3//jar",
-        "@com_google_code_gson_gson//jar",
-        "@org_apache_commons_cli//jar",
-        "@org_apache_commons_io//jar",
-        "@org_apache_commons_lang3//jar",
+        "@maven//:com_amazonaws_aws_java_sdk_kms",
+        "@maven//:com_amazonaws_aws_java_sdk_s3",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:commons_cli_commons_cli",
+        "@maven//:commons_io_commons_io",
+        "@maven//:org_apache_commons_commons_lang3",
     ],
 )
 
@@ -79,9 +71,9 @@ java_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":aws_sdk_core",
-        "@com_amazonaws_aws_java_sdk_lambda//jar",
-        "@com_google_code_gson_gson//jar",
-        "@org_apache_commons_cli//jar",
+        "@maven//:com_amazonaws_aws_java_sdk_lambda",
+        "@maven//:com_google_code_gson_gson",
+        "@maven//:commons_cli_commons_cli",
     ],
 )
 
@@ -91,8 +83,8 @@ java_library(
     visibility = ["//visibility:public"],
     deps = [
         ":aws_sdk_core",
-        "@com_amazonaws_aws_java_sdk_core//jar",
-        "@com_amazonaws_aws_java_sdk_lambda//jar",
-        "@junit//jar",
+        "@maven//:com_amazonaws_aws_java_sdk_core",
+        "@maven//:com_amazonaws_aws_java_sdk_lambda",
+        "@maven//:junit_junit",
     ],
 )

@@ -97,21 +97,21 @@ def web_internal_html_page_impl(ctx):
 
     source_map = {}
     resources = []
-    css_files = ctx.files.css_files
-    deferred_js_files = ctx.files.deferred_js_files
-    js_files = ctx.files.js_files
-    inline_js_files = ctx.files.inline_js_files
+    css_files = list(ctx.files.css_files)
+    deferred_js_files = list(ctx.files.deferred_js_files)
+    js_files = list(ctx.files.js_files)
+    inline_js_files = list(ctx.files.inline_js_files)
     for dep in _explode_deps(ctx.attr.deps):
         if hasattr(dep, "source_map"):
-            source_map += dep.source_map
+            source_map.update(**dep.source_map)
         if hasattr(dep, "resources"):
-            resources.extend(list(dep.resources))
+            resources.extend(dep.resources.to_list())
         if hasattr(dep, "css_resources"):
-            css_files.extend(list(dep.css_resources))
+            css_files.extend(dep.css_resources.to_list())
         if hasattr(dep, "deferred_js_resources"):
-            deferred_js_files.extend(list(dep.deferred_js_files))
+            deferred_js_files.extend(dep.deferred_js_resources.to_list())
         if hasattr(dep, "js_resources"):
-            js_files.extend(list(dep.js_resources))
+            js_files.extend(dep.js_resources.to_list())
         if type(dep) == "Target":
             for file in dep.files.to_list():
                 if file.is_source:

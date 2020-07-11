@@ -5,7 +5,7 @@ java_binary(
     name = "closure_compiler",
     main_class = "com.google.javascript.jscomp.CommandLineRunner",
     visibility = ["//visibility:public"],
-    runtime_deps = ["@com_google_javascript_closure_compiler//jar"],
+    runtime_deps = ["@maven//:com_google_javascript_closure_compiler"],
 )
 
 py_binary(

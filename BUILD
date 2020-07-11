@@ -6,7 +6,7 @@ java_binary(
     main_class = "com.yahoo.platform.yui.compressor.Bootstrap",
     visibility = ["//visibility:public"],
     runtime_deps = [
-        "@com_yahoo_platform_yui_yuicompressor//jar",
-        "@org_mozilla_rhino//jar",
+        "@maven//:com_yahoo_platform_yui_yuicompressor",
+        "@maven//:org_mozilla_rhino",
     ],
 )

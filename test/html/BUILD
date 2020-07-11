@@ -32,8 +32,8 @@ html_page(
     favicon_images = ["favicon.png"],
     favicon_sizes = [16],
     inline_js_files = ["test.js"],
-    js_files = ["test.js"],
-    deps = ["dep.txt"],
+    js_files = ["test.js", "//test/js:test_resource_map"],
+    deps = ["dep.txt", "//test/js:test_resource_map"],
 )
 
 assert_valid_type(":test_html_page", "html")
@@ -50,6 +50,9 @@ assert_label_providers(
         ],
         "js_resources": [
             "test/html/test.js",
+            "{BIN_DIR}/test/js/resource_map/test_resource_map.js",
+            "{BIN_DIR}/test/js/closure_compile/test_closure_compile.js",
+            "{BIN_DIR}/test/js/minify_js/test_minify_js.min.js"
         ],
         # No inline_js_files as it has been inlined
         "resources": [
@@ -84,6 +87,9 @@ minify_test_html_page_providers = {
         "test/html/test_deferred.js",
     ],
     "js_resources": [
+        "{BIN_DIR}/test/js/minify_js/test_minify_js.min.js",
+        "{BIN_DIR}/test/js/closure_compile/test_closure_compile.js",
+        "{BIN_DIR}/test/js/resource_map/test_resource_map.js",
         "test/html/test.js",
     ],
     "resources": [
@@ -266,6 +272,8 @@ assert_files_equal("expected-inject-html-outer-inherited-providers-test.html", "
 
 outer_inherited_providers = dict(inject_html_inherited_providers_test_providers)
 
+outer_inherited_providers["js_resources"] = reverse(outer_inherited_providers["js_resources"])
+
 outer_inherited_providers["resources"] = (
     ["{BIN_DIR}/test/html/inject_html_outer_inherited_providers_test.html"] +
     outer_inherited_providers["resources"]
@@ -293,8 +301,9 @@ inner_inherited_providers["resources"] = (
     inner_inherited_providers["resources"]
 )
 
-# An even stranger thing occurs here where the the source_map needs to be reversed again
+# An even stranger thing occurs here where the the source_map and js_resources need to be reversed again
 inner_inherited_providers["source_map"] = reverse(inner_inherited_providers["source_map"])
+inner_inherited_providers["js_resources"] = reverse(inner_inherited_providers["js_resources"])
 
 assert_label_providers(
     ":inject_html_inner_inherited_providers_test",
