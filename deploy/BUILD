@@ -33,6 +33,7 @@ java_import(
     name = "aws_sdk_core",
     jars = [],
     exports = [
+        "@maven//:javax_xml_bind_jaxb_api",
         "@maven//:com_amazonaws_aws_java_sdk_core",
         "@maven//:com_fasterxml_jackson_core_jackson_annotations",
         "@maven//:com_google_code_findbugs_jsr305",

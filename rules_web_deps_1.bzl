@@ -141,6 +141,7 @@ def rules_web_dependencies():
         name = "utluiz_jericho_selector",
         commit = "8d2b47df389fe5ff62d6676c6477c60559665ced",
         remote = "https://github.com/utluiz/jericho-selector.git",
+        shallow_since = "1491358492 +1000",
         build_file_content = _JERICHO_SELECTOR_BUILD_FILE,
     )
 
