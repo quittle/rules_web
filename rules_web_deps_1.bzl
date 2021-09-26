@@ -191,8 +191,8 @@ def rules_web_dependencies():
 
     http_archive(
         name = "nu_validator",
-        url = "https://github.com/validator/validator/releases/download/18.3.0/vnu.jar_18.3.0.zip",
-        sha256 = "9f8bcdc94b5496b9fcb8c01e20fd22684a7dcbbae48804aeb027f17315fb3f8d",
+        url = "https://github.com/validator/validator/releases/download/20.6.30/vnu.jar_20.6.30.zip",
+        sha256 = "f6dc1464229756f582bdd6c083df11ec13e0d7389dd50b56e63133aa8b0dd200",
         strip_prefix = "dist",
         build_file_content = _NU_VALIDATOR_BUILD_FILE,
     )
